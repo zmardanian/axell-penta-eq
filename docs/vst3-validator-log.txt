@@ -1,0 +1,586 @@
+* Loading module...
+
+	/var/home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
+
+* Check valid bundle structure...
+
+* Scanning classes...
+
+  Factory Info:
+	vendor = Axell Yobag
+	url = 
+	email = 
+
+  Class Info 0:
+	name = Axell Penta EQ
+	category = Audio Module Class
+	subCategories = Fx|EQ
+	version = 1.0.0
+	sdkVersion = VST 3.8.0
+	cid = ABCDEF019182FAEB41787962506E7131
+
+  Class Info 1:
+	name = Axell Penta EQ
+	category = Component Controller Class
+	subCategories = Fx|EQ
+	version = 1.0.0
+	sdkVersion = VST 3.8.0
+	cid = ABCDEF011234ABCD41787962506E7131
+
+* Checking snapshots...
+
+Info: No snapshots in Bundle.
+
+* Creating tests...
+
+* Running tests...
+
+-------------------------------------------------------------
+TestSuite : Axell Penta EQ
+-------------------------------------------------------------
+
+-------------------------------------------------------------
+TestSuite : General Tests
+-------------------------------------------------------------
+
+[Scan Editor Classes]
+Info:  ===Scan Editor Classes ====================================
+Info:  This component has an edit controller class
+Info:     Controller CID: {ABCDEF01-1234-ABCD-4178-7962506E7131}
+[Succeeded]
+
+[Scan Buses]
+Info:  ===Scan Buses ====================================
+Info:  => Audio Buses: [2 In(s) => 1 Out(s)]
+Info:       In [0]: "Input" (Main-Default Active) 
+Info:       In [1]: "Sidechain" (Aux-Default Active) 
+Info:       Out[0]: "Output" (Main-Default Active) 
+Info:  => Event Buses: [0 In(s) => 0 Out(s)]
+[Succeeded]
+
+[Scan Parameters]
+Info:  ===Scan Parameters ====================================
+Info:  This component exports 246 parameter(s)
+Info:     Parameter 000 (id=962376260): [title="Input Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 001 (id=1040127981): [title="Output Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 002 (id=108124): [title="Mix"] [unit="%"] [type = Float, default = 1.000000, unit = 0]
+Info:     Parameter 003 (id=95852938): [title="Drive"] [unit="%"] [type = Float, default = 0.300000, unit = 0]
+Info:     Parameter 004 (id=1438330318): [title="Auto Gain"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 005 (id=106629499): [title="Phase Mode"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 006 (id=158060251): [title="Linear Phase Quality"] [unit=""] [type = Discrete, default = 0.500000, unit = 0]
+Info:     Parameter 007 (id=3556): [title="Oversampling"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 008 (id=967928829): [title="Character Position"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 009 (id=3208455): [title="HP On"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 010 (id=935580576): [title="HP Frequency"] [unit="Hz"] [type = Float, default = 0.357050, unit = 0]
+Info:     Parameter 011 (id=1097547139): [title="HP Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 012 (id=103497): [title="HP Resonance"] [unit=""] [type = Float, default = 0.365273, unit = 0]
+Info:  =>Parameter 012 (id=103497): getParamValueByString ("0.71") doesn't return the original normalized value! Got 0.367087 instead of 0.365273.
+Info:     Parameter 013 (id=3327619): [title="LP On"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 014 (id=1050097180): [title="LP Frequency"] [unit="Hz"] [type = Float, default = 0.770706, unit = 0]
+Info:     Parameter 015 (id=352594567): [title="LP Slope"] [unit=""] [type = Discrete, default = 0.142857, unit = 0]
+Info:     Parameter 016 (id=107341): [title="LP Resonance"] [unit=""] [type = Float, default = 0.365273, unit = 0]
+Info:  =>Parameter 016 (id=107341): getParamValueByString ("0.71") doesn't return the original normalized value! Got 0.367087 instead of 0.365273.
+Info:     Parameter 017 (id=422693357): [title="Band 1 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 018 (id=706353865): [title="Band 1 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 019 (id=422669674): [title="Band 1 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 020 (id=422245544): [title="Band 1 Frequency"] [unit="Hz"] [type = Float, default = 0.245689, unit = 0]
+Info:     Parameter 021 (id=422259119): [title="Band 1 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 022 (id=2969665): [title="Band 1 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 023 (id=216546683): [title="Band 1 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 024 (id=422451155): [title="Band 1 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 025 (id=213762263): [title="Band 1 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 026 (id=706355785): [title="Band 1 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 027 (id=706370638): [title="Band 1 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 028 (id=215294221): [title="Band 1 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 029 (id=215300059): [title="Band 1 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 030 (id=706352744): [title="Band 1 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 031 (id=706368617): [title="Band 1 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 032 (id=706369972): [title="Band 1 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 033 (id=451322508): [title="Band 2 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 034 (id=707277386): [title="Band 2 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 035 (id=451298825): [title="Band 2 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 036 (id=450874695): [title="Band 2 Frequency"] [unit="Hz"] [type = Float, default = 0.291853, unit = 0]
+Info:     Parameter 037 (id=450888270): [title="Band 2 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 038 (id=2970626): [title="Band 2 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 039 (id=1104050364): [title="Band 2 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 040 (id=451080306): [title="Band 2 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 041 (id=1101265944): [title="Band 2 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 042 (id=707279306): [title="Band 2 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 043 (id=707294159): [title="Band 2 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 044 (id=1102797902): [title="Band 2 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 045 (id=1102803740): [title="Band 2 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 046 (id=707276265): [title="Band 2 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 047 (id=707292138): [title="Band 2 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 048 (id=707293493): [title="Band 2 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 049 (id=479951659): [title="Band 3 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 050 (id=708200907): [title="Band 3 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 051 (id=479927976): [title="Band 3 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 052 (id=479503846): [title="Band 3 Frequency"] [unit="Hz"] [type = Float, default = 0.340743, unit = 0]
+Info:     Parameter 053 (id=479517421): [title="Band 3 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 054 (id=2971587): [title="Band 3 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 055 (id=1991554045): [title="Band 3 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 056 (id=479709457): [title="Band 3 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 057 (id=1988769625): [title="Band 3 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 058 (id=708202827): [title="Band 3 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 059 (id=708217680): [title="Band 3 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 060 (id=1990301583): [title="Band 3 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 061 (id=1990307421): [title="Band 3 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 062 (id=708199786): [title="Band 3 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 063 (id=708215659): [title="Band 3 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 064 (id=708217014): [title="Band 3 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 065 (id=508580810): [title="Band 4 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 066 (id=709124428): [title="Band 4 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 067 (id=508557127): [title="Band 4 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 068 (id=508132997): [title="Band 4 Frequency"] [unit="Hz"] [type = Float, default = 0.389591, unit = 0]
+Info:     Parameter 069 (id=508146572): [title="Band 4 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 070 (id=2972548): [title="Band 4 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 071 (id=731574078): [title="Band 4 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 072 (id=508338608): [title="Band 4 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 073 (id=728789658): [title="Band 4 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 074 (id=709126348): [title="Band 4 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 075 (id=709141201): [title="Band 4 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 076 (id=730321616): [title="Band 4 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 077 (id=730327454): [title="Band 4 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 078 (id=709123307): [title="Band 4 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 079 (id=709139180): [title="Band 4 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 080 (id=709140535): [title="Band 4 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 081 (id=537209961): [title="Band 5 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 082 (id=710047949): [title="Band 5 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 083 (id=537186278): [title="Band 5 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 084 (id=536762148): [title="Band 5 Frequency"] [unit="Hz"] [type = Float, default = 0.433411, unit = 0]
+Info:     Parameter 085 (id=536775723): [title="Band 5 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 086 (id=2973509): [title="Band 5 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 087 (id=1619077759): [title="Band 5 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 088 (id=536967759): [title="Band 5 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 089 (id=1616293339): [title="Band 5 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 090 (id=710049869): [title="Band 5 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 091 (id=710064722): [title="Band 5 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 092 (id=1617825297): [title="Band 5 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 093 (id=1617831135): [title="Band 5 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 094 (id=710046828): [title="Band 5 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 095 (id=710062701): [title="Band 5 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 096 (id=710064056): [title="Band 5 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 097 (id=565839112): [title="Band 6 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 098 (id=710971470): [title="Band 6 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 099 (id=565815429): [title="Band 6 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 100 (id=565391299): [title="Band 6 Frequency"] [unit="Hz"] [type = Float, default = 0.477588, unit = 0]
+Info:     Parameter 101 (id=565404874): [title="Band 6 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 102 (id=2974470): [title="Band 6 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 103 (id=359097792): [title="Band 6 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 104 (id=565596910): [title="Band 6 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 105 (id=356313372): [title="Band 6 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 106 (id=710973390): [title="Band 6 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 107 (id=710988243): [title="Band 6 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 108 (id=357845330): [title="Band 6 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 109 (id=357851168): [title="Band 6 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 110 (id=710970349): [title="Band 6 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 111 (id=710986222): [title="Band 6 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 112 (id=710987577): [title="Band 6 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 113 (id=594468263): [title="Band 7 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 114 (id=711894991): [title="Band 7 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 115 (id=594444580): [title="Band 7 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 116 (id=594020450): [title="Band 7 Frequency"] [unit="Hz"] [type = Float, default = 0.519050, unit = 0]
+Info:     Parameter 117 (id=594034025): [title="Band 7 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 118 (id=2975431): [title="Band 7 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 119 (id=1246601473): [title="Band 7 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 120 (id=594226061): [title="Band 7 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 121 (id=1243817053): [title="Band 7 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 122 (id=711896911): [title="Band 7 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 123 (id=711911764): [title="Band 7 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 124 (id=1245349011): [title="Band 7 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 125 (id=1245354849): [title="Band 7 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 126 (id=711893870): [title="Band 7 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 127 (id=711909743): [title="Band 7 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 128 (id=711911098): [title="Band 7 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 129 (id=623097414): [title="Band 8 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 130 (id=712818512): [title="Band 8 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 131 (id=623073731): [title="Band 8 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 132 (id=622649601): [title="Band 8 Frequency"] [unit="Hz"] [type = Float, default = 0.576220, unit = 0]
+Info:     Parameter 133 (id=622663176): [title="Band 8 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 134 (id=2976392): [title="Band 8 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 135 (id=2134105154): [title="Band 8 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 136 (id=622855212): [title="Band 8 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 137 (id=2131320734): [title="Band 8 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 138 (id=712820432): [title="Band 8 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 139 (id=712835285): [title="Band 8 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 140 (id=2132852692): [title="Band 8 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 141 (id=2132858530): [title="Band 8 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 142 (id=712817391): [title="Band 8 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 143 (id=712833264): [title="Band 8 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 144 (id=712834619): [title="Band 8 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 145 (id=651726565): [title="Band 9 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 146 (id=713742033): [title="Band 9 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 147 (id=651702882): [title="Band 9 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 148 (id=651278752): [title="Band 9 Frequency"] [unit="Hz"] [type = Float, default = 0.645903, unit = 0]
+Info:     Parameter 149 (id=651292327): [title="Band 9 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 150 (id=2977353): [title="Band 9 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 151 (id=874125187): [title="Band 9 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 152 (id=651484363): [title="Band 9 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 153 (id=871340767): [title="Band 9 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 154 (id=713743953): [title="Band 9 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 155 (id=713758806): [title="Band 9 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 156 (id=872872725): [title="Band 9 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 157 (id=872878563): [title="Band 9 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 158 (id=713740912): [title="Band 9 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 159 (id=713756785): [title="Band 9 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 160 (id=713758140): [title="Band 9 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 161 (id=1000261435): [title="Band 10 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 162 (id=378616763): [title="Band 10 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 163 (id=1000237752): [title="Band 10 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 164 (id=999813622): [title="Band 10 Frequency"] [unit="Hz"] [type = Float, default = 0.720844, unit = 0]
+Info:     Parameter 165 (id=999827197): [title="Band 10 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 166 (id=92014003): [title="Band 10 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 167 (id=941287917): [title="Band 10 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 168 (id=1000019233): [title="Band 10 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 169 (id=938503497): [title="Band 10 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 170 (id=378618683): [title="Band 10 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 171 (id=378633536): [title="Band 10 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 172 (id=940035455): [title="Band 10 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 173 (id=940041293): [title="Band 10 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 174 (id=378615642): [title="Band 10 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 175 (id=378631515): [title="Band 10 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 176 (id=378632870): [title="Band 10 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 177 (id=1028890586): [title="Band 11 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 178 (id=379540284): [title="Band 11 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 179 (id=1028866903): [title="Band 11 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 180 (id=1028442773): [title="Band 11 Frequency"] [unit="Hz"] [type = Float, default = 0.782843, unit = 0]
+Info:     Parameter 181 (id=1028456348): [title="Band 11 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 182 (id=92014964): [title="Band 11 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 183 (id=1828791598): [title="Band 11 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 184 (id=1028648384): [title="Band 11 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 185 (id=1826007178): [title="Band 11 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 186 (id=379542204): [title="Band 11 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 187 (id=379557057): [title="Band 11 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 188 (id=1827539136): [title="Band 11 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 189 (id=1827544974): [title="Band 11 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 190 (id=379539163): [title="Band 11 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 191 (id=379555036): [title="Band 11 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 192 (id=379556391): [title="Band 11 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 193 (id=1057519737): [title="Band 12 Active"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 194 (id=380463805): [title="Band 12 Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 195 (id=1057496054): [title="Band 12 Type"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 196 (id=1057071924): [title="Band 12 Frequency"] [unit="Hz"] [type = Float, default = 0.856453, unit = 0]
+Info:     Parameter 197 (id=1057085499): [title="Band 12 Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 198 (id=92015925): [title="Band 12 Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 199 (id=568811631): [title="Band 12 Slope"] [unit=""] [type = Discrete, default = 0.428571, unit = 0]
+Info:     Parameter 200 (id=1057277535): [title="Band 12 Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 201 (id=566027211): [title="Band 12 Placement"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 202 (id=380465725): [title="Band 12 Dynamic"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 203 (id=380480578): [title="Band 12 Threshold"] [unit="dB"] [type = Float, default = 0.600000, unit = 0]
+Info:     Parameter 204 (id=567559169): [title="Band 12 Range"] [unit="dB"] [type = Float, default = 0.375000, unit = 0]
+Info:     Parameter 205 (id=567565007): [title="Band 12 Ratio"] [unit=":1"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 206 (id=380462684): [title="Band 12 Attack"] [unit="ms"] [type = Float, default = 0.425131, unit = 0]
+Info:     Parameter 207 (id=380478557): [title="Band 12 Release"] [unit="ms"] [type = Float, default = 0.470277, unit = 0]
+Info:     Parameter 208 (id=380479912): [title="Band 12 Detector"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 209 (id=3450627): [title="Passive Tube On"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 210 (id=1751834952): [title="Passive Tube Low Frequency"] [unit=""] [type = Discrete, default = 0.666667, unit = 0]
+Info:     Parameter 211 (id=616018643): [title="Passive Tube Low Boost"] [unit=""] [type = Float, default = 0.000000, unit = 0]
+Info:     Parameter 212 (id=615248442): [title="Passive Tube Low Atten"] [unit=""] [type = Float, default = 0.000000, unit = 0]
+Info:     Parameter 213 (id=780465502): [title="Passive Tube High Frequency"] [unit=""] [type = Discrete, default = 0.666667, unit = 0]
+Info:     Parameter 214 (id=1806396603): [title="Passive Tube High Bandwidth"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 215 (id=568336765): [title="Passive Tube High Boost"] [unit=""] [type = Float, default = 0.000000, unit = 0]
+Info:     Parameter 216 (id=932835070): [title="Passive Tube Atten Select"] [unit=""] [type = Discrete, default = 0.500000, unit = 0]
+Info:     Parameter 217 (id=567566564): [title="Passive Tube High Atten"] [unit=""] [type = Float, default = 0.000000, unit = 0]
+Info:     Parameter 218 (id=100345374): [title="Inductor On"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 219 (id=963216383): [title="Inductor HPF"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:     Parameter 220 (id=1945017101): [title="Inductor Low Frequency"] [unit=""] [type = Discrete, default = 0.666667, unit = 0]
+Info:     Parameter 221 (id=1945030676): [title="Inductor Low Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 222 (id=495715329): [title="Inductor Mid Frequency"] [unit=""] [type = Discrete, default = 0.600000, unit = 0]
+Info:     Parameter 223 (id=495728904): [title="Inductor Mid Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 224 (id=326674752): [title="Inductor High Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 225 (id=94843649): [title="Console On"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 226 (id=950378053): [title="Console Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 227 (id=792662908): [title="Console HPF"] [unit="Hz"] [type = Float, default = 0.000000, unit = 0]
+Info:     Parameter 228 (id=792666752): [title="Console LPF"] [unit="Hz"] [type = Float, default = 1.000000, unit = 0]
+Info:  =>Parameter 228 (id=792666752): getParamValueByString ("Off") doesn't return the original normalized value! Got 0.000000 instead of 1.000000.
+Info:     Parameter 229 (id=594953275): [title="Console LF Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 230 (id=594939700): [title="Console LF Frequency"] [unit="Hz"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 231 (id=594808255): [title="Console LF Bell"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 232 (id=1491933250): [title="Console LMF Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 233 (id=1491919675): [title="Console LMF Frequency"] [unit="Hz"] [type = Float, default = 0.451807, unit = 0]
+Info:     Parameter 234 (id=950346382): [title="Console LMF Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 235 (id=89402174): [title="Console HMF Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 236 (id=89388599): [title="Console HMF Frequency"] [unit="Hz"] [type = Float, default = 0.574720, unit = 0]
+Info:     Parameter 237 (id=950227218): [title="Console HMF Q"] [unit=""] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 238 (id=480436671): [title="Console HF Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 239 (id=480423096): [title="Console HF Frequency"] [unit="Hz"] [type = Float, default = 0.676198, unit = 0]
+Info:     Parameter 240 (id=480291651): [title="Console HF Bell"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 241 (id=92821705): [title="Air On"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 242 (id=1154567906): [title="Air Frequency"] [unit=""] [type = Discrete, default = 0.750000, unit = 0]
+Info:     Parameter 243 (id=1154581481): [title="Air Gain"] [unit="dB"] [type = Float, default = 0.000000, unit = 0]
+Info:     Parameter 244 (id=1652125811): [title="Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 245 (id=1886548852): [title="Program"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:  =>Parameter 245 (id=1886548852) is kIsProgramChange, but not a kIsList!
+Info:  Note: This Unit (idx=0, id=0, name="Root Unit") has 246 parameters: it could be better to split it in sub-units!.
+[Succeeded]
+
+[MIDI Mapping]
+Info:  ===MIDI Mapping ====================================
+[Succeeded]
+
+[MIDI Learn]
+Info:  ===MIDI Learn ====================================
+Info:  No MIDI Learn interface supplied!
+[Succeeded]
+
+[Scan Units]
+Info:  ===Scan Units ====================================
+Info:  This component has 1 unit(s).
+Info:     Unit000 (ID = 0): "Root Unit" (parent ID = -1, programlist ID = 1886548852)
+[Succeeded]
+
+[Scan Programs]
+Info:  ===Scan Programs ====================================
+Info:  Programlist 000 (id=1886548852):  "Factory Presets" (40 programs).
+Info:  Programlist 000->Program 000: "Init (Flat)"
+Info:  Programlist 000->Program 001: "Rap Lead - Clean & Forward"
+Info:  Programlist 000->Program 002: "Boom Bap Lead - Warm Grit"
+Info:  Programlist 000->Program 003: "Dark & Gritty Lead"
+Info:  Programlist 000->Program 004: "Doubles - Tuck Behind"
+Info:  Programlist 000->Program 005: "Ad-libs - Hype Cut"
+Info:  Programlist 000->Program 006: "Backing Stack - Wide & Soft"
+Info:  Programlist 000->Program 007: "Telephone / Lo-fi"
+Info:  Programlist 000->Program 008: "De-ess + Air"
+Info:  Programlist 000->Program 009: "Podcast / Spoken Word"
+Info:  Programlist 000->Program 010: "Chorus / Hook Lift"
+Info:  Programlist 000->Program 011: "Harsh Mic Tamer"
+Info:  Programlist 000->Program 012: "Room Box Removal"
+Info:  Programlist 000->Program 013: "Rap Lead - Passive Tube Polish"
+Info:  Programlist 000->Program 014: "Kick - Punch & Knock"
+Info:  Programlist 000->Program 015: "Snare - Crack & Body"
+Info:  Programlist 000->Program 016: "Hats - Smooth Sizzle"
+Info:  Programlist 000->Program 017: "808 - Clean Sub + Bite"
+Info:  Programlist 000->Program 018: "Bass - Defined Low End"
+Info:  Programlist 000->Program 019: "Dusty Sampler (12-bit era)"
+Info:  Programlist 000->Program 020: "Vinyl Loop Cleanup"
+Info:  Programlist 000->Program 021: "Keys / Rhodes - Warm Bell"
+Info:  Programlist 000->Program 022: "Guitar - Clean Up & Presence"
+Info:  Programlist 000->Program 023: "Drum Bus - Boom Bap Thump"
+Info:  Programlist 000->Program 024: "Beat Bus - Glue Polish"
+Info:  Programlist 000->Program 025: "Bass/Kick Carve (side-chain)"
+Info:  Programlist 000->Program 026: "Sample Chop - Room for Vocals"
+Info:  Programlist 000->Program 027: "Master - Gentle Polish"
+Info:  Programlist 000->Program 028: "Master - Boom Bap Warmth"
+Info:  Programlist 000->Program 029: "Master - Air & Clarity"
+Info:  Programlist 000->Program 030: "Master - Low-End Control (dynamic)"
+Info:  Programlist 000->Program 031: "Master - M/S Widen Highs"
+Info:  Programlist 000->Program 032: "Master - Mono Bass"
+Info:  Programlist 000->Program 033: "Master - De-Harsh"
+Info:  Programlist 000->Program 034: "Master - Loudness Prep"
+Info:  Programlist 000->Program 035: "Mix Bus - Console Glue"
+Info:  Programlist 000->Program 036: "Axell Signature - LCT 440 Pure"
+Info:  Programlist 000->Program 037: "Axell Signature - SM7B"
+Info:  Programlist 000->Program 038: "Axell Signature - Booth Fix"
+Info:  Programlist 000->Program 039: "Axell Signature - Tracking (Light)"
+[Succeeded]
+
+[Terminate/Initialize]
+Info:  ===Terminate/Initialize ====================================
+[Succeeded]
+
+[Check Unit Structure]
+Info:  ===Check Unit Structure ====================================
+Info:  All units have valid parent IDs.
+[Succeeded]
+
+[Valid State Transition 32bits]
+Info:  ===Valid State Transition 32bits ====================================
+[Succeeded]
+
+[Valid State Transition 64bits]
+Info:  ===Valid State Transition 64bits ====================================
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Bus Consistency]
+Info:  ===Bus Consistency ====================================
+[Succeeded]
+
+[Bus Activation]
+Info:  ===Bus Activation ====================================
+Info:     Bus Activation: Input Audio Bus (0) (kMain)
+Info:     Bus Activation: Input Audio Bus (1) (kAux)
+Info:     Bus Activation: Output Audio Bus (0) (kMain)
+[Succeeded]
+
+[Check Audio Bus Arrangement]
+Info:  ===Check Audio Bus Arrangement ====================================
+Info:     Check Input Audio Bus Arrangement (0)
+Info:     Check Input Audio Bus Arrangement (1)
+Info:     Check Output Audio Bus Arrangement (0)
+[Succeeded]
+
+[SideChain Arrangement]
+Info:  ===SideChain Arrangement ====================================
+[Succeeded]
+
+[Suspend/Resume]
+Info:  ===Suspend/Resume ====================================
+[Succeeded]
+
+[Note Expression]
+Info:  ===Note Expression ====================================
+Info:  No Note Expression interface supplied!
+[Succeeded]
+
+[Keyswitch]
+Info:  ===Keyswitch ====================================
+Info:  No Keyswitch interface supplied!
+[Succeeded]
+
+[ProcessContext Requirements]
+Info:  ===ProcessContext Requirements ====================================
+Info:  ProcessContextRequirements:
+Info:   - SystemTime
+Info:   - ContinousTimeSamples
+Info:   - ProjectTimeMusic
+Info:   - BarPosititionMusic
+Info:   - CycleMusic
+Info:   - SamplesToNextClock
+Info:   - Tempo
+Info:   - TimeSignature
+Info:   - Chord
+Info:   - FrameRate
+Info:   - TransportState
+[Succeeded]
+
+-------------------------------------------------------------
+TestSuite : Single Precision (32 bit) Tests
+-------------------------------------------------------------
+
+[Process Test]
+[Succeeded]
+
+[Process function running in another thread]
+Info:  ===Process function running in another thread ====================================
+[Succeeded]
+
+[Silence Flags]
+Info:  ===Silence Flags ====================================
+[Succeeded]
+
+[Silence Processing]
+Info:  ===Silence Processing ====================================
+[Succeeded]
+
+[Parameters Flush (no Buffer)]
+Info:  ===Parameters Flush (no Buffer) ====================================
+[Succeeded]
+
+[Parameters Flush 2 (only numChannel==0)]
+Info:  ===Parameters Flush 2 (only numChannel==0) ====================================
+[Succeeded]
+
+[Parameters Flush 2 (no Buffer, no parameter change)]
+Info:  ===Parameters Flush 2 (no Buffer, no parameter change) ====================================
+[Succeeded]
+
+[Variable Block Size]
+Info:  ===Variable Block Size ====================================
+[Succeeded]
+
+[Process Format]
+Info:  ===Process Format ====================================
+Info:  ***Tested Sample Rates***
+Info:        22050 Hz - processed successfully!
+Info:        32000 Hz - processed successfully!
+Info:        44100 Hz - processed successfully!
+Info:        48000 Hz - processed successfully!
+Info:        88200 Hz - processed successfully!
+Info:        96000 Hz - processed successfully!
+Info:       192000 Hz - processed successfully!
+Info:       384000 Hz - processed successfully!
+Info:    1234.5678 Hz - processed successfully!
+Info:    12345.678 Hz - processed successfully!
+Info:    123456.78 Hz - processed successfully!
+Info:    1234567.8 Hz - processed successfully!
+[Succeeded]
+
+[Parameter Bypass persistence]
+Info:  ===Parameter Bypass persistence ====================================
+[Succeeded]
+
+[In: Stereo: 2 Channels, Out: Stereo: 2 Channels]
+Info:  ===In: Stereo: 2 Channels, Out: Stereo: 2 Channels ====================================
+[Succeeded]
+
+[In: Mono: 1 Channels, Out: Mono: 1 Channels]
+Info:  ===In: Mono: 1 Channels, Out: Mono: 1 Channels ====================================
+[Succeeded]
+
+[Accuracy: Block, 1 Parameters, Change every100 Samples]
+Info:  ===Accuracy: Block, 1 Parameters, Change every100 Samples ====================================
+[Succeeded]
+
+[Accuracy: Sample, 1 Parameters, Change every100 Samples]
+Info:  ===Accuracy: Sample, 1 Parameters, Change every100 Samples ====================================
+Info:     Not all points have been read via IParameterChanges
+[Succeeded]
+
+-------------------------------------------------------------
+TestSuite : Double Precision (64 bit) Tests
+-------------------------------------------------------------
+
+[Process Test]
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Process function running in another thread]
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Silence Flags]
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Silence Processing]
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Parameters Flush (no Buffer)]
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Parameters Flush 2 (only numChannel==0)]
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Parameters Flush 2 (no Buffer, no parameter change)]
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Variable Block Size]
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Process Format]
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Parameter Bypass persistence]
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[In: Stereo: 2 Channels, Out: Stereo: 2 Channels]
+Info:  ===In: Stereo: 2 Channels, Out: Stereo: 2 Channels ====================================
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[In: Mono: 1 Channels, Out: Mono: 1 Channels]
+Info:  ===In: Mono: 1 Channels, Out: Mono: 1 Channels ====================================
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Accuracy: Block, 1 Parameters, Change every100 Samples]
+Info:  ===Accuracy: Block, 1 Parameters, Change every100 Samples ====================================
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+[Accuracy: Sample, 1 Parameters, Change every100 Samples]
+Info:  ===Accuracy: Sample, 1 Parameters, Change every100 Samples ====================================
+Info:  64bit Audio Processing not supported.
+[Succeeded]
+
+-------------------------------------------------------------
+Result: 47 tests passed, 0 tests failed
+-------------------------------------------------------------

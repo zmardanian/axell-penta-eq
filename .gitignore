@@ -1,0 +1,8 @@
+build/
+build-*/
+tools/*
+!tools/proto/
+tools/proto/__pycache__/
+__pycache__/
+tests/report-asan.md
+*.user
