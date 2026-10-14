@@ -64,7 +64,7 @@ public:
     bool isPresetModified() const;
     void markPresetReference();
 
-    int getActiveSlot() const { return activeSlot; }
+    int getActiveSlot() const { return activeSlot.load(); }
     void selectSlot (int slot);
     void copyActiveToOther();
 
@@ -87,6 +87,7 @@ public:
 private:
     void timerCallback() override;
     void restoreTree (const juce::ValueTree& tree);
+    juce::ValueTree exactState(); // copyState() plus each parameter's exact plain value ("p")
     void runEngine (juce::AudioBuffer<float>& buffer);
     static void storeMax (std::atomic<float>& a, float v) noexcept;
 
@@ -112,7 +113,10 @@ private:
     juce::CriticalSection nameLock;
     juce::String presetName { "Init (Flat)" };
     std::vector<float> presetReference;
-    int activeSlot = 0;
+    // A/B: the inactive slot is saved with the session. slotLock guards slots/activeSlot writes against a
+    // host reading the state from another thread (never held while parameters change).
+    juce::CriticalSection slotLock;
+    std::atomic<int> activeSlot { 0 };
     juce::ValueTree slots[2];
     std::vector<std::vector<float>> undoPast, undoFuture;
     static constexpr size_t kUndoDepth = 100;

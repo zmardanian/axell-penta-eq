@@ -323,14 +323,14 @@ void testIndependent (dt::Recorder& r)
         if (worst > 0.1)
             std::printf ("  [%g k] worst Butterworth case: %s (%.3f dB)\n", fs / 1000, wn.c_str(), worst);
     }
-    // 2. resonant shelves and tilt over the whole Q range (Q > 5 needs the resonance below Nyquist:
-    //    checked at >= 88.2 kHz, and at 44.1/48 kHz with 2x oversampling)
+    // 2. resonant shelves and tilt over the whole Q range, without oversampling at every rate (since
+    //    2.0: before, Q > 5 needed the resonance below Nyquist - 2x oversampling at 44.1/48 kHz)
     uint64_t seed = 0x5eed1234u + (uint64_t) fs;
     auto rnd = [&seed] { seed = seed * 6364136223846793005ull + 1442695040888963407ull; return (double) (seed >> 11) * (1.0 / 9007199254740992.0); };
     for (int band = 0; band < 2; ++band)
     {
         const bool highQ = band == 1;
-        const int os = highQ && fs < 80000.0 ? 1 : 0;
+        const int os = 0;
         double worst = 0.0;
         std::string wn;
         const int cases = quick ? 12 : 48;
@@ -356,9 +356,106 @@ void testIndependent (dt::Recorder& r)
                 wn = b;
             }
         }
-        r.less (highQ ? (os ? "shelves/tilt Q 5..24 (OS 2x) vs RBJ analog" : "shelves/tilt Q 5..24 vs RBJ analog")
-                      : "shelves/tilt Q 0.1..5 vs RBJ analog", worst, 0.1, "dB");
+        r.less (highQ ? "shelves/tilt Q 5..24 vs RBJ analog (1x)" : "shelves/tilt Q 0.1..5 vs RBJ analog", worst, 0.1, "dB");
         std::printf ("  [%g k] %s worst: %s\n", fs / 1000, highQ ? "Q 5..24" : "Q 0.1..5", wn.c_str());
+    }
+    // 2b. near Nyquist at 1x: every type centred 12-30 kHz (the control's range) vs its analog curve -
+    //     notch and band-pass at their true centre, also above Nyquist (D25)
+    {
+        double worst = 0.0;
+        std::string wn;
+        const int cases = quick ? 10 : 36;
+        for (int i = 0; i < cases; ++i)
+        {
+            const int kinds[] = { kBell, kHighShelf, kLowShelf, kTilt, kNotch, kBandPass };
+            const int type = kinds[i % 6];
+            const double f0 = 12000.0 * std::pow (2.5, rnd()), g = -24.0 + 48.0 * rnd();
+            const double q = type == kBandPass ? 0.3 * std::pow (40.0, rnd()) : 0.2 * std::pow (120.0, rnd());
+            const int slope = type == kBandPass ? 1 + (int) (rnd() * 7) : 1;
+            Rig rig;
+            rig.set ("phase", (float) (i % 2 == 0 ? kZeroLatency : kNatural));
+            rig.band (0, type, (float) f0, (float) g, (float) q, slope);
+            rig.prepare (fs, 1, 512);
+            const int n = (kSlopeDb[slope] + 6) / 12;
+            const auto tgt = [&] (double f)
+            {
+                const std::complex<double> sj (0.0, f / f0);
+                switch (type)
+                {
+                    case kBell:
+                    {
+                        const double A = std::pow (10.0, std::abs (g) / 40.0);
+                        const auto h = (sj * sj + sj * A / q + 1.0) / (sj * sj + sj / (A * q) + 1.0);
+                        return dt::db (std::abs (g >= 0 ? h : 1.0 / h));
+                    }
+                    case kNotch: return dt::db (std::abs ((sj * sj + 1.0) / (sj * sj + sj / q + 1.0)));
+                    case kBandPass: return ref::bandPassDb (f, f0, q, n);
+                    case kTilt: return ref::tiltDb (f, f0, q, g);
+                    default: return ref::shelfDb (f, f0, q, g, type == kLowShelf);
+                }
+            };
+            double at = 0.0;
+            const double e = refError (rig, fs, tgt, -24.0, 0.5, &at);
+            if (e > worst)
+            {
+                worst = e;
+                char b[160];
+                std::snprintf (b, sizeof b, "type %d f=%.0f g=%+.1f q=%.2f slope %d: %.3f dB @ %.0f Hz", type, f0, g, q, kSlopeDb[slope], e, at);
+                wn = b;
+            }
+        }
+        r.less ("every type centred 12..30 kHz vs analog (1x, ZL + NP)", worst, 0.1, "dB");
+        std::printf ("  [%g k] 12..30 kHz worst: %s\n", fs / 1000, wn.c_str());
+    }
+    // 2c. Natural Phase: steep, narrow band-pass (96 dB/oct, Q 12) keeps magnitude and analog phase (D26)
+    {
+        double worst = 0.0, worstPh = 0.0;
+        for (double f0 : { 250.0, 1000.0, 4000.0 })
+        {
+            Rig rig;
+            rig.set ("phase", (float) kNatural);
+            rig.band (0, kBandPass, (float) f0, 0, 12.0f, 7);
+            rig.prepare (fs, 1, 512);
+            const auto h = dt::impulse (rig, (int) (2.0 * fs), 0, 0, 0, 512);
+            const int lat = rig.e.getLatencySamples();
+            for (double f : dt::logFreqs (20.0, std::min (20000.0, 0.4535 * fs), 400))
+            {
+                const std::complex<double> sj (0.0, f / f0);
+                const auto a = std::pow ((sj / 12.0) / (sj * sj + sj / 12.0 + 1.0), 8);
+                if (dt::db (std::abs (a)) < -24.0)
+                    continue;
+                const auto d = dt::dft (h, 2.0 * dt::kPi * f / fs) * std::polar (1.0, 2.0 * dt::kPi * f / fs * lat);
+                worst = std::max (worst, std::abs (dt::db (std::abs (d)) - dt::db (std::abs (a))));
+                if (dt::db (std::abs (a)) >= -20.0)
+                    worstPh = std::max (worstPh, std::abs (std::arg (d / a)) * 180.0 / dt::kPi);
+            }
+        }
+        r.less ("Natural Phase band-pass 96 dB/oct Q 12 vs analog magnitude", worst, 0.1, "dB");
+        r.less ("Natural Phase band-pass 96 dB/oct Q 12 vs analog phase (>= -20 dB)", worstPh, 3.0, "deg");
+    }
+    // 2d. a dynamic band near Nyquist (its fit is tracked every control block): stable and bounded
+    {
+        Rig rig;
+        rig.band (0, kHighShelf, 19500.0f, 9.0f, 12.0f, 1);
+        rig.set (bandId (0, bpDyn), 1);
+        rig.set (bandId (0, bpThr), -40);
+        rig.set (bandId (0, bpRange), -18);
+        rig.set (bandId (0, bpAtk), 1);
+        rig.set (bandId (0, bpRel), 30);
+        rig.prepare (fs, 1, 256, false);
+        auto b = dt::zeros (1, (int) fs * 2);
+        for (int i = 0; i < (int) b[0].size(); ++i) // noise bursts: the gain swings over the whole range
+            b[0][(size_t) i] = (float) ((i / 2400) % 2 == 0 ? 0.5 : 0.002) * (float) std::sin (0.7 * i + 0.0003 * i * i);
+        rig.run (b, 256);
+        double peak = 0.0;
+        bool finite = true;
+        for (float v : b[0])
+        {
+            finite = finite && std::isfinite (v);
+            peak = std::max (peak, (double) std::abs (v));
+        }
+        r.equal ("dynamic high shelf 19.5 kHz Q 12 (tracked fit): output finite", finite ? 1 : 0, 1, "");
+        r.less ("dynamic high shelf 19.5 kHz Q 12 (tracked fit): output peak", dt::db (peak), dt::db (0.5) + 30.0, "dBFS"); // resonant shelf overshoot, no blow-up
     }
     // 3. band-pass: every slope distinct, n = slope/12 (rounded) 2nd-order sections
     {
@@ -497,6 +594,9 @@ dt::Buf renderScripted (double fs, int nCh, int mode, int block, uint64_t seed, 
         rig.band (b, b % 8, 200.0f * (float) (b + 1), 6.0f, 1.0f);
     rig.set ("ptOn", 1);
     rig.set ("indOn", 1);
+    rig.set ("b1_dyn", 1); // a spectral band (its hops are tied to the absolute sample position)
+    rig.set ("b1_dmode", 1);
+    rig.set ("b1_thr", -45);
     rig.prepare (fs, nCh, block);
     auto buf = dt::zeros (nCh, len);
     dt::addNoise (buf, extreme ? 0.9 : 0.3, seed);
@@ -556,6 +656,9 @@ void testBlockInvariance (dt::Recorder& r)
                     rg.band (b, b % 8, 200.0f * (float) (b + 1), 6.0f, 1.0f);
                 rg.set ("ptOn", 1);
                 rg.set ("indOn", 1);
+                rg.set ("b1_dyn", 1);
+                rg.set ("b1_dmode", 1);
+                rg.set ("b1_thr", -45);
                 rg.prepare (fs, nCh, blk);
                 const int len = 1024 * 40;
                 auto buf = dt::zeros (nCh, len);
@@ -678,7 +781,7 @@ void testClicks (dt::Recorder& r)
         }
         return worst;
     };
-    struct Step { const char* name; std::vector<std::pair<std::string, float>> a, b; };
+    struct Step { const char* name; std::vector<std::pair<std::string, float>> a, b; double limit = -60.0; };
     const std::vector<Step> steps {
         { "gain jump -12 <-> +12 dB", { { "b1_gain", -12 } }, { { "b1_gain", 12 } } },
         { "freq jump 300 Hz <-> 3 kHz", { { "b1_freq", 300 } }, { { "b1_freq", 3000 } } },
@@ -697,6 +800,16 @@ void testClicks (dt::Recorder& r)
         { "oversampling 1x <-> 4x", { { "os", 0 } }, { { "os", 2 } } },
         { "output gain -12 <-> +6", { { "outGain", -12 } }, { { "outGain", 6 } } },
         { "solo-free mix 0 <-> 100 %", { { "mix", 0 } }, { { "mix", 100 } } },
+        // near Nyquist (fitted 4th-order realisations, D25): sweeps across the hard / classic boundary
+        // a 1-octave jump of a Q 12 resonance glides through the top octave in ~20 ms: at 88.2-192 kHz,
+        // where the resonance is inside the band, the moving resonance itself rings (v1.0: -54 dBFS)
+        { "high shelf Q 12 +12 dB: 14 kHz <-> 28 kHz", { { "b1_type", 2 }, { "b1_q", 12 }, { "b1_gain", 12 }, { "b1_freq", 14000 } }, { { "b1_freq", 28000 } }, -50.0 },
+        { "notch Q 2: 15 kHz <-> 30 kHz", { { "b1_type", 5 }, { "b1_q", 2 }, { "b1_freq", 15000 } }, { { "b1_freq", 30000 } } },
+        { "bell 21 kHz Q 8: -18 <-> +18 dB", { { "b1_freq", 21000 }, { "b1_q", 8 }, { "b1_gain", -18 } }, { { "b1_gain", 18 } } },
+        { "dynamic mode broadband <-> spectral (100 Hz band, acting)", { { "b1_freq", 100 }, { "b1_dyn", 1 }, { "b1_thr", -40 }, { "b1_range", -12 }, { "b1_dmode", 0 } },
+          { { "b1_dmode", 1 } } },
+        { "spectral band on/off while acting", { { "b1_freq", 100 }, { "b1_dyn", 1 }, { "b1_dmode", 1 }, { "b1_thr", -40 }, { "b1_range", -12 } },
+          { { "b1_dyn", 0 } } },
     };
     for (const auto& st : steps)
     {
@@ -726,7 +839,7 @@ void testClicks (dt::Recorder& r)
             rig.e.process (ptr, nCh, std::min (256, len - pos));
         }
         const double hf = hfPeak (b, (int) fs / 4);
-        r.less (std::string ("HF burst > 6 kHz: ") + st.name, dt::db (hf), -60.0, "dBFS");
+        r.less (std::string ("HF burst > 6 kHz: ") + st.name, dt::db (hf), st.limit, "dBFS");
     }
 }
 
@@ -831,6 +944,96 @@ void testDynamics (dt::Recorder& r)
         rig.run (b, 512);
         const double g3 = dt::db (dt::toneAmp (b[0], (int) fs / 2, 8192, 3000.0, fs)) - dt::db (0.05);
         r.range ("source = Band 2 region: 3 kHz band reacts to 9 kHz", g3, -6.5, -5.5, "dB");
+    }
+
+    //== spectral dynamics (Dynamic Mode = Spectral) ===============================================
+    // a loud 3 kHz tone and a quiet 2.2 kHz tone inside a 3 kHz bell's region, a loud 300 Hz tone outside
+    auto specRun = [&] (int dmode, float range, int place, const dt::Buf* sc, auto&& addInput)
+    {
+        Rig rig;
+        rig.band (0, kBell, 3000, 0, 1, 3, 0, place);
+        rig.set ("b1_dyn", 1);
+        rig.set ("b1_dmode", (float) dmode);
+        rig.set ("b1_thr", -40);
+        rig.set ("b1_range", range);
+        rig.set ("b1_ratio", 20);
+        rig.set ("b1_atk", 5);
+        rig.set ("b1_rel", 100);
+        if (sc != nullptr)
+            rig.set ("b1_src", (float) (kNumBands + 1));
+        rig.prepare (fs, nCh, 512);
+        auto b = dt::zeros (nCh, (int) (2.5 * fs));
+        addInput (b);
+        rig.run (b, 512, sc);
+        return b;
+    };
+    auto tone = [&] (const dt::Buf& b, double f, double ref, int ch = 0)
+    {
+        return dt::db (dt::toneAmp (b[(size_t) ch], (int) (1.5 * fs), (int) (0.8 * fs), f, fs)) - dt::db (ref);
+    };
+    auto threeTones = [&] (dt::Buf& b)
+    {
+        dt::addSine (b, fs, 3000.0, 0.5);
+        dt::addSine (b, fs, 2200.0, 0.00316);
+        dt::addSine (b, fs, 300.0, 0.5);
+    };
+    {
+        const auto sp = specRun (1, -12.0f, kStereo, nullptr, threeTones);
+        const auto bb = specRun (0, -12.0f, kStereo, nullptr, threeTones);
+        r.range ("spectral: loud tone in the band reduced by the range", tone (sp, 3000.0, 0.5), -12.5, -11.5, "dB");
+        r.range ("spectral: quiet tone in the same band untouched", tone (sp, 2200.0, 0.00316), -0.1, 0.1, "dB");
+        r.range ("spectral: loud tone outside the band (300 Hz) ~ untouched", tone (sp, 300.0, 0.5), -0.5, 0.05, "dB");
+        r.less ("broadband for comparison pulls the quiet tone down (dB)", tone (bb, 2200.0, 0.00316), -6.0, "dB");
+        const auto up = specRun (1, 6.0f, kStereo, nullptr, threeTones);
+        r.range ("spectral upward (range +6): loud tone raised", tone (up, 3000.0, 0.5), 5.5, 6.5, "dB");
+        r.range ("spectral upward: quiet tone untouched", tone (up, 2200.0, 0.00316), -0.1, 0.1, "dB");
+    }
+    {
+        // below threshold everywhere: bit-identical to the static band
+        auto quiet = [&] (dt::Buf& b) { dt::addSine (b, fs, 3000.0, 0.001); dt::addSine (b, fs, 500.0, 0.001); };
+        const auto sp = specRun (1, -12.0f, kStereo, nullptr, quiet);
+        Rig rig;
+        rig.band (0, kBell, 3000, 0, 1);
+        rig.prepare (fs, nCh, 512);
+        auto ref = dt::zeros (nCh, (int) (2.5 * fs));
+        quiet (ref);
+        rig.run (ref, 512);
+        double d = 0.0;
+        for (size_t c = 0; c < ref.size(); ++c)
+            for (size_t i = 0; i < ref[c].size(); ++i)
+                d = std::max (d, (double) std::abs (sp[c][i] - ref[c][i]));
+        r.less ("spectral below threshold: output identical to the static band", d, 1.0e-9, "");
+    }
+    {
+        // external side-chain: a loud 3 kHz tone in the side-chain cuts 3 kHz of the programme only
+        auto scB = dt::zeros (1, (int) (2.5 * fs));
+        dt::addSine (scB, fs, 3000.0, 0.5);
+        auto prog = [&] (dt::Buf& b) { dt::addSine (b, fs, 3000.0, 0.01); dt::addSine (b, fs, 2200.0, 0.01); };
+        const auto sp = specRun (1, -9.0f, kStereo, &scB, prog);
+        r.range ("spectral side-chain: the side-chain's frequency cut in the programme", tone (sp, 3000.0, 0.01), -9.5, -8.5, "dB");
+        r.range ("spectral side-chain: other frequencies untouched", tone (sp, 2200.0, 0.01), -0.1, 0.1, "dB");
+    }
+    if (nCh == 2)
+    {
+        // a spectral band on the Side: a loud 3 kHz Side tone is cut, the same tone in the Mid is not
+        auto ms = [&] (dt::Buf& b)
+        {
+            for (int i = 0; i < (int) b[0].size(); ++i)
+            {
+                const double m = 0.5 * std::sin (2.0 * dt::kPi * 3000.0 * i / fs), sd = 0.5 * std::sin (2.0 * dt::kPi * 3000.0 * i / fs + 1.0);
+                b[0][(size_t) i] = (float) (m + sd);
+                b[1][(size_t) i] = (float) (m - sd);
+            }
+        };
+        const auto sp = specRun (1, -12.0f, kSide, nullptr, ms);
+        dt::Buf mid (1, std::vector<float> (sp[0].size())), side (1, std::vector<float> (sp[0].size()));
+        for (size_t i = 0; i < sp[0].size(); ++i)
+        {
+            mid[0][i] = 0.5f * (sp[0][i] + sp[1][i]);
+            side[0][i] = 0.5f * (sp[0][i] - sp[1][i]);
+        }
+        r.range ("spectral on Side: Side tone cut by the range", tone (side, 3000.0, 0.5), -12.5, -11.5, "dB");
+        r.range ("spectral on Side: Mid untouched", tone (mid, 3000.0, 0.5), -0.1, 0.1, "dB");
     }
 }
 
@@ -1146,6 +1349,8 @@ void testRealtimeSafety (std::vector<dt::Result>& all)
                 rig.band (b, b % 8, 80.0f * (float) (b + 1), 3.0f, 1.0f, 3, b % 2, b % 5);
             for (int b = 0; b < 12; b += 3)
                 rig.set (bandId (b, bpDyn), 1);
+            for (int b = 0; b < 12; b += 6)
+                rig.set (bandId (b, bpDynMode), 1); // spectral
             rig.set ("ptOn", 1);
             rig.set ("indOn", 1);
             rig.set ("conOn", 1);
@@ -1233,6 +1438,20 @@ void benchmark (std::vector<dt::Result>& all)
               r.band (4, kBell, 3000, -1, 1.2f); r.set ("b5_dyn", 1); r.set ("b5_range", -2);
               r.band (5, kHighShelf, 8000, 1, 0.7f, 1, 0, kSide);
           } },
+        { "vocal + 2 spectral bands (harshness 3 kHz, sibilance 7 kHz)", [] (Rig& r)
+          {
+              r.set ("hpOn", 1); r.set ("hpFreq", 80);
+              r.band (0, kLowShelf, 140, 2.5f, 0.7f, 1); r.band (1, kBell, 450, -3, 1.4f);
+              r.band (2, kBell, 3000, 0, 1.2f); r.set ("b3_dyn", 1); r.set ("b3_dmode", 1); r.set ("b3_thr", -50); r.set ("b3_range", -6);
+              r.band (3, kHighShelf, 7000, 0, 0.7f, 1); r.set ("b4_dyn", 1); r.set ("b4_dmode", 1); r.set ("b4_thr", -50); r.set ("b4_range", -8);
+              r.band (5, kHighShelf, 12000, 2, 0.7f, 1);
+          } },
+        { "near Nyquist: 4 fitted bands at 48 kHz (2 dynamic, gain moving)", [] (Rig& r)
+          {
+              r.band (0, kHighShelf, 19000, 6, 12, 1); r.set ("b1_dyn", 1); r.set ("b1_thr", -50); r.set ("b1_range", -9);
+              r.band (1, kBell, 21000, -6, 8); r.set ("b2_dyn", 1); r.set ("b2_thr", -50); r.set ("b2_range", 9);
+              r.band (2, kNotch, 25000, 0, 2); r.band (3, kBandPass, 23000, 0, 3, 7);
+          } },
         { "worst case: 12 dynamic Character bands + all modules, OS 4x", [] (Rig& r)
           {
               for (int b = 0; b < 12; ++b)
@@ -1253,6 +1472,10 @@ void benchmark (std::vector<dt::Result>& all)
         const int len = 48000 * (quick ? 5 : 30);
         auto buf = dt::zeros (2, len);
         dt::addNoise (buf, 0.3, 1);
+        if (std::string (b.name).find ("gain moving") != std::string::npos)
+            for (auto& ch : buf) // level steps 8x per second: the dynamic gains move all the time
+                for (int i = 0; i < len; ++i)
+                    ch[(size_t) i] *= ((i / 6000) % 2 == 0) ? 1.0f : 0.02f;
         const auto t0 = std::chrono::steady_clock::now();
         rig.run (buf, 128);
         const double sec = std::chrono::duration<double> (std::chrono::steady_clock::now() - t0).count();

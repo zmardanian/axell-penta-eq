@@ -1,7 +1,7 @@
 # Axell Penta EQ
 
-An all-round equalizer VST3 for Linux by **Axell Yobag**: a surgical, analog-matched parametric EQ with dynamic
-bands and Mid/Side, plus a rack of four character modules - **Inductor**, **Console E/G**, **Passive Tube**
+An all-round equalizer VST3 for Linux by **Axell Yobag**: a surgical, analog-matched parametric EQ with dynamic and
+spectral bands, Mid/Side, curve drawing and reference matching, plus a rack of four character modules - **Inductor**, **Console E/G**, **Passive Tube**
 and **Air**. Built for rap and boom bap vocals, beats, 808s, the mix bus and the master. Companion to
 [Duo Vocal Comp](https://github.com/zmardanian/duo-vocal-comp).
 
@@ -13,12 +13,16 @@ and **Air**. Built for rap and boom bap vocals, beats, 808s, the mix bus and the
 - 12 bands + dedicated high-pass and low-pass. Types: bell, low/high shelf, low/high cut (6–96 dB/oct with
   resonance), notch, band-pass, tilt.
 - **Clean** mode: curves match the analog prototypes within ±0.1 dB up to 20 kHz - no "cramping" of high bells and
-  shelves near the top of the spectrum, at 44.1–192 kHz (measured independently; see *Accuracy*).
+  shelves near the top of the spectrum, for every band type, gain, Q and frequency at 44.1–192 kHz, without
+  exceptions (measured independently; see *Accuracy*).
 - **Character** mode per band: proportional Q (wider at small gains, narrower at big ones), cuts tighter than
   boosts, and boosts that saturate gently with **Drive**.
 - **Dynamic** per band: threshold, range (cut *or* boost when loud), ratio, attack, release. The detector can listen
   to the band's own region, to **another band's region** (cut 3 kHz when 9 kHz gets loud) or to the **external
   side-chain** (duck the 808's fundamental with the kick). De-essing, harshness, mud and boom control.
+- **Spectral dynamics** per band: instead of moving as a whole, every frequency inside the band reacts on its own -
+  only what is too loud gets cut (a resonance, a whistle, a harsh partial, a sharp sibilant), the rest of the band
+  stays untouched. Zero added latency; the graph shows the live per-frequency gain.
 - Per band placement: **Stereo / Left / Right / Mid / Side**.
 - **Solo** a band's region to find problem frequencies.
 
@@ -41,12 +45,17 @@ and **Air**. Built for rap and boom bap vocals, beats, 808s, the mix bus and the
   loudness-matched **Auto Gain** (never pumps).
 - Spectrum analyzer: input (pre), output (post) and side-chain spectra, 1/6-octave smoothing, 4.5 dB/oct tilt,
   peak hold, adjustable speed and EQ scale.
-- **40 factory presets** (all loudness-matched), user presets with descriptions, preset browser with categories and
-  search, **A/B** compare, **undo/redo**.
+- **Workflow**: select several bands and move them together, keyboard editing, copy/paste (also between
+  instances), invert, note readout and snapping, a band on a spectrum peak with one click, **Draw** a curve and let
+  the EQ build it, **Match** your track to a reference, **Gain Scale** (0–200 %).
+- **42 factory presets** (all loudness-matched), user presets with descriptions, preset browser with categories and
+  search, **A/B** compare (saved with the session), **undo/redo**.
 - Resizable vector GUI (75–200 %), sharp on HiDPI, tooltips on every control.
 
 | | |
 |---|---|
+| ![Spectral dynamics: the live per-frequency gain of band 4](docs/screenshots/penta-spectral.png) | ![Match](docs/screenshots/penta-match.png) |
+| ![Draw a curve](docs/screenshots/penta-draw.png) | ![Several bands selected](docs/screenshots/penta-multiselect.png) |
 | ![Preset browser](docs/screenshots/penta-browser.png) | ![Rap lead preset at 100 %](docs/screenshots/penta-100pct.png) |
 
 ## Using it
@@ -55,12 +64,34 @@ and **Air**. Built for rap and boom bap vocals, beats, 808s, the mix bus and the
 | Action | Result |
 |---|---|
 | Click on empty space | add a bell band there (gain from the click height) |
-| Drag a dot | frequency (left/right) and gain (up/down); cuts, notch and band-pass: up/down = resonance/Q |
-| Shift + drag | fine adjustment |
-| Mouse wheel on a dot | Q (Shift = fine) |
+| Drag on empty space | select the bands inside the frame (Ctrl/Shift: add to the selection) |
+| Ctrl/Cmd + click a dot | add / remove it from the selection |
+| Drag a dot | frequency (left/right) and gain (up/down); a selection moves together; cuts, notch and band-pass: up/down = resonance/Q |
+| Shift + drag / Ctrl + drag | fine adjustment / Q |
+| Mouse wheel on a dot | Q (Shift = fine), for the whole selection |
 | Double-click a dot | gain back to 0 dB |
-| Alt + click a dot | remove the band |
-| Right-click a dot | type, slope, placement, mode, dynamic, bypass, remove |
+| Alt + click a dot | remove the band (or the selection) |
+| Alt + click empty space | a new narrow band on the nearest spectrum peak (hold Alt to see it first) |
+| Right-click a dot / empty space | band menu (type, slope, placement, mode, dynamic, spectral, invert, copy/paste, remove) / graph menu |
+
+| Key | Action |
+|---|---|
+| ← → / ↑ ↓ | frequency ±1 semitone / gain ±0.5 dB (Shift: 1/96 octave / 0.1 dB; cuts: ↑ ↓ = Q) |
+| Del, Backspace | remove the selected bands |
+| Ctrl+A, Esc, Tab / Shift+Tab | select all, select none, next / previous band |
+| I, B | invert the gains, bypass |
+| Ctrl+C, Ctrl+V | copy a band, paste it onto the selection or into a free band (works between instances) |
+| Ctrl+Z, Ctrl+Shift+Z / Ctrl+Y | undo, redo |
+
+The readout shows the note of the frequency (e.g. *A4 +20ct*); **Snap frequency to notes** (analyzer or graph
+menu) makes drags and nudges land on semitones. **SCALE** in the graph's top bar scales the gain of every band
+(0–200 %, double-click = 100 %).
+
+**DRAW**: paint the curve you want across the graph (several strokes are fine; unpainted parts count as flat), then
+**APPLY** - the EQ fits up to 12 bands to it (one undo step). **MATCH**: play a reference (a mix you like) through the
+side-chain, through this instance, or through another instance of the EQ in the session and capture it; play your
+track and capture it; set amount, smoothing and the largest correction and press **APPLY**. The level difference
+is removed - it matches tone, not loudness.
 
 Dynamic bands show a bar from their static gain to the end of their range; the white curve moves live, the faint
 curve is the static setting. The **ANALYZER** menu in the graph's corner sets pre/post/side-chain display, peak hold,
@@ -69,8 +100,9 @@ tilt, speed and the EQ scale (±6/12/18/30 dB).
 ### Band panel
 Band chips **HP 1 … 12 LP** select a band (grey chips are free: clicking one switches it on as a flat bell).
 **SOLO** (hold) plays only the band's region, **BYPASS** keeps the band but disables it, **REMOVE** deletes it.
-The right half holds the **DYNAMIC** section: threshold, range, ratio, attack, release and the detector source
-(*Self*, *Band n* or *External*).
+The right half holds the **DYNAMIC** section: threshold, range, ratio, attack, release, the detector source
+(*Self*, *Band n* or *External*) and **BROAD / SPECTRAL**. Spectral thresholds are per frequency: loud music reads
+about −45 to −25 dBFS per frequency, so around −30 dB the band catches ringing peaks and lets the rest pass.
 
 ### Header
 Preset menu (opens the browser), previous/next, **SAVE**, **A / B / COPY**, **UNDO / REDO** (Ctrl+Z,
@@ -96,13 +128,13 @@ Linear Phase resolves narrow low-frequency moves better at higher resolution (Me
 
 | Category | Presets |
 |---|---|
-| **Vocals** (13) | Rap Lead - Clean & Forward · Boom Bap Lead - Warm Grit · Dark & Gritty Lead · Doubles - Tuck Behind · Ad-libs - Hype Cut · Backing Stack - Wide & Soft · Telephone / Lo-fi · De-ess + Air · Podcast / Spoken Word · Chorus / Hook Lift · Harsh Mic Tamer · Room Box Removal · Rap Lead - Passive Tube Polish |
+| **Vocals** (14) | Rap Lead - Clean & Forward · Boom Bap Lead - Warm Grit · Dark & Gritty Lead · Doubles - Tuck Behind · Ad-libs - Hype Cut · Backing Stack - Wide & Soft · Telephone / Lo-fi · De-ess + Air · Podcast / Spoken Word · Chorus / Hook Lift · Harsh Mic Tamer · Room Box Removal · Rap Lead - Passive Tube Polish · Vocal - Spectral Harshness Tamer |
 | **Beats & Instruments** (13) | Kick - Punch & Knock · Snare - Crack & Body · Hats - Smooth Sizzle · 808 - Clean Sub + Bite · Bass - Defined Low End · Dusty Sampler (12-bit era) · Vinyl Loop Cleanup · Keys / Rhodes - Warm Bell · Guitar - Clean Up & Presence · Drum Bus - Boom Bap Thump · Beat Bus - Glue Polish · Bass/Kick Carve (side-chain) · Sample Chop - Room for Vocals |
-| **Mix Bus & Master** (9) | Master - Gentle Polish · Master - Boom Bap Warmth · Master - Air & Clarity · Master - Low-End Control (dynamic) · Master - M/S Widen Highs · Master - Mono Bass · Master - De-Harsh · Master - Loudness Prep · Mix Bus - Console Glue |
+| **Mix Bus & Master** (10) | Master - Gentle Polish · Master - Boom Bap Warmth · Master - Air & Clarity · Master - Low-End Control (dynamic) · Master - M/S Widen Highs · Master - Mono Bass · Master - De-Harsh · Master - Loudness Prep · Mix Bus - Console Glue · Mix Bus - Spectral Resonance Control |
 | **Axell Signature** (4) | LCT 440 Pure · SM7B · Booth Fix · Tracking (Light) - tuned to a measured voice (thin 80–160 Hz chest, booth box at 350–600 Hz, presence dip at 2.5–5 kHz, sibilance at 8–10 kHz, dark tilt) |
 | **Utility** | Init (Flat) |
 
-Every preset has a description in the browser. All of them are loudness-matched to bypass (within ±0.5 LU on pink
+Every preset has a description in the browser. All of them are loudness-matched to bypass (within ±0.05 LU on pink
 noise), so switching compares tone, not level. The measured frequency response of every preset is in
 [docs/preset-curves](docs/preset-curves/README.md), and where each move comes from is documented in
 [docs/research/preset-sources.md](docs/research/preset-sources.md). Dynamic thresholds assume a normal tracked
@@ -118,13 +150,13 @@ User presets are saved to `~/.local/share/AxellPentaEQ/Presets` (with your own d
 
 ## Install
 
-1. Download `AxellPentaEQ-1.0.0-linux-x86_64.tar.gz` from the
+1. Download `AxellPentaEQ-2.0.0-linux-x86_64.tar.gz` from the
    [latest release](https://github.com/zmardanian/axell-penta-eq/releases/latest).
 2. Extract it and run the installer:
 
    ```bash
-   tar xzf AxellPentaEQ-1.0.0-linux-x86_64.tar.gz
-   cd AxellPentaEQ-1.0.0-linux-x86_64
+   tar xzf AxellPentaEQ-2.0.0-linux-x86_64.tar.gz
+   cd AxellPentaEQ-2.0.0-linux-x86_64
    ./install.sh
    ```
 
@@ -154,44 +186,52 @@ bash scripts/install.sh           # copy to ~/.vst3
 
 ## Quality
 
-- **DSP suite** (`tests/DspTests.cpp`, JUCE-free): 624 checks at 44.1/48/88.2/96/192 kHz, mono and stereo -
+- **DSP suite** (`tests/DspTests.cpp`, JUCE-free): 743 checks at 44.1/48/88.2/96/192 kHz, mono and stereo -
   Clean magnitude vs analog on ~600 filter settings per mode (worst error: Zero Latency 0.003 dB, Natural 0.05 dB,
   Linear 0.10 dB), plus textbook references independent of the engine's own model (exact Butterworth curves at
-  every slope, RBJ resonant shelves over the whole Q range), bit-exact flat nulls, latency = impulse delay in every
-  mode, bit-identical output for any block size, random extreme automation fuzzing (no NaN/Inf), click tests for
-  every switch including phase-mode changes during playback, dynamic-band levels and time constants, L/R/M/S
-  isolation (≤ −120 dBFS leakage), character-module curves and harmonics, presets (loudness within ±0.1 LU), and
-  zero heap allocations in the audio path. Both suites also pass under AddressSanitizer + UBSan + LeakSanitizer.
+  every slope, RBJ resonant shelves over the whole Q range without oversampling, every band type centred at
+  12–30 kHz, steep narrow band-pass in Natural Phase), bit-exact flat nulls, latency = impulse delay in every mode,
+  bit-identical output for any block size (with a spectral band), random extreme automation fuzzing (no NaN/Inf),
+  click tests for every switch including phase-mode changes, near-Nyquist sweeps and spectral on/off during
+  playback, dynamic and spectral bands (selectivity, upward mode, side-chain, Mid/Side), L/R/M/S isolation
+  (≤ −120 dBFS leakage), character-module curves and harmonics, presets (loudness within ±0.1 LU), and zero heap
+  allocations in the audio path. Both suites also pass under AddressSanitizer + UBSan + LeakSanitizer.
   Report: [tests/report.md](tests/report.md).
-- **Plugin suite** (`tests/PluginTests.cpp`): 49 checks - parameters, bit-identical session restore, presets,
-  user presets, A/B, undo/redo, latency in every mode, buses, side-chain, latency-aligned bypass, editor lifecycle,
-  graph mouse interaction, type changes resetting a neutral Q, tooltips on every control.
+- **Plugin suite** (`tests/PluginTests.cpp`): 78 checks - parameters (2.0 additions appended, 1.0 sessions open
+  unchanged), bit-identical session restore (A/B included), presets, user presets, A/B, undo/redo, latency in every
+  mode and the latency handoff to the host, buses, side-chain, latency-aligned bypass, editor lifecycle, graph
+  mouse and keyboard interaction (selection, frame, group drag, nudge, invert, copy/paste, note snapping, spectrum
+  peak grab), Draw and Match end to end, Gain Scale on the audio, type changes resetting a neutral Q, tooltips on
+  every control.
 - **Independent audit** ([tests/independent](tests/independent/README.md)): a separate VST3 host loads the built
   bundle and sets parameters as a host does. Its output is compared with analog curves computed by scipy, sharing
-  no code with the plugin. It covers random settings of every band type at six sample rates, plus 160+
-  processing checks: latency, linearity, block-size invariance, M/S, Mix, Linear Phase, clicks, dynamics and
-  side-chain. Report: [tests/independent/audit-report.txt](tests/independent/audit-report.txt). It found six
-  defects before release, all fixed (listed in its README).
-- **pluginval** strictness 10: SUCCESS, including the **Steinberg VST3 validator** (47/47 tests).
+  no code with the plugin: 1526 random settings of every band type at six sample rates (including Q up to 24 and
+  band frequencies up to 30 kHz at 44.1/48 kHz, Zero Latency and Natural Phase) - all within spec, **none exempt** -
+  plus 174 processing checks: latency (also live, against the host's current compensation), linearity,
+  block-size invariance, M/S, Mix, Linear Phase, clicks, dynamics, spectral dynamics, Gain Scale and side-chain.
+  Report: [tests/independent/audit-report.txt](tests/independent/audit-report.txt). Every defect it ever found is
+  listed in its README.
+- **pluginval** strictness 10: SUCCESS (three seeds), including the **Steinberg VST3 validator** (47/47 tests).
 - **REAPER**: loaded, automated by script, rendered offline - the render matches the analog curve within 0.01 dB.
-- **CPU** (one stereo instance, 48 kHz / 128 samples, 8-core Zen 3 laptop): vocal chain 1.3 %, beat bus with
-  Console + Passive Tube at 2x 2.8 %, mastering chain in Natural Phase 1.4 %, in Linear Phase 1.2 %; worst case
-  (12 dynamic Character bands + all modules at 4x) 12.5 %.
+- **CPU** (one stereo instance, 48 kHz / 128 samples, 8-core Zen 3 laptop): vocal chain 1.4 %, the same with two
+  spectral bands 2.7 %, beat bus with Console + Passive Tube at 2x 2.9 %, mastering chain in Natural Phase 1.5 %, in
+  Linear Phase 1.3 %; four fitted near-Nyquist bands (two dynamic, gain moving) 4.2 %; worst case (12 dynamic
+  Character bands + all modules at 4x) 13 %.
 
 ### Accuracy
 
 Clean mode follows the analog prototypes within **±0.1 dB** from 20 Hz to 20 kHz wherever the curve is above −24 dB.
 Cuts stay within ±0.5 dB down to −48 dB. Natural Phase also follows the analog phase (within a few degrees). This
-holds in Zero Latency and Natural Phase for every band type, gain and Q at 88.2–192 kHz, and at 44.1/48 kHz with
-these exceptions near the top of the band:
+holds in Zero Latency and Natural Phase for **every band type, gain, Q and frequency** (up to the control's 30 kHz)
+at **every sample rate, 44.1 kHz included, without oversampling** - no exceptions (since 2.0; the independent audit
+checks it with nothing exempt).
 
-- Shelves and tilt with **Q above 5** whose resonance lies near or above Nyquist (about 3 % of such settings at
-  44.1 kHz) can be off by several dB near 20 kHz. **2x oversampling** brings them within 0.06 dB.
-- Notch and band-pass centred **above 18 kHz** deviate up to about 1 dB at 20 kHz. 2x oversampling fixes this too.
-- Band frequencies above about 0.9 × Nyquist (the control reaches 30 kHz) are approximations of a curve that mostly
-  lies outside the audio band.
-- **Natural Phase** has a 2.7 ms correction window: band-pass at 72/96 dB/oct with Q above 6 is accurate to about
-  0.3 dB near its peak.
+Near Nyquist a plain 2nd-order digital section cannot follow an analog curve whose resonance or centre lies close to
+or above Nyquist. Those sections - only those - are realised as a pair of biquads fitted to the analog curve across the
+audio band, stable and minimum phase by construction; above 20 kHz the response may stay below the analog curve but
+never rises more than 3 dB above it. Notch and band-pass act at their true centre, also above Nyquist (a 25 kHz notch
+shapes the top of the band like the analog one). Every other band keeps the classic matched design, so typical
+settings sound and cost exactly as before.
 
 Linear Phase resolves low, narrow bands according to its resolution: Medium f ≥ max(100 Hz, 40·Q), High f ≥ 10·Q.
 

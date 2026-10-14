@@ -281,6 +281,48 @@ int main()
         p.selectSlot (0);
         check (std::abs (getParam (p, "b1_gain") + 9.0f) < 1.0e-3f, "A/B: copy B -> A");
 
+        // A/B survives a session reopen: both slots and the active one, bit-exact
+        {
+            PentaProcessor a;
+            prepare (a);
+            setParam (a, "b1_gain", 3.0f);
+            setParam (a, "b3_freq", 1234.567f);
+            a.selectSlot (1);
+            setParam (a, "b1_gain", -9.0f);
+            setParam (a, "b3_q", 2.345f);
+            const auto bVals = a.readValues();
+            a.selectSlot (0);
+            const auto aVals = a.readValues();
+            a.selectSlot (1);
+            juce::MemoryBlock mb;
+            a.getStateInformation (mb);
+            PentaProcessor q;
+            prepare (q);
+            q.setStateInformation (mb.getData(), (int) mb.getSize());
+            check (q.getActiveSlot() == 1 && q.readValues() == bVals, "A/B session: reopens on slot B with B's values");
+            q.selectSlot (0);
+            check (q.readValues() == aVals, "A/B session: slot A survives the reopen (bit-exact)");
+            q.selectSlot (1);
+            check (q.readValues() == bVals, "A/B session: back to B (bit-exact)");
+            q.selectSlot (0);
+            juce::MemoryBlock m2;
+            q.getStateInformation (m2);
+            PentaProcessor r;
+            prepare (r);
+            r.setStateInformation (m2.getData(), (int) m2.getSize());
+            const bool onA = r.getActiveSlot() == 0 && r.readValues() == aVals;
+            r.selectSlot (1);
+            check (onA && r.readValues() == bVals, "A/B session: reopens on slot A, B kept");
+            // a session without A/B data (older build, XML) clears the slots of the previous session
+            juce::MemoryBlock old;
+            PentaProcessor::copyXmlToBinary (*PentaProcessor().apvts.copyState().createXml(), old);
+            r.setStateInformation (old.getData(), (int) old.getSize());
+            const auto flat = r.readValues();
+            const bool slotA = r.getActiveSlot() == 0;
+            r.selectSlot (1);
+            check (slotA && r.readValues() == flat, "A/B session: older state -> slot A active, no stale slot B");
+        }
+
         PentaProcessor u;
         prepare (u);
         u.pushUndo();
@@ -340,6 +382,77 @@ int main()
         pump (200);
         check (l0 == 0 && p.getLatencySamples() == p.engine().getLatencySamples() && p.getLatencySamples() > 0,
                "latency re-reported after switching to Natural Phase (" + juce::String (p.getLatencySamples()) + ")");
+
+        // latency handoff: after a latency change the output stays muted until the host has been told
+        // (no message loop runs between the switch and pump(), as when the host is slow to react)
+        auto peak = [] (const Buf& b, int from, int to)
+        {
+            float m = 0.0f;
+            for (const auto& c : b)
+                for (int i = from; i < to; ++i)
+                    m = std::max (m, std::abs (c[(size_t) i]));
+            return m;
+        };
+        // max |y[i] - x[i - lat]| for i >= from (a default setting is a pure delay)
+        auto alignErr = [] (const Buf& x, const Buf& y, int lat, int from)
+        {
+            float m = 0.0f;
+            for (size_t c = 0; c < x.size(); ++c)
+                for (int i = std::max (from, lat); i < (int) x[c].size(); ++i)
+                    m = std::max (m, std::abs (y[c][(size_t) i] - x[c][(size_t) (i - lat)]));
+            return m;
+        };
+        {
+            PentaProcessor h;
+            prepare (h, 48000.0, 256);
+            render (h, noise (2, 24000, 3));
+            setParam (h, "phase", 1); // Zero Latency -> Natural Phase
+            const auto o1 = render (h, noise (2, 14336, 4));
+            const int natLat = h.engine().getLatencySamples();
+            check (natLat > 0 && h.getLatencySamples() == 0 && peak (o1, 1024, 14336) < 1.0e-9f,
+                   "latency handoff: muted while the host still compensates the old latency (0.3 s, no message loop)");
+            pump (60);
+            const auto x2 = noise (2, 9728, 5);
+            const auto o2 = render (h, x2);
+            const float e2 = alignErr (x2, o2, natLat, 1024);
+            check (h.getLatencySamples() == natLat && e2 < 1.0e-5f && peak (o2, 1024, 9728) > 0.1f,
+                   "latency handoff: resumes once reported, aligned to the new latency (" + juce::String (e2) + ")");
+            setParam (h, "phase", 0); // back to Zero Latency: lower latency, the riskier direction
+            const auto o3 = render (h, noise (2, 14336, 6));
+            const bool muted = h.getLatencySamples() == natLat && peak (o3, 1024, 14336) < 1.0e-9f;
+            pump (60);
+            const auto x4 = noise (2, 9728, 7);
+            const auto o4 = render (h, x4);
+            const float e4 = alignErr (x4, o4, 0, 1024);
+            check (muted && h.getLatencySamples() == 0 && e4 < 1.0e-5f && peak (o4, 1024, 9728) > 0.1f,
+                   "latency handoff: Natural Phase -> Zero Latency also waits, then aligned (" + juce::String (e4) + ")");
+            setParam (h, "lpQuality", 2); // no latency change in Zero Latency: no wait for the host
+            const auto x5 = noise (2, 9728, 8);
+            const auto o5 = render (h, x5);
+            check (alignErr (x5, o5, 0, 4800) < 1.0e-5f, "latency handoff: a switch that keeps the latency does not wait");
+        }
+        {
+            // a host without a message loop: give up after 0.5 s rather than stay silent
+            PentaProcessor h;
+            prepare (h, 48000.0, 256);
+            setParam (h, "phase", 1);
+            const auto o = render (h, noise (2, 49152, 9));
+            check (peak (o, 1024, 23000) < 1.0e-9f && peak (o, 28800, 49152) > 0.1f,
+                   "latency handoff: no host response -> resumes after 0.5 s");
+        }
+        {
+            // offline renders never wait (deterministic, independent of the message thread)
+            PentaProcessor h;
+            h.setNonRealtime (true);
+            prepare (h, 48000.0, 256);
+            render (h, noise (2, 4800, 10));
+            setParam (h, "phase", 1);
+            const auto x = noise (2, 9728, 11);
+            const auto o = render (h, x);
+            const int lat = h.engine().getLatencySamples();
+            check (h.getLatencySamples() == 0 && alignErr (x, o, lat, 4800) < 1.0e-5f,
+                   "latency handoff: offline renders do not wait for the host");
+        }
     }
 
     //== 7. bus layouts, side-chain, bypass ===========================================
@@ -508,6 +621,218 @@ int main()
             const auto img = ed->createComponentSnapshot (ed->getLocalBounds(), true, 1.0f);
             check (img.isValid() && img.getWidth() == (int) (ui::kWidth * s), "editor renders at " + juce::String ((int) (s * 100)) + " %");
         }
+    }
+
+    //== 9. 2.0: new parameters, Gain Scale, spectral mode, graph workflow =========
+    {
+        // a session saved by 1.0 (no Dynamic Mode / Gain Scale) opens with their defaults
+        {
+            PentaProcessor a;
+            prepare (a);
+            setParam (a, "b3_dmode", 1.0f);
+            setParam (a, "gainScale", 40.0f);
+            setParam (a, "b1_gain", 5.0f);
+            auto state = a.apvts.copyState();
+            for (auto id : { "b3_dmode", "gainScale" })
+                state.removeChild (state.getChildWithProperty ("id", id), nullptr);
+            juce::MemoryBlock old;
+            PentaProcessor::copyXmlToBinary (*state.createXml(), old);
+            PentaProcessor b;
+            prepare (b);
+            setParam (b, "b3_dmode", 1.0f);
+            setParam (b, "gainScale", 40.0f);
+            b.setStateInformation (old.getData(), (int) old.getSize());
+            check (getParam (b, "b3_dmode") < 0.5f && std::abs (getParam (b, "gainScale") - 100.0f) < 1.0e-3f
+                       && std::abs (getParam (b, "b1_gain") - 5.0f) < 1.0e-3f,
+                   "a 1.0 session opens with Dynamic Mode = Broadband and Gain Scale = 100 %");
+            bool v2 = true;
+            for (auto* prm : b.getParameters())
+                if (auto* r = dynamic_cast<juce::RangedAudioParameter*> (prm))
+                {
+                    const bool added = r->paramID.endsWith ("_dmode") || r->paramID == "gainScale";
+                    v2 = v2 && (r->getVersionHint() == (added ? 2 : 1));
+                }
+            check (v2, "parameters added in 2.0 carry version hint 2, all others 1");
+        }
+        // Gain Scale scales the band gains in the audio path
+        {
+            PentaProcessor g;
+            prepare (g);
+            setParam (g, "b1_used", 1.0f);
+            setParam (g, "b1_freq", 1000.0f);
+            setParam (g, "b1_gain", 8.0f);
+            setParam (g, "gainScale", 50.0f);
+            const int n = 48000;
+            Buf in (2, std::vector<float> ((size_t) n));
+            for (int i = 0; i < n; ++i)
+                in[0][(size_t) i] = in[1][(size_t) i] = 0.1f * (float) std::sin (2.0 * juce::MathConstants<double>::pi * 1000.0 * i / 48000.0);
+            const auto out = render (g, in);
+            double pk = 0.0;
+            for (int i = n / 2; i < n - 256; ++i)
+                pk = std::max (pk, (double) std::abs (out[0][(size_t) i]));
+            const double gainDb = 20.0 * std::log10 (pk / 0.1);
+            check (std::abs (gainDb - 4.0) < 0.1, "Gain Scale 50 %: a +8 dB bell acts as +4 dB (" + juce::String (gainDb, 2) + " dB)");
+        }
+        PentaProcessor q;
+        prepare (q);
+        std::unique_ptr<juce::AudioProcessorEditor> ed (q.createEditor());
+        ed->setSize (ui::kWidth, ui::kHeight);
+        auto* editor = dynamic_cast<PentaEditor*> (ed.get());
+        auto& graph = editor->getGraph();
+        const auto area = graph.getLocalBounds().toFloat();
+        const auto plot = area.reduced (2.0f).withTrimmedLeft (30.0f).withTrimmedBottom (18.0f).withTrimmedRight (34.0f);
+        auto xFor = [&] (double hz) { return plot.getX() + (float) (std::log (hz / 20.0) / std::log (1000.0)) * plot.getWidth(); };
+        auto yFor = [&] (double db) { return plot.getCentreY() - (float) (db / graph.options.rangeDb) * plot.getHeight() * 0.5f; };
+        auto band = [&] (int b, float hz, float db)
+        {
+            setParam (q, "b" + std::to_string (b) + "_type", 0.0f);
+            setParam (q, "b" + std::to_string (b) + "_freq", hz);
+            setParam (q, "b" + std::to_string (b) + "_gain", db);
+            setParam (q, "b" + std::to_string (b) + "_q", 1.0f);
+            setParam (q, "b" + std::to_string (b) + "_used", 1.0f);
+        };
+        band (1, 500.0f, 3.0f);
+        band (2, 2000.0f, -3.0f);
+        editor->refreshNow();
+        // frame selection on empty space selects both nodes
+        const juce::Point<float> from (xFor (300.0), yFor (9.0)), to (xFor (3500.0), yFor (-9.0));
+        graph.mouseDown (mouse (graph, from));
+        graph.mouseDrag (mouse (graph, to, {}, 1, from));
+        graph.mouseUp (mouse (graph, to, {}, 1, from));
+        auto selNow = graph.selection();
+        check (selNow.size() == 2 && selNow[0] == 1 && selNow[1] == 2 && getParam (q, "b3_used") < 0.5f,
+               "dragging a frame on empty space selects the nodes inside (no band added)");
+        // dragging one selected node moves the whole selection: same frequency ratio, same gain change
+        const float f1 = getParam (q, "b1_freq"), f2 = getParam (q, "b2_freq"), g1 = getParam (q, "b1_gain"), g2 = getParam (q, "b2_gain");
+        const juce::Point<float> n1 (xFor (500.0), yFor (3.0)), n1b = n1 + juce::Point<float> (40.0f, -30.0f);
+        graph.mouseDown (mouse (graph, n1));
+        graph.mouseDrag (mouse (graph, n1b, {}, 1, n1));
+        graph.mouseUp (mouse (graph, n1b, {}, 1, n1));
+        const float r1 = getParam (q, "b1_freq") / f1, r2 = getParam (q, "b2_freq") / f2;
+        const float d1 = getParam (q, "b1_gain") - g1, d2 = getParam (q, "b2_gain") - g2;
+        check (r1 > 1.2f && std::abs (r1 - r2) < 0.01f && d1 > 1.0f && std::abs (d1 - d2) < 0.05f,
+               "dragging a selected node moves the selection together (ratio " + juce::String (r1, 3) + "/" + juce::String (r2, 3)
+                   + ", gain +" + juce::String (d1, 2) + "/+" + juce::String (d2, 2) + " dB)");
+        // keyboard: arrows nudge the selection, I inverts, Delete removes
+        const float k1 = getParam (q, "b1_freq"), k2 = getParam (q, "b2_freq"), kg = getParam (q, "b1_gain");
+        graph.keyPressed (juce::KeyPress (juce::KeyPress::rightKey));
+        graph.keyPressed (juce::KeyPress (juce::KeyPress::upKey));
+        check (std::abs (getParam (q, "b1_freq") / k1 - std::exp2 (1.0f / 12.0f)) < 1.0e-3f
+                   && std::abs (getParam (q, "b2_freq") / k2 - std::exp2 (1.0f / 12.0f)) < 1.0e-3f
+                   && std::abs (getParam (q, "b1_gain") - kg - 0.5f) < 1.0e-3f,
+               "Right arrow: +1 semitone, Up arrow: +0.5 dB, for every selected band");
+        const float i1 = getParam (q, "b1_gain"), i2 = getParam (q, "b2_gain");
+        graph.keyPressed (juce::KeyPress ('i'));
+        check (std::abs (getParam (q, "b1_gain") + i1) < 1.0e-3f && std::abs (getParam (q, "b2_gain") + i2) < 1.0e-3f,
+               "I inverts the gains of the selection");
+        // copy band 1, paste into a new band
+        graph.setSelected (1);
+        graph.keyPressed (juce::KeyPress ('c', juce::ModifierKeys::commandModifier, 0));
+        graph.clearSelection();
+        graph.keyPressed (juce::KeyPress ('v', juce::ModifierKeys::commandModifier, 0));
+        check (getParam (q, "b3_used") > 0.5f && std::abs (getParam (q, "b3_freq") - getParam (q, "b1_freq")) < 0.5f
+                   && std::abs (getParam (q, "b3_gain") - getParam (q, "b1_gain")) < 1.0e-3f,
+               "Ctrl+C / Ctrl+V: a band's settings pasted into a new band");
+        graph.setSelected (3);
+        graph.toggleSelected (2);
+        graph.keyPressed (juce::KeyPress (juce::KeyPress::deleteKey));
+        check (getParam (q, "b3_used") < 0.5f && getParam (q, "b2_used") < 0.5f && getParam (q, "b1_used") > 0.5f,
+               "Delete removes the selected bands only");
+        check (q.undoStep() && getParam (q, "b3_used") > 0.5f && getParam (q, "b2_used") > 0.5f, "removing a selection is one undo step");
+        // note readout and snapping
+        check (EqGraph::noteName (440.0) == "A4" && EqGraph::noteName (440.0 * std::exp2 (0.2 / 12.0)) == "A4 +20ct"
+                   && EqGraph::noteName (261.6256) == "C4",
+               "note readout: A4, A4 +20ct, C4");
+        graph.options.snapNotes = true;
+        editor->refreshNow();
+        graph.setSelected (1);
+        const juce::Point<float> s0 (xFor (getParam (q, "b1_freq")), yFor (getParam (q, "b1_gain")));
+        graph.mouseDown (mouse (graph, s0));
+        graph.mouseDrag (mouse (graph, s0 + juce::Point<float> (23.0f, 0.0f), {}, 1, s0));
+        graph.mouseUp (mouse (graph, s0 + juce::Point<float> (23.0f, 0.0f), {}, 1, s0));
+        const double semis = 12.0 * std::log2 (getParam (q, "b1_freq") / 440.0);
+        check (std::abs (semis - std::round (semis)) < 0.01, "snap to notes: a dragged band lands on a semitone (" + juce::String (semis, 3) + ")");
+        graph.options.snapNotes = false;
+        // grab a spectrum peak: a 3 kHz tone, Alt+click a bit off it creates a band on the peak
+        for (int b = 1; b <= penta::kNumBands; ++b)
+            setParam (q, "b" + std::to_string (b) + "_used", 0.0f);
+        {
+            const int n = 48000;
+            Buf in (2, std::vector<float> ((size_t) n));
+            for (int i = 0; i < n; ++i)
+                in[0][(size_t) i] = in[1][(size_t) i] = 0.3f * (float) std::sin (2.0 * juce::MathConstants<double>::pi * 3000.0 * i / 48000.0);
+            for (int k = 0; k < 8; ++k)
+            {
+                render (q, in);
+                editor->refreshNow();
+            }
+        }
+        graph.modifierKeysChanged (juce::ModifierKeys::altModifier);
+        const juce::Point<float> near (xFor (3300.0), yFor (0.0));
+        graph.mouseDown (mouse (graph, near, juce::ModifierKeys::altModifier));
+        graph.mouseUp (mouse (graph, near, juce::ModifierKeys::altModifier));
+        graph.modifierKeysChanged ({});
+        check (getParam (q, "b1_used") > 0.5f && std::abs (getParam (q, "b1_freq") / 3000.0f - 1.0f) < 0.03f,
+               "Alt+click near a spectrum peak: new band on the peak (" + juce::String (getParam (q, "b1_freq"), 0) + " Hz)");
+        // draw mode: sketch a bump, APPLY fits bands that follow it
+        graph.setDrawMode (true);
+        juce::Point<float> last (xFor (25.0), yFor (0.0));
+        for (int i = 1; i <= 80; ++i)
+        {
+            const double f = 25.0 * std::pow (19000.0 / 25.0, i / 80.0);
+            const double db = 6.0 * std::exp (-std::pow (std::log2 (f / 1000.0) / 0.8, 2.0));
+            const juce::Point<float> pnt (xFor (f), yFor (db));
+            graph.drawSegment (last, pnt);
+            last = pnt;
+        }
+        graph.applyDrawing();
+        q.apvts.copyState();
+        penta::CurveModel cm;
+        cm.build (q.readValues(), 48000.0);
+        const double at1k = cm.totalDb (1000.0), at100 = cm.totalDb (100.0), at10k = cm.totalDb (10000.0);
+        check (! graph.isDrawMode() && std::abs (at1k - 6.0) < 0.5 && std::abs (at100) < 0.5 && std::abs (at10k) < 0.5,
+               "draw a +6 dB bump at 1 kHz, APPLY: the fitted curve follows it (1k " + juce::String (at1k, 2) + ", 100 "
+                   + juce::String (at100, 2) + ", 10k " + juce::String (at10k, 2) + " dB)");
+        check (q.undoStep() && getParam (q, "b1_freq") > 2500.0f, "APPLY of a drawing is one undo step");
+        // match: a reference with +4 dB above ~5 kHz -> the fitted bands reproduce the match curve
+        {
+            auto& m = editor->getMatch();
+            MatchPanel::Spectrum ref, trk;
+            for (double f : graph.gridHz())
+            {
+                const double pink = -20.0 - 3.0 * std::log2 (f / 1000.0);
+                ref.db.push_back (pink + 4.0 * (0.5 + 0.5 * std::tanh (2.0 * std::log2 (f / 5000.0))));
+                trk.db.push_back (pink);
+            }
+            ref.valid = trk.valid = true;
+            ref.seconds = trk.seconds = 10.0;
+            m.setReference (ref);
+            m.setTrack (trk);
+            m.setAmount (100.0);
+            const auto target = m.matchCurve();
+            const auto hz = m.matchHz();
+            const int used = m.apply();
+            penta::CurveModel mm;
+            mm.build (q.readValues(), 48000.0);
+            double worst = 0.0;
+            for (size_t i = 0; i < hz.size(); ++i)
+                worst = std::max (worst, std::abs (mm.totalDb (hz[i]) - target[i]));
+            check (used > 0 && worst < 0.5, "MATCH: bands fitted to the match curve (" + juce::String (used) + " bands, worst "
+                                                + juce::String (worst, 2) + " dB)");
+            check (target.back() - target[hz.size() / 4] > 3.0, "MATCH: brighter reference -> the correction lifts the highs");
+        }
+        // band panel: the Spectral selector appears with the dynamic controls
+        setParam (q, "b1_used", 1.0f);
+        setParam (q, "b1_type", 0.0f);
+        setParam (q, "b1_dyn", 1.0f);
+        editor->selectSlot (1);
+        pump (100);
+        juce::StringArray tips;
+        collectTooltips (*ed, tips);
+        bool spectralTip = false;
+        for (auto& t : tips)
+            spectralTip = spectralTip || t.contains ("SPECTRAL: every frequency inside the band");
+        check (spectralTip, "band panel offers BROAD / SPECTRAL for dynamic bands");
     }
 
     tmp.deleteRecursively();

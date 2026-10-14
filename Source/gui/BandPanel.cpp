@@ -19,7 +19,12 @@ const char* gain = "Boost or cut in dB. Double-click to reset.";
 const char* q = "Bandwidth: low Q = wide and musical, high Q = narrow and surgical. Mouse wheel on the dot also works.";
 const char* dyn = "Makes this band DYNAMIC: it only moves when the signal in its region (or the detector source) gets "
                   "louder than THRESHOLD. Perfect for de-essing, harshness, mud and 808 boom.";
-const char* thr = "Level (dBFS, in the detector's frequency region) where the band starts to move.";
+const char* dmode = "BROAD: the whole band moves when its region gets loud. SPECTRAL: every frequency inside the band "
+                    "reacts on its own - only what is too loud gets cut (a resonance, a whistle, a harsh partial, a sharp "
+                    "sibilant), the rest of the region stays untouched. Zero latency in every phase mode.";
+const char* thr = "Level (dBFS) where the band starts to move. BROAD: the level in the detector's region. SPECTRAL: per "
+                  "frequency - a steady tone at this level just starts it. Loud music reads about -45 to -25 dBFS per "
+                  "frequency (noise lower), so -30 dB catches ringing peaks while the rest passes.";
 const char* range = "How far the band can move: negative = cuts when loud (de-ess, tame), positive = boosts when loud.";
 const char* ratio = "How fast the band reaches its range above the threshold (like a compressor ratio).";
 const char* atk = "How fast the band reacts (ms). 0.5-2 ms for sibilance, 10-30 ms to keep transients.";
@@ -58,7 +63,8 @@ BandPanel::BandPanel (PentaProcessor& p, std::function<void (int)> onSelect) : p
         addAndMakeVisible (b);
     }
     for (auto* c : std::initializer_list<juce::Component*> { &type, &slope, &source, &mode, &place, &freq, &gain, &q, &dyn,
-                                                            &thr, &range, &ratio, &atk, &rel, &cutOn, &solo, &bypass, &remove })
+                                                            &dmode, &thr, &range, &ratio, &atk, &rel, &cutOn, &solo, &bypass,
+                                                            &remove })
         addAndMakeVisible (c);
     solo.setTooltip (tip::solo);
     bypass.setTooltip (tip::bypass);
@@ -171,6 +177,7 @@ void BandPanel::rebind()
     mode.unbind();
     place.unbind();
     dyn.unbind();
+    dmode.unbind();
     cutOn.unbind();
     const bool cut = slot == 0 || slot == penta::kNumSlots - 1;
     const auto c = col::band (slot <= 0 ? 12 : (slot == penta::kNumSlots - 1 ? 13 : slot - 1));
@@ -208,6 +215,7 @@ void BandPanel::rebind()
         mode.bind (*a.getParameter (bandId (b, bpMode)), tip::mode, g);
         place.bind (*a.getParameter (bandId (b, bpPlace)), tip::place, g);
         dyn.bind (a, bandId (b, bpDyn), tip::dyn, g);
+        dmode.bind (*a.getParameter (bandId (b, bpDynMode)), tip::dmode, g);
         thr.bind (a, bandId (b, bpThr), tip::thr, g);
         range.bind (a, bandId (b, bpRange), tip::range, g);
         ratio.bind (a, bandId (b, bpRatio), tip::ratio, g);
@@ -232,8 +240,8 @@ void BandPanel::updateEnablement()
         isDyn = getParam (penta::bandId (slot - 1, penta::bpDyn)) > 0.5f;
         shelfOrCut = t != penta::kBell && t != penta::kNotch;
     }
-    for (auto* c : std::initializer_list<juce::Component*> { &type, &mode, &place, &gain, &dyn, &thr, &range, &ratio, &atk,
-                                                            &rel, &source, &solo, &bypass })
+    for (auto* c : std::initializer_list<juce::Component*> { &type, &mode, &place, &gain, &dyn, &dmode, &thr, &range, &ratio,
+                                                            &atk, &rel, &source, &solo, &bypass })
         c->setVisible (band);
     cutOn.setVisible (cut);
     freq.setVisible (! none);
@@ -244,7 +252,7 @@ void BandPanel::updateEnablement()
     slope.setEnabled (cut || shelfOrCut);
     mode.setEnabled (band && (t == penta::kBell || t == penta::kLowShelf || t == penta::kHighShelf));
     dyn.setEnabled (gainType);
-    for (auto* c : std::initializer_list<juce::Component*> { &thr, &range, &ratio, &atk, &rel, &source })
+    for (auto* c : std::initializer_list<juce::Component*> { &thr, &range, &ratio, &atk, &rel, &source, &dmode })
         c->setEnabled (gainType && isDyn);
     if (band)
         bypass.setToggleState (getParam (penta::bandId (slot - 1, penta::bpBypass)) > 0.5f, juce::dontSendNotification);
@@ -315,11 +323,14 @@ void BandPanel::resized()
     q.setBounds (m);
 
     auto d = dynArea;
-    auto dcol = d.removeFromLeft (130);
-    auto dc = dcol.withSizeKeepingCentre (130, rowH * 2 + 10);
-    dyn.setBounds (dc.removeFromTop (rowH));
-    dc.removeFromTop (10);
-    source.setBounds (dc.removeFromTop (rowH));
+    auto dcol = d.removeFromLeft (140);
+    const int dRow = 24;
+    auto dc = dcol.withSizeKeepingCentre (140, dRow * 3 + 10);
+    dyn.setBounds (dc.removeFromTop (dRow));
+    dc.removeFromTop (5);
+    dmode.setBounds (dc.removeFromTop (dRow));
+    dc.removeFromTop (5);
+    source.setBounds (dc.removeFromTop (dRow));
     d.removeFromLeft (6);
     const int dw = d.getWidth() / 5;
     for (auto* k : { &thr, &range, &ratio, &atk, &rel })

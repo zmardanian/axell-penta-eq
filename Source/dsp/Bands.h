@@ -104,13 +104,12 @@ inline void buildBand (const BandShape& b, double fsP, ChainDesign& d, bool char
             break;
         case kNotch:
         {
-            const double wn = 2.0 * kPi * std::min (f, 0.49 * fsP) / fsP;
-            d.add (proto::notch (wn, q));
+            d.add (proto::notch (w, q)); // above Nyquist too: the in-band part of the analog curve
             break;
         }
         case kBandPass:
         {
-            const double wb = 2.0 * kPi * std::min (f, 0.49 * fsP) / fsP;
+            const double wb = w;
             // 2nd-order sections: slope / 12, rounded (6 -> 1, 18 -> 2, 72 -> 6, 96 -> 8)
             const int n = std::clamp ((kSlopeDb[std::clamp (b.slopeIdx, 0, 7)] + 6) / 12, 1, kMaxSections);
             for (int i = 0; i < n; ++i)
@@ -123,6 +122,11 @@ inline void buildBand (const BandShape& b, double fsP, ChainDesign& d, bool char
         default:
             break;
     }
+    // near-Nyquist refinement up to 20 kHz (Sections.h); below ~0.93 pi at any rate
+    // (not for the parallel Character forms: their digital equivalent is one biquad, Chain::parallelBiquad)
+    const double wTop = d.parallel ? 0.0 : std::min (2.0 * kPi * 20000.0 / fsP, 0.93 * kPi);
+    for (int i = 0; i < d.count; ++i)
+        d.sect[(size_t) i].wTop = wTop;
 }
 
 // analog magnitude (dB) of a design at a frequency in rad/sample of its processing rate

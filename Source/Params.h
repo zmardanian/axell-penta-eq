@@ -50,6 +50,7 @@ inline const std::vector<std::string> indLow { "35 Hz", "60 Hz", "110 Hz", "220 
 inline const std::vector<std::string> indMid { "360 Hz", "700 Hz", "1.6 kHz", "3.2 kHz", "4.8 kHz", "7.2 kHz" };
 inline const std::vector<std::string> conMode { "E", "G" };
 inline const std::vector<std::string> airFreq { "2.5 kHz", "5 kHz", "10 kHz", "20 kHz", "40 kHz" };
+inline const std::vector<std::string> dynMode { "Broadband", "Spectral" };
 
 inline std::vector<std::string> dynSource()
 {
@@ -79,14 +80,15 @@ enum PhaseMode { kZeroLatency = 0, kNatural, kLinear };
 inline constexpr float kBandDefaultHz[kNumBands] = { 40.0f, 80.0f, 160.0f, 300.0f, 500.0f, 800.0f,
                                                     1200.0f, 2000.0f, 3500.0f, 6000.0f, 9000.0f, 14000.0f };
 
-// The per-band parameter suffixes, in table order (index = offset inside the band block)
+// The per-band parameter suffixes. bpUsed..bpSrc are the band block of the table (1.0); parameters added
+// later (bpDynMode, 2.0) sit at the end of the table, so every earlier index and VST3 id stays unchanged.
 enum BandParam { bpUsed = 0, bpBypass, bpType, bpFreq, bpGain, bpQ, bpSlope, bpMode, bpPlace,
-                 bpDyn, bpThr, bpRange, bpRatio, bpAtk, bpRel, bpSrc, kBandParamCount };
+                 bpDyn, bpThr, bpRange, bpRatio, bpAtk, bpRel, bpSrc, bpDynMode, kBandParamCount };
 
 inline std::string bandId (int band, BandParam p)
 {
     static const char* suffix[kBandParamCount] = { "used", "byp", "type", "freq", "gain", "q", "slope", "mode",
-                                                   "place", "dyn", "thr", "range", "ratio", "atk", "rel", "src" };
+                                                   "place", "dyn", "thr", "range", "ratio", "atk", "rel", "src", "dmode" };
     return "b" + std::to_string (band + 1) + "_" + suffix[p];
 }
 
@@ -220,6 +222,15 @@ inline std::vector<ParamSpec> buildTable()
     t.push_back (bo ("airOn", "Air On", false));
     t.push_back (ch ("airFreq", "Air Frequency", choice::airFreq, 3));
     t.push_back (fl ("airGain", "Air Gain", 0.0f, 20.0f, 0.0f, "dB"));
+
+    // 2.0 (appended: earlier sessions, presets and automation keep their parameters)
+    for (int b = 0; b < kNumBands; ++b)
+    {
+        t.push_back (ch (bandId (b, bpDynMode), "Band " + std::to_string (b + 1) + " Dynamic Mode", choice::dynMode, 0));
+        t.back().version = 2;
+    }
+    t.push_back (fl ("gainScale", "Gain Scale", 0.0f, 200.0f, 100.0f, "%"));
+    t.back().version = 2;
     return t;
 }
 } // namespace detail
@@ -252,6 +263,7 @@ struct ParamIdx
     int conOn, conMode, conHpf, conLpf, conLfGain, conLfFreq, conLfBell, conLmfGain, conLmfFreq, conLmfQ,
         conHmfGain, conHmfFreq, conHmfQ, conHfGain, conHfFreq, conHfBell;
     int airOn, airFreq, airGain;
+    int gainScale;
 };
 
 inline const ParamIdx& idx()
@@ -279,6 +291,7 @@ inline const ParamIdx& idx()
         r.conHmfGain = i ("conHmfGain"); r.conHmfFreq = i ("conHmfFreq"); r.conHmfQ = i ("conHmfQ");
         r.conHfGain = i ("conHfGain"); r.conHfFreq = i ("conHfFreq"); r.conHfBell = i ("conHfBell");
         r.airOn = i ("airOn"); r.airFreq = i ("airFreq"); r.airGain = i ("airGain");
+        r.gainScale = i ("gainScale");
         return r;
     }();
     return p;

@@ -1,14 +1,14 @@
-Started validating: /var/home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
-Random seed: 0x4bc5995
+Started validating: /home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
+Random seed: 0x35fa671
 Validation started
 Strictness level: 10
 -----------------------------------------------------------------
-Starting tests in: pluginval / Scan for plugins located in: /var/home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3...
+Starting tests in: pluginval / Scan for plugins located in: /home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3...
 Num plugins found: 1
 
-Testing plugin: VST3-Axell Penta EQ-7a392446-8c6d3599
-Axell Yobag: Axell Penta EQ v1.0.0
-Completed tests in pluginval / Scan for plugins located in: /var/home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
+Testing plugin: VST3-Axell Penta EQ-36e333de-8c6d3599
+Axell Yobag: Axell Penta EQ v2.0.0
+Completed tests in pluginval / Scan for plugins located in: /home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
 -----------------------------------------------------------------
 Starting tests in: pluginval / Open plugin (cold)...
 Completed tests in pluginval / Open plugin (cold)
@@ -27,7 +27,7 @@ Reported taillength: 0.25
 Completed tests in pluginval / Plugin info
 -----------------------------------------------------------------
 Starting tests in: pluginval / Plugin programs...
-Num programs: 40
+Num programs: 42
 All program names checked
 
 Changing program

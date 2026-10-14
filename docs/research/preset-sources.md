@@ -25,6 +25,7 @@ comparisons judge tone, not level. Dynamic thresholds assume a typical tracked l
 | Harsh Mic Tamer | Vocals | dynamic 3 kHz (−5) and 5.5 kHz (−4); −1.5 @ 8 kHz | V4/V5 (harshness lives 2–5 kHz, sibilance above), X7 |
 | Room Box Removal | Vocals | narrow cuts 280 / 450 / 650 Hz; +1 shelf 10 k | V8, V2 |
 | Rap Lead - Passive Tube Polish | Vocals | parametric HP + box cut + de-ess; Passive Tube 100 Hz boost 3/atten 2, 10 kHz boost 4 broad, 20 kHz atten 2; drive 35 % | V1, V2, V5; R2 (low trick, broad top, tube makeup) |
+| Vocal - Spectral Harshness Tamer | Vocals | HP 80; +1 @ 250; spectral 3.2 kHz Q 0.7 (thr −30, −6, fast) and spectral high shelf 6.5 k (thr −32, −7, 1 ms) | V4 (presence region 3–5 kHz; harshness is its excess), V5 (sibilance: a dynamic band), X7 (2–5 kHz harshness); workflow-study.md §1 |
 | Kick - Punch & Knock | Beats | HP 30; +3 @ 60 Hz; −4 @ 400 Hz; +3 @ 3.5 kHz; LP 12 kHz | B1 |
 | Snare - Crack & Body | Beats | HP 80; +2 @ 200; −2 @ 900; +3 @ 5 kHz; +2 shelf 10 k | B2 |
 | Hats - Smooth Sizzle | Beats | HP 300; dynamic 3 kHz; −1 @ 7 kHz; +2 shelf 10 k | B3 |
@@ -47,6 +48,7 @@ comparisons judge tone, not level. Dynamic thresholds assume a typical tracked l
 | Master - De-Harsh | Mix/Master | Natural Phase; dynamic 3 kHz (−3), 6 kHz (−2); −0.5 dB tilt | X7, X1 |
 | Master - Loudness Prep | Mix/Master | Linear Phase High; HP 28 Hz 48 dB/oct; Side low cut 100; −0.5 @ 150; dynamic 3.5 kHz | X7, X2 |
 | Mix Bus - Console Glue | Mix/Master | Console G LF 60 +1.5, HMF 3 k +1, HF 12 k +1; drive 50 % | R4 (G proportional Q, console drive) |
+| Mix Bus - Spectral Resonance Control | Mix/Master | Spectral 320 Hz Q 0.8 (thr −28, −3, ratio 3, slow) and 2.8 kHz Q 0.6 (thr −30, −4); +1 shelf 12 k | V2, V8 (low-mid ringing / boxiness 200–500 Hz), X7 (2–5 kHz harshness), X1 (small, wide, invisible moves); workflow-study.md §1 |
 | Axell Signature - LCT 440 Pure | Axell Signature | HP 65; +3 shelf 140; −4 @ 450 Q 1.4; +1.5 @ 2.8 k and 4.6 k; dynamic 8.7 kHz (−7, fast); Air 40 kHz +1.5 | VP (all rows), M2 |
 | Axell Signature - SM7B | Axell Signature | HP 70; +2 shelf 140; −3 @ 450; +2.5 @ 2.8 k and 4.6 k; dynamic 8.7 kHz (−4.5); Air 20 kHz +3.5 | VP, M1 |
 | Axell Signature - Booth Fix | Axell Signature | HP 65; +2.5 shelf 140; 450 Hz −1.5 static / −4 dynamic; +2 @ 2.8 k and 4.6 k; dynamic 8.7 kHz (−6); Air 20 kHz +2.5 | VP, V8 |

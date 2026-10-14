@@ -6,6 +6,7 @@ using APVTS = juce::AudioProcessorValueTreeState;
 namespace
 {
 const juce::Identifier kPresetNameId ("presetName");
+const juce::Identifier kAbId ("AB");
 const juce::Identifier kPresetDescId ("presetDescription");
 
 juce::NormalisableRange<float> rangeFor (const penta::ParamSpec& s)
@@ -83,7 +84,7 @@ PentaProcessor::PentaProcessor()
         values[i] = t[i].def;
     }
     presetReference = readValues();
-    startTimerHz (20);
+    startTimerHz (50); // also reports latency changes: the engine stays muted until then
 }
 
 PentaProcessor::~PentaProcessor()
@@ -129,6 +130,7 @@ void PentaProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     dsp.setNonRealtime (isNonRealtime());
     dsp.prepare (sampleRate, preparedChannels, samplesPerBlock);
     setLatencySamples (dsp.getLatencySamples());
+    dsp.setHostLatency (getLatencySamples());
 }
 
 void PentaProcessor::reset()
@@ -227,8 +229,15 @@ void PentaProcessor::timerCallback()
         setPresetName (list[(size_t) pp].name);
         presetReference = list[(size_t) pp].resolve();
     }
-    if (preparedChannels > 0 && dsp.getLatencySamples() != getLatencySamples())
-        setLatencySamples (dsp.getLatencySamples());
+    // latency handoff: the engine publishes a new latency when it switches (muted) and stays muted
+    // until this has told the host (VST3: restartComponent, synchronous on the message thread)
+    if (preparedChannels > 0)
+    {
+        const int lat = dsp.getLatencySamples();
+        if (lat != getLatencySamples())
+            setLatencySamples (lat);
+        dsp.setHostLatency (lat);
+    }
 }
 
 //==============================================================================
@@ -425,23 +434,31 @@ void PentaProcessor::selectSlot (int slot)
     if (slot == activeSlot)
         return;
     pushUndo();
-    slots[activeSlot] = apvts.copyState();
-    if (slots[slot].isValid())
+    const auto current = exactState();
+    juce::ValueTree target;
     {
-        auto t = slots[slot].createCopy();
+        const juce::ScopedLock sl (slotLock);
+        slots[activeSlot] = current;
+        if (slots[slot].isValid())
+            target = slots[slot].createCopy();
+        else
+            slots[slot] = current.createCopy();
+        activeSlot = slot;
+    }
+    if (target.isValid())
+    {
         const auto ui = uiState().createCopy();
-        restoreTree (t);
+        restoreTree (target);
         apvts.state.removeChild (apvts.state.getChildWithName ("UI"), nullptr);
         apvts.state.appendChild (ui, nullptr);
     }
-    else
-        slots[slot] = apvts.copyState();
-    activeSlot = slot;
 }
 
 void PentaProcessor::copyActiveToOther()
 {
-    slots[1 - activeSlot] = apvts.copyState();
+    const auto current = exactState();
+    const juce::ScopedLock sl (slotLock);
+    slots[1 - activeSlot] = current;
 }
 
 // normalised value that maps to exactly `plainValue` (plain -> normalised -> plain can be off by an
@@ -484,17 +501,37 @@ void PentaProcessor::restoreTree (const juce::ValueTree& tree)
 //==============================================================================
 // Session state is stored as a binary ValueTree (exact float round trip: a reopened project is
 // bit-identical). XML state (older builds, hand-made sessions) is still accepted.
-void PentaProcessor::getStateInformation (juce::MemoryBlock& destData)
+juce::ValueTree PentaProcessor::exactState()
 {
     auto state = apvts.copyState();
-    state.setProperty (kPresetNameId, getPresetName(), nullptr);
-    // the exact normalised value next to the plain one: skewed ranges would otherwise lose the last
+    // the exact plain value next to APVTS's cached one: skewed ranges would otherwise lose the last
     // bit through plain -> normalised -> plain, and a reopened project would not be bit-identical
     for (size_t i = 0; i < params.size(); ++i)
     {
         auto child = state.getChildWithProperty ("id", params[i]->paramID);
         if (child.isValid())
             child.setProperty ("p", plain (i), nullptr); // exact plain value (float -> double is exact)
+    }
+    return state;
+}
+
+void PentaProcessor::getStateInformation (juce::MemoryBlock& destData)
+{
+    auto state = exactState();
+    state.setProperty (kPresetNameId, getPresetName(), nullptr);
+    // A/B: which slot is active, and the inactive slot's parameters (the active one is the state itself)
+    {
+        juce::ValueTree ab (kAbId);
+        const juce::ScopedLock sl (slotLock);
+        ab.setProperty ("active", activeSlot.load(), nullptr);
+        const auto& other = slots[1 - activeSlot];
+        if (other.isValid())
+        {
+            auto o = other.createCopy();
+            o.removeChild (o.getChildWithName ("UI"), nullptr);
+            ab.appendChild (o, nullptr);
+        }
+        state.appendChild (ab, nullptr);
     }
     juce::MemoryOutputStream os (destData, false);
     os.writeInt (0x50454e51); // 'PENQ' magic
@@ -515,6 +552,23 @@ void PentaProcessor::setStateInformation (const void* data, int sizeInBytes)
             tree = juce::ValueTree::fromXml (*xml);
     if (tree.isValid() && tree.hasType (apvts.state.getType()))
     {
+        // A/B (older sessions have none: slot A active, B empty, as in a new instance)
+        int act = 0;
+        juce::ValueTree other;
+        const auto ab = tree.getChildWithName (kAbId);
+        if (ab.isValid())
+        {
+            act = juce::jlimit (0, 1, (int) ab.getProperty ("active", 0));
+            if (ab.getNumChildren() > 0 && ab.getChild (0).hasType (apvts.state.getType()))
+                other = ab.getChild (0).createCopy();
+            tree.removeChild (ab, nullptr);
+        }
+        {
+            const juce::ScopedLock sl (slotLock);
+            activeSlot = act;
+            slots[act] = {};
+            slots[1 - act] = other;
+        }
         setPresetName (tree.getProperty (kPresetNameId, getPresetName()).toString());
         restoreTree (tree);
         undoPast.clear();

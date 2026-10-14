@@ -1,50 +1,51 @@
 Axell Penta EQ - independent audit, 2026-10-14, plugin: build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
 
-== Zero Latency, all band types, 6 rates: 539/539 within spec, worst 0.0021 dB (>= -24 dB), worst cut skirt 0.020 dB
-   Bell       n=144 worst 0.00209 dB  median 0.000008
-   Low Shelf  n= 60 worst 0.00159 dB  median 0.000005
-   High Shelf n= 60 worst 0.00099 dB  median 0.000007
-   Low Cut    n= 72 worst 0.00165 dB  median 0.000011
-   High Cut   n= 71 worst 0.00022 dB  median 0.000007
-   Notch      n= 36 worst 0.00017 dB  median 0.000033
-   Band Pass  n= 48 worst 0.00015 dB  median 0.000010
-   Tilt       n= 48 worst 0.00199 dB  median 0.000009
-   known limits (1 settings outside the documented envelope, not counted):
-     - band frequency above ~0.9 x Nyquist: 1 settings, worst 0.000 dB
+== Zero Latency, all band types, 6 rates: 540/540 within spec, worst 0.0056 dB (>= -24 dB), worst cut skirt 0.020 dB
+   Bell       n=144 worst 0.00243 dB  median 0.000055
+   Low Shelf  n= 60 worst 0.00180 dB  median 0.000077
+   High Shelf n= 60 worst 0.00192 dB  median 0.000020
+   Low Cut    n= 72 worst 0.00189 dB  median 0.000015
+   High Cut   n= 72 worst 0.00539 dB  median 0.000010
+   Notch      n= 36 worst 0.00150 dB  median 0.000057
+   Band Pass  n= 48 worst 0.00559 dB  median 0.000013
+   Tilt       n= 48 worst 0.00199 dB  median 0.000024
 
-== Natural Phase, all band types, 44.1/48/96 kHz: 268/268 within spec, worst 0.0382 dB (>= -24 dB), worst cut skirt 0.128 dB
-   phase vs analog (>= -20 dB): worst 2.12 deg
-   Bell       n= 72 worst 0.00515 dB  median 0.000016
-   Low Shelf  n= 30 worst 0.00293 dB  median 0.000014
-   High Shelf n= 30 worst 0.00330 dB  median 0.000015
-   Low Cut    n= 36 worst 0.00145 dB  median 0.000148
-   High Cut   n= 35 worst 0.03817 dB  median 0.000295
-   Notch      n= 18 worst 0.00016 dB  median 0.000045
-   Band Pass  n= 23 worst 0.00431 dB  median 0.000089
-   Tilt       n= 24 worst 0.00677 dB  median 0.000008
-   known limits (2 settings outside the documented envelope, not counted):
-     - Natural Phase: band-pass >= 72 dB/oct with Q > 6 (group delay exceeds the 2.7 ms window): 1 settings, worst 0.257 dB
-     - band frequency above ~0.9 x Nyquist: 1 settings, worst 0.003 dB
+== Natural Phase, all band types, 44.1/48/96 kHz: 270/270 within spec, worst 0.0218 dB (>= -24 dB), worst cut skirt 0.014 dB
+   phase vs analog (>= -20 dB): worst 0.72 deg
+   Bell       n= 72 worst 0.00503 dB  median 0.000021
+   Low Shelf  n= 30 worst 0.00308 dB  median 0.000048
+   High Shelf n= 30 worst 0.00320 dB  median 0.000030
+   Low Cut    n= 36 worst 0.00197 dB  median 0.000035
+   High Cut   n= 36 worst 0.02177 dB  median 0.000235
+   Notch      n= 18 worst 0.00016 dB  median 0.000044
+   Band Pass  n= 24 worst 0.01268 dB  median 0.000314
+   Tilt       n= 24 worst 0.00677 dB  median 0.000010
 
-== shelves/tilt Q 0.1-24 (Q > 5 at 44.1/48 kHz also with OS 2x): 270/270 within spec, worst 0.0062 dB (>= -24 dB), worst cut skirt 0.000 dB
-   Low Shelf  n= 90 worst 0.00102 dB  median 0.000012
-   High Shelf n= 90 worst 0.00477 dB  median 0.000098
-   Tilt       n= 90 worst 0.00621 dB  median 0.000035
-   known limits (62 settings outside the documented envelope, not counted):
-     - shelf/tilt Q > 5 at 44.1/48 kHz without oversampling: 62 settings, worst 0.001 dB
+== shelves/tilt Q 0.1-24 at 44.1/48/96 kHz (Q > 5 at 44.1/48 kHz also with OS 2x): 332/332 within spec, worst 0.0062 dB (>= -24 dB), worst cut skirt 0.000 dB
+   Low Shelf  n=108 worst 0.00183 dB  median 0.000100
+   High Shelf n=117 worst 0.00477 dB  median 0.000102
+   Tilt       n=107 worst 0.00620 dB  median 0.000097
 
-== band frequencies 15-30 kHz at 44.1/48 kHz: 30/30 within spec, worst 0.0001 dB (>= -24 dB), worst cut skirt 0.000 dB
-   Bell       n=  6 worst 0.00001 dB  median 0.000002
-   Low Shelf  n=  3 worst 0.00001 dB  median 0.000006
-   High Shelf n=  7 worst 0.00001 dB  median 0.000002
-   Low Cut    n=  2 worst 0.00000 dB  median 0.000003
-   High Cut   n=  4 worst 0.00002 dB  median 0.000012
-   Notch      n=  2 worst 0.00012 dB  median 0.000084
-   Band Pass  n=  2 worst 0.00001 dB  median 0.000010
-   Tilt       n=  4 worst 0.00001 dB  median 0.000004
-   known limits (66 settings outside the documented envelope, not counted):
-     - band frequency above ~0.9 x Nyquist: 59 settings, worst 0.001 dB
-     - notch/band-pass centred above 18 kHz at 44.1/48 kHz without oversampling: 7 settings, worst 0.004 dB
+== band frequencies 12-30 kHz at 44.1/48 kHz (Zero Latency): 192/192 within spec, worst 0.0209 dB (>= -24 dB), worst cut skirt 0.001 dB
+   Bell       n= 24 worst 0.01364 dB  median 0.000999
+   Low Shelf  n= 24 worst 0.00224 dB  median 0.000599
+   High Shelf n= 24 worst 0.00515 dB  median 0.000703
+   Low Cut    n= 24 worst 0.00347 dB  median 0.000660
+   High Cut   n= 24 worst 0.01628 dB  median 0.000811
+   Notch      n= 24 worst 0.02092 dB  median 0.000387
+   Band Pass  n= 24 worst 0.00942 dB  median 0.000564
+   Tilt       n= 24 worst 0.00182 dB  median 0.000563
+
+== band frequencies 12-30 kHz at 44.1/48 kHz (Natural Phase): 192/192 within spec, worst 0.0312 dB (>= -24 dB), worst cut skirt 0.007 dB
+   phase vs analog (>= -20 dB): worst 1.82 deg
+   Bell       n= 24 worst 0.02288 dB  median 0.001140
+   Low Shelf  n= 24 worst 0.00640 dB  median 0.001699
+   High Shelf n= 24 worst 0.01044 dB  median 0.001633
+   Low Cut    n= 24 worst 0.00812 dB  median 0.001496
+   High Cut   n= 24 worst 0.02855 dB  median 0.003622
+   Notch      n= 24 worst 0.03117 dB  median 0.000355
+   Band Pass  n= 24 worst 0.01846 dB  median 0.000470
+   Tilt       n= 24 worst 0.00483 dB  median 0.001141
 
 AUDIT 1 (magnitude/phase): 0 failures
 
@@ -102,29 +103,29 @@ PASS  default settings transparent (192000, Natural Phase, OS 4x): latency 545, 
 PASS  default settings transparent (192000, Linear Phase, OS 1x): latency 17408, max |out - in delayed| = 1.21e-08 (-158.3 dBFS)
 PASS  default settings transparent (192000, Linear Phase, OS 2x): latency 17433, max |out - in delayed| = 8.49e-07 (-121.4 dBFS)
 PASS  default settings transparent (192000, Linear Phase, OS 4x): latency 17441, max |out - in delayed| = 2e-06 (-114.0 dBFS)
-PASS  Zero Latency: reported latency 0 matches the signal (44100, OS 1x): phase residual at 4/8/12 kHz [0.268 0.545 0.843] deg
+PASS  Zero Latency: reported latency 0 matches the signal (44100, OS 1x): phase residual at 4/8/12 kHz [0.268 0.545 0.844] deg
 PASS  Zero Latency: reported latency 71 matches the signal (44100, OS 2x): phase residual at 4/8/12 kHz [0.068 0.137 0.207] deg
 PASS  Zero Latency: reported latency 79 matches the signal (44100, OS 4x): phase residual at 4/8/12 kHz [0.017 0.034 0.051] deg
-PASS  Natural Phase: reported latency 128 matches the signal (44100, OS 1x): phase residual at 4/8/12 kHz [-0. -0.  0.] deg
+PASS  Natural Phase: reported latency 128 matches the signal (44100, OS 1x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
 PASS  Natural Phase: reported latency 199 matches the signal (44100, OS 2x): phase residual at 4/8/12 kHz [-0. -0. -0.] deg
 PASS  Natural Phase: reported latency 207 matches the signal (44100, OS 4x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
 PASS  Linear Phase: reported latency 4352 matches the signal (44100, OS 1x): phase residual at 4/8/12 kHz [ 0. -0. -0.] deg
 PASS  Linear Phase: reported latency 4423 matches the signal (44100, OS 2x): phase residual at 4/8/12 kHz [ 0. -0. -0.] deg
 PASS  Linear Phase: reported latency 4431 matches the signal (44100, OS 4x): phase residual at 4/8/12 kHz [ 0. -0. -0.] deg
-PASS  Zero Latency: reported latency 0 matches the signal (48000, OS 1x): phase residual at 4/8/12 kHz [0.226 0.459 0.707] deg
+PASS  Zero Latency: reported latency 0 matches the signal (48000, OS 1x): phase residual at 4/8/12 kHz [0.227 0.46  0.708] deg
 PASS  Zero Latency: reported latency 71 matches the signal (48000, OS 2x): phase residual at 4/8/12 kHz [0.058 0.116 0.175] deg
 PASS  Zero Latency: reported latency 79 matches the signal (48000, OS 4x): phase residual at 4/8/12 kHz [0.014 0.029 0.043] deg
-PASS  Natural Phase: reported latency 128 matches the signal (48000, OS 1x): phase residual at 4/8/12 kHz [-0. -0. -0.] deg
-PASS  Natural Phase: reported latency 199 matches the signal (48000, OS 2x): phase residual at 4/8/12 kHz [ 0.  0. -0.] deg
+PASS  Natural Phase: reported latency 128 matches the signal (48000, OS 1x): phase residual at 4/8/12 kHz [ 0.  0. -0.] deg
+PASS  Natural Phase: reported latency 199 matches the signal (48000, OS 2x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
 PASS  Natural Phase: reported latency 207 matches the signal (48000, OS 4x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
 PASS  Linear Phase: reported latency 4352 matches the signal (48000, OS 1x): phase residual at 4/8/12 kHz [ 0.  0. -0.] deg
 PASS  Linear Phase: reported latency 4423 matches the signal (48000, OS 2x): phase residual at 4/8/12 kHz [-0.  0. -0.] deg
 PASS  Linear Phase: reported latency 4431 matches the signal (48000, OS 4x): phase residual at 4/8/12 kHz [ 0.  0. -0.] deg
-PASS  Zero Latency: reported latency 0 matches the signal (88200, OS 1x): phase residual at 4/8/12 kHz [0.068 0.136 0.205] deg
+PASS  Zero Latency: reported latency 0 matches the signal (88200, OS 1x): phase residual at 4/8/12 kHz [0.068 0.137 0.207] deg
 PASS  Zero Latency: reported latency 25 matches the signal (88200, OS 2x): phase residual at 4/8/12 kHz [0.017 0.034 0.051] deg
 PASS  Zero Latency: reported latency 33 matches the signal (88200, OS 4x): phase residual at 4/8/12 kHz [0.004 0.009 0.013] deg
-PASS  Natural Phase: reported latency 256 matches the signal (88200, OS 1x): phase residual at 4/8/12 kHz [ 0. -0. -0.] deg
-PASS  Natural Phase: reported latency 281 matches the signal (88200, OS 2x): phase residual at 4/8/12 kHz [-0. -0.  0.] deg
+PASS  Natural Phase: reported latency 256 matches the signal (88200, OS 1x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
+PASS  Natural Phase: reported latency 281 matches the signal (88200, OS 2x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
 PASS  Natural Phase: reported latency 289 matches the signal (88200, OS 4x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
 PASS  Linear Phase: reported latency 8704 matches the signal (88200, OS 1x): phase residual at 4/8/12 kHz [-0.  0. -0.] deg
 PASS  Linear Phase: reported latency 8729 matches the signal (88200, OS 2x): phase residual at 4/8/12 kHz [-0.  0. -0.] deg
@@ -132,17 +133,17 @@ PASS  Linear Phase: reported latency 8737 matches the signal (88200, OS 4x): pha
 PASS  Zero Latency: reported latency 0 matches the signal (96000, OS 1x): phase residual at 4/8/12 kHz [0.058 0.116 0.175] deg
 PASS  Zero Latency: reported latency 25 matches the signal (96000, OS 2x): phase residual at 4/8/12 kHz [0.014 0.029 0.043] deg
 PASS  Zero Latency: reported latency 33 matches the signal (96000, OS 4x): phase residual at 4/8/12 kHz [0.004 0.007 0.011] deg
-PASS  Natural Phase: reported latency 256 matches the signal (96000, OS 1x): phase residual at 4/8/12 kHz [-0.  0.  0.] deg
-PASS  Natural Phase: reported latency 281 matches the signal (96000, OS 2x): phase residual at 4/8/12 kHz [ 0. -0.  0.] deg
-PASS  Natural Phase: reported latency 289 matches the signal (96000, OS 4x): phase residual at 4/8/12 kHz [ 0. -0.  0.] deg
+PASS  Natural Phase: reported latency 256 matches the signal (96000, OS 1x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
+PASS  Natural Phase: reported latency 281 matches the signal (96000, OS 2x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
+PASS  Natural Phase: reported latency 289 matches the signal (96000, OS 4x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
 PASS  Linear Phase: reported latency 8704 matches the signal (96000, OS 1x): phase residual at 4/8/12 kHz [ 0.  0. -0.] deg
 PASS  Linear Phase: reported latency 8729 matches the signal (96000, OS 2x): phase residual at 4/8/12 kHz [ 0.  0. -0.] deg
 PASS  Linear Phase: reported latency 8737 matches the signal (96000, OS 4x): phase residual at 4/8/12 kHz [ 0.  0. -0.] deg
 PASS  Zero Latency: reported latency 0 matches the signal (176400, OS 1x): phase residual at 4/8/12 kHz [0.017 0.034 0.051] deg
 PASS  Zero Latency: reported latency 25 matches the signal (176400, OS 2x): phase residual at 4/8/12 kHz [0.004 0.009 0.013] deg
 PASS  Zero Latency: reported latency 33 matches the signal (176400, OS 4x): phase residual at 4/8/12 kHz [0.001 0.002 0.003] deg
-PASS  Natural Phase: reported latency 512 matches the signal (176400, OS 1x): phase residual at 4/8/12 kHz [-0. -0. -0.] deg
-PASS  Natural Phase: reported latency 537 matches the signal (176400, OS 2x): phase residual at 4/8/12 kHz [ 0. -0.  0.] deg
+PASS  Natural Phase: reported latency 512 matches the signal (176400, OS 1x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
+PASS  Natural Phase: reported latency 537 matches the signal (176400, OS 2x): phase residual at 4/8/12 kHz [ 0.  0. -0.] deg
 PASS  Natural Phase: reported latency 545 matches the signal (176400, OS 4x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
 PASS  Linear Phase: reported latency 17408 matches the signal (176400, OS 1x): phase residual at 4/8/12 kHz [-0.  0. -0.] deg
 PASS  Linear Phase: reported latency 17433 matches the signal (176400, OS 2x): phase residual at 4/8/12 kHz [-0.  0.  0.] deg
@@ -152,15 +153,15 @@ PASS  Zero Latency: reported latency 25 matches the signal (192000, OS 2x): phas
 PASS  Zero Latency: reported latency 33 matches the signal (192000, OS 4x): phase residual at 4/8/12 kHz [0.001 0.002 0.003] deg
 PASS  Natural Phase: reported latency 512 matches the signal (192000, OS 1x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
 PASS  Natural Phase: reported latency 537 matches the signal (192000, OS 2x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
-PASS  Natural Phase: reported latency 545 matches the signal (192000, OS 4x): phase residual at 4/8/12 kHz [-0.  0. -0.] deg
+PASS  Natural Phase: reported latency 545 matches the signal (192000, OS 4x): phase residual at 4/8/12 kHz [0. 0. 0.] deg
 PASS  Linear Phase: reported latency 17408 matches the signal (192000, OS 1x): phase residual at 4/8/12 kHz [ 0.  0. -0.] deg
 PASS  Linear Phase: reported latency 17433 matches the signal (192000, OS 2x): phase residual at 4/8/12 kHz [ 0.  0. -0.] deg
 PASS  Linear Phase: reported latency 17441 matches the signal (192000, OS 4x): phase residual at 4/8/12 kHz [ 0.  0. -0.] deg
-PASS  Clean bands are linear and time-invariant at Drive 100, +3.5 dBFS input (44100, Zero Latency): residual vs convolution -134.7 dB
-PASS  Clean bands are linear and time-invariant at Drive 100, +3.5 dBFS input (44100, Natural Phase): residual vs convolution -129.7 dB
+PASS  Clean bands are linear and time-invariant at Drive 100, +3.5 dBFS input (44100, Zero Latency): residual vs convolution -134.1 dB
+PASS  Clean bands are linear and time-invariant at Drive 100, +3.5 dBFS input (44100, Natural Phase): residual vs convolution -128.4 dB
 PASS  Clean bands are linear and time-invariant at Drive 100, +3.5 dBFS input (44100, Linear Phase): residual vs convolution -127.8 dB
-PASS  Clean bands are linear and time-invariant at Drive 100, +3.5 dBFS input (96000, Zero Latency): residual vs convolution -132.5 dB
-PASS  Clean bands are linear and time-invariant at Drive 100, +3.5 dBFS input (96000, Natural Phase): residual vs convolution -124.3 dB
+PASS  Clean bands are linear and time-invariant at Drive 100, +3.5 dBFS input (96000, Zero Latency): residual vs convolution -132.4 dB
+PASS  Clean bands are linear and time-invariant at Drive 100, +3.5 dBFS input (96000, Natural Phase): residual vs convolution -125.2 dB
 PASS  Clean bands are linear and time-invariant at Drive 100, +3.5 dBFS input (96000, Linear Phase): residual vs convolution -128.1 dB
 PASS  host block size does not change the output (Zero Latency, dynamic + character + OS 2x): max diff 512 vs random(1..4096) 0, vs random(1..64) 0
 PASS  host block size does not change the output (Natural Phase, dynamic + character + OS 2x): max diff 512 vs random(1..4096) 0, vs random(1..64) 0
@@ -181,10 +182,10 @@ PASS  Side band on L=-R equals Stereo band (Linear Phase): max error 2.38e-07
 PASS  Mid band on L=-R is transparent (Linear Phase): max error 1.19e-07
 PASS  Left band: L processed, R untouched (Linear Phase): max error 0
 PASS  bell under OS 2x matches analog to 20 kHz (44100, Zero Latency): worst 0.0001 dB at 19999 Hz
-PASS  bell under OS 2x matches analog to 20 kHz (44100, Natural Phase): worst 0.0001 dB at 18234 Hz
+PASS  bell under OS 2x matches analog to 20 kHz (44100, Natural Phase): worst 0.0001 dB at 19999 Hz
 PASS  bell under OS 4x matches analog to 20 kHz (44100, Zero Latency): worst 0.0003 dB at 18234 Hz
 PASS  bell under OS 4x matches analog to 20 kHz (44100, Natural Phase): worst 0.0001 dB at 18234 Hz
-PASS  bell under OS 2x matches analog to 20 kHz (48000, Zero Latency): worst 0.0001 dB at 20000 Hz
+PASS  bell under OS 2x matches analog to 20 kHz (48000, Zero Latency): worst 0.0019 dB at 20000 Hz
 PASS  bell under OS 2x matches analog to 20 kHz (48000, Natural Phase): worst 0.0001 dB at 20000 Hz
 PASS  bell under OS 4x matches analog to 20 kHz (48000, Zero Latency): worst 0.0002 dB at 20000 Hz
 PASS  bell under OS 4x matches analog to 20 kHz (48000, Natural Phase): worst 0.0001 dB at 20000 Hz
@@ -193,14 +194,14 @@ PASS  bell under OS 2x matches analog to 20 kHz (96000, Natural Phase): worst 0.
 PASS  bell under OS 4x matches analog to 20 kHz (96000, Zero Latency): worst 0.0001 dB at 8706 Hz
 PASS  bell under OS 4x matches analog to 20 kHz (96000, Natural Phase): worst 0.0001 dB at 8706 Hz
 PASS  Mix 50% is the latency-aligned average of dry and wet (Zero Latency): max error 5.96e-08
-PASS  Mix 50% is the latency-aligned average of dry and wet (Natural Phase): max error 5.96e-08
+PASS  Mix 50% is the latency-aligned average of dry and wet (Natural Phase): max error 1.17e-38
 PASS  Mix 50% is the latency-aligned average of dry and wet (Linear Phase): max error 5.96e-08
 PASS  Output +6 dB and Input -12 dB are exact gains: errors 4.62e-08, 7.18e-09
 PASS  Linear Phase Low: symmetric IR, magnitude vs analog >= 400 Hz: latency 2176 (45 ms), asymmetry 2.4e-08, worst mag error 0.000 dB, max phase 0.000 deg
 PASS  Linear Phase Medium: symmetric IR, magnitude vs analog >= 200 Hz: latency 4352 (91 ms), asymmetry 5.8e-08, worst mag error 0.000 dB, max phase 0.000 deg
 PASS  Linear Phase High: symmetric IR, magnitude vs analog >= 60 Hz: latency 17408 (363 ms), asymmetry 7.3e-08, worst mag error 0.000 dB, max phase 0.000 deg
-PASS  no clicks: freq sweep 50 Hz -> 15 kHz in 1 s (host steps every 32 samples): peak energy above 6 kHz -137.2 dB re output peak
-PASS  no clicks: gain sweep -30 -> +30 dB in 0.5 s: peak energy above 6 kHz -125.7 dB re output peak
+PASS  no clicks: freq sweep 50 Hz -> 15 kHz in 1 s (host steps every 32 samples): peak energy above 6 kHz -127.4 dB re output peak
+PASS  no clicks: gain sweep -30 -> +30 dB in 0.5 s: peak energy above 6 kHz -125.0 dB re output peak
 PASS  no clicks: gain jumps -30 <-> +30 dB every 100 ms: peak energy above 6 kHz -87.3 dB re output peak
 PASS  no clicks: type switch Bell <-> High Shelf every 100 ms: peak energy above 6 kHz -76.2 dB re output peak
 PASS  no clicks: phase mode switch every 250 ms: peak energy above 6 kHz -107.0 dB re output peak
@@ -211,8 +212,19 @@ PASS  dynamic band: reduction limited by Range at high level: [np.float64(-12.0)
 PASS  dynamic band: gain falls monotonically with level: 
 PASS  external side-chain drives the band; silent side-chain leaves it alone: with SC -9.00 dB, silent SC 0.000 dB
 PASS  mono instance == stereo instance with L=R: max diff 0
+PASS  spectral dynamics (Zero Latency): loud tone cut by the range, quiet tone in the band untouched: 3 kHz -11.83 dB, 2.2 kHz -0.001 dB, 300 Hz -0.16 dB
+PASS  spectral dynamics (Natural Phase): loud tone cut by the range, quiet tone in the band untouched: 3 kHz -11.83 dB, 2.2 kHz -0.001 dB, 300 Hz -0.16 dB
+PASS  spectral dynamics (Linear Phase): loud tone cut by the range, quiet tone in the band untouched: 3 kHz -11.83 dB, 2.2 kHz -0.001 dB, 300 Hz -0.16 dB
+PASS  broadband dynamics (Zero Latency) for comparison: the quiet tone is pulled down too: 2.2 kHz -8.29 dB
+PASS  broadband dynamics (Natural Phase) for comparison: the quiet tone is pulled down too: 2.2 kHz -8.29 dB
+PASS  broadband dynamics (Linear Phase) for comparison: the quiet tone is pulled down too: 2.2 kHz -8.29 dB
+PASS  spectral dynamics add no latency (same as broadband in every phase mode): [0, 128, 4352, 0, 128, 4352]
+PASS  Gain Scale 50 % (Zero Latency): +8 dB bell -> +4 dB: 4.000 dB
+PASS  Gain Scale 50 % (Natural Phase): +8 dB bell -> +4 dB: 4.000 dB
+PASS  Gain Scale 50 % (Linear Phase): +8 dB bell -> +4 dB: 4.000 dB
 PASS  output after 10 s of silence (resonant band + whole character rack): max |y| in last second 7.73e-23
+PASS  live latency changes: output always aligned with the host's current compensation: 9 host latency updates [0, 128, 4352], misaligned 16-sample windows 0, audible 86 %
 
-AUDIT 2 (processing): 163/163 pass
+AUDIT 2 (processing): 174/174 pass
 
 TOTAL FAILURES: 0

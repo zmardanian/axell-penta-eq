@@ -37,21 +37,16 @@ def reference(c, f):
         return H_shelf1(f, f0, g, low) if sl == 6 else H_shelf2(f, f0, q, g, low)
     if t in ("Low Cut", "High Cut"):
         return cut_ref(f, f0, sl // 6, t == "Low Cut", min(max(q, 0.3), 12))
-    if t == "Notch": return H_notch(f, min(f0, 0.49 * c["fs"]), q)
-    if t == "Band Pass": return H_bp(f, min(f0, 0.49 * c["fs"]), q, min(max((sl + 6) // 12, 1), 8))
+    if t == "Notch": return H_notch(f, f0, q)  # the analog curve at its true centre, also above Nyquist
+    if t == "Band Pass": return H_bp(f, f0, q, min(max((sl + 6) // 12, 1), 8))
     if t == "Tilt": return H_tilt1(f, f0, g) if sl == 6 else H_tilt2(f, f0, q, g)
 
 def known_limit(c, phase):
-    """documented accuracy envelope (README "Accuracy"); returns the reason a setting lies outside, or None"""
-    fs, osf = c["fs"], c.get("os", 1)
-    if c["f"] > 0.45 * fs:
-        return "band frequency above ~0.9 x Nyquist"
-    if c["type"] in ("Low Shelf", "High Shelf", "Tilt") and c["slope"] != 6 and c["q"] > 5 and fs * osf < 80000:
-        return "shelf/tilt Q > 5 at 44.1/48 kHz without oversampling"
-    if c["type"] in ("Notch", "Band Pass") and c["f"] > 18000 and fs * osf < 80000:
-        return "notch/band-pass centred above 18 kHz at 44.1/48 kHz without oversampling"
-    if phase == "Natural Phase" and c["type"] == "Band Pass" and c["slope"] >= 72 and c["q"] > 6:
-        return "Natural Phase: band-pass >= 72 dB/oct with Q > 6 (group delay exceeds the 2.7 ms window)"
+    """documented accuracy envelope (README "Accuracy"); returns the reason a setting lies outside, or None.
+    Since 2.0 the near-Nyquist limits at 44.1/48 kHz are gone (fitted 4th-order realisations, DECISIONS D25):
+    every band type, Q and frequency up to 30 kHz is checked against the spec at every rate. No setting is
+    exempt any more; the hook stays for future features."""
+    # (2.0 also removed the last one: Natural Phase band-pass >= 72 dB/oct with Q > 6, D26)
     return None
 
 def make_configs(seed, fss, per, flo=20.0, fhi=20000.0, shelfq=(0.3, 4.0)):
@@ -145,9 +140,10 @@ if __name__ == "__main__":
                 sh.append(dict(fs=fs, type=t, f=float(np.exp(rng.uniform(np.log(20), np.log(20000)))), g=float(rng.uniform(-30, 30)),
                                q=float(np.exp(rng.uniform(np.log(0.1), np.log(24)))), slope=12))
     sh += [dict(c, os=2) for c in sh if c["q"] > 5 and c["fs"] < 80000]
-    fails += summary(measure(sh, "Zero Latency", "sh"), "shelves/tilt Q 0.1-24 (Q > 5 at 44.1/48 kHz also with OS 2x)")
-    # band frequencies up to 30 kHz (the control allows it): informational for the part above 0.9 x Nyquist
-    hi = make_configs(99, [44100, 48000], {t: 6 for t in TYPES}, flo=15000, fhi=30000)
-    fails += summary(measure(hi, "Zero Latency", "hi"), "band frequencies 15-30 kHz at 44.1/48 kHz")
+    fails += summary(measure(sh, "Zero Latency", "sh"), "shelves/tilt Q 0.1-24 at 44.1/48/96 kHz (Q > 5 at 44.1/48 kHz also with OS 2x)")
+    # band frequencies up to 30 kHz (the control allows it), every type, also high-Q shelves/tilt and both modes
+    hi = make_configs(99, [44100, 48000], {t: 12 for t in TYPES}, flo=12000, fhi=30000, shelfq=(0.1, 24.0))
+    fails += summary(measure([dict(c) for c in hi], "Zero Latency", "hi"), "band frequencies 12-30 kHz at 44.1/48 kHz (Zero Latency)")
+    fails += summary(measure([dict(c) for c in hi], "Natural Phase", "hn"), "band frequencies 12-30 kHz at 44.1/48 kHz (Natural Phase)")
     print(f"\nAUDIT 1 (magnitude/phase): {fails} failures")
     sys.exit(fails)

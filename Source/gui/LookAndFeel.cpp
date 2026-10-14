@@ -228,13 +228,15 @@ juce::Font LookAndFeel::getLabelFont (juce::Label& l)
 void LookAndFeel::drawLabel (juce::Graphics& g, juce::Label& l)
 {
     using namespace juce;
-    const bool inSlider = dynamic_cast<Slider*> (l.getParentComponent()) != nullptr;
-    if (inSlider)
+    auto* parentSlider = dynamic_cast<Slider*> (l.getParentComponent());
+    const bool inSlider = parentSlider != nullptr;
+    const bool bar = inSlider && parentSlider->getSliderStyle() == Slider::LinearBar; // drawn by drawLinearSlider
+    if (inSlider && ! bar)
     {
         g.setColour (col::well);
         g.fillRoundedRectangle (l.getLocalBounds().toFloat(), 4.0f);
     }
-    else
+    else if (! inSlider)
         g.fillAll (l.findColour (Label::backgroundColourId));
     if (! l.isBeingEdited())
     {
@@ -242,6 +244,24 @@ void LookAndFeel::drawLabel (juce::Graphics& g, juce::Label& l)
         g.setFont (inSlider ? font (jmin (12.0f, (float) l.getHeight() * 0.7f), 1) : l.getFont());
         g.drawFittedText (l.getText(), l.getLocalBounds().reduced (2, 0), l.getJustificationType(), 1, 0.8f);
     }
+}
+
+// bar sliders (Gain Scale, Match): a well, the value as a fill, an outline; the text is the label on top
+void LookAndFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int w, int h, float pos, float minPos, float maxPos,
+                                    juce::Slider::SliderStyle style, juce::Slider& s)
+{
+    if (style != juce::Slider::LinearBar)
+    {
+        LookAndFeel_V4::drawLinearSlider (g, x, y, w, h, pos, minPos, maxPos, style, s);
+        return;
+    }
+    const auto r = juce::Rectangle<float> ((float) x, (float) y, (float) w, (float) h).reduced (0.5f);
+    g.setColour (col::well);
+    g.fillRoundedRectangle (r, 4.0f);
+    g.setColour (s.findColour (juce::Slider::trackColourId));
+    g.fillRoundedRectangle (r.withRight (juce::jlimit (r.getX(), r.getRight(), pos)), 4.0f);
+    g.setColour (col::track);
+    g.drawRoundedRectangle (r, 4.0f, 1.0f);
 }
 
 juce::Font LookAndFeel::getPopupMenuFont() { return font (14.5f, 0); }

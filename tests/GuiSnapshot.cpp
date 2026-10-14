@@ -89,5 +89,62 @@ int main (int argc, char** argv)
     shoot (dir, "penta-100pct-hidpi2x", 1.0f, 2.0f, preset ("Master - M/S Widen Highs"), [] (PentaEditor& e) { e.selectSlot (1); });
     shoot (dir, "penta-browser", 1.0f, 1.0f, preset ("Master - Gentle Polish"), [] (PentaEditor& e) { e.openBrowser(); });
     shoot (dir, "penta-hp-selected", 1.0f, 1.0f, preset ("Kick - Punch & Knock"), [] (PentaEditor& e) { e.selectSlot (0); });
+
+    // 2.0 workflow
+    auto set = [] (PentaProcessor& p, const char* id, float v)
+    {
+        auto* prm = p.apvts.getParameter (id);
+        prm->setValueNotifyingHost (prm->convertTo0to1 (v));
+    };
+    shoot (dir, "penta-spectral", 1.0f, 1.0f, [&] (PentaProcessor& p)
+    {
+        p.applyFactoryPreset (presetIndex ("Axell Signature - Booth Fix"));
+        set (p, "b4_used", 1); set (p, "b4_type", 0); set (p, "b4_freq", 220); set (p, "b4_gain", 0); set (p, "b4_q", 1.2f);
+        set (p, "b4_dyn", 1); set (p, "b4_dmode", 1); set (p, "b4_thr", -48); set (p, "b4_range", -9);
+    }, [] (PentaEditor& e) { e.selectSlot (4); });
+    shoot (dir, "penta-multiselect", 1.0f, 1.0f, preset ("Rap Lead - Clean & Forward"), [] (PentaEditor& e)
+    {
+        auto& g = e.getGraph();
+        g.setSelected (2);
+        g.toggleSelected (3);
+        g.toggleSelected (4);
+        e.selectSlot (2);
+        g.toggleSelected (3);
+        g.toggleSelected (4);
+    });
+    shoot (dir, "penta-draw", 1.0f, 1.0f, preset ("Init (Flat)"), [] (PentaEditor& e)
+    {
+        auto& g = e.getGraph();
+        g.setDrawMode (true);
+        const auto b = g.getLocalBounds().toFloat();
+        juce::Point<float> last (b.getX() + 40.0f, b.getCentreY() - 40.0f);
+        for (int i = 1; i <= 60; ++i)
+        {
+            const float x = b.getX() + 40.0f + (b.getWidth() - 80.0f) * (float) i / 60.0f;
+            const float y = b.getCentreY() - 40.0f * std::cos ((float) i * 0.11f) + 25.0f * std::sin ((float) i * 0.23f);
+            g.drawSegment (last, { x, y });
+            last = { x, y };
+        }
+    });
+    shoot (dir, "penta-match", 1.0f, 1.0f, preset ("Init (Flat)"), [] (PentaEditor& e)
+    {
+        auto& m = e.getMatch();
+        const auto& hz = e.getGraph().gridHz();
+        MatchPanel::Spectrum ref, trk;
+        for (double f : hz)
+        {
+            const double pink = -20.0 - 3.0 * std::log2 (f / 1000.0);
+            ref.db.push_back (pink + 2.5 * std::exp (-std::pow (std::log2 (f / 80.0), 2.0)) + 3.0 * std::tanh (std::log2 (f / 6000.0)));
+            trk.db.push_back (pink - 3.0 * std::exp (-std::pow (std::log2 (f / 2500.0) * 1.5, 2.0)) - 2.0 * std::tanh (std::log2 (f / 8000.0)));
+        }
+        ref.valid = trk.valid = true;
+        ref.seconds = 18.4;
+        trk.seconds = 21.0;
+        ref.origin = "side-chain";
+        trk.origin = "this track";
+        m.setReference (ref);
+        m.setTrack (trk);
+        m.open();
+    });
     return 0;
 }

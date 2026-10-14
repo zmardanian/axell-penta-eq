@@ -1,4 +1,4 @@
-Axell Penta EQ 1.0.0 - Linux x86_64 VST3
+Axell Penta EQ 2.0.0 - Linux x86_64 VST3
 =======================================
 
 An all-round EQ by Axell Yobag: 12 analog-matched parametric bands + HP/LP with
@@ -51,8 +51,8 @@ Axell Penta EQ is free software under the GNU Affero General Public License v3
 Steinberg VST3 SDK (MIT), the Inter typeface (SIL OFL 1.1) and the other
 bundled components are listed in THIRD_PARTY_NOTICES.md.
 
-The complete corresponding source code for this binary is the v1.0.0 tag of:
-  https://github.com/zmardanian/axell-penta-eq/tree/v1.0.0
+The complete corresponding source code for this binary is the v2.0.0 tag of:
+  https://github.com/zmardanian/axell-penta-eq/tree/v2.0.0
 
 The character modules are behavioural models built from published
 specifications and measurements, with descriptive names only; no affiliation

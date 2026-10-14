@@ -8,5 +8,6 @@
 | [voice-profile.md](voice-profile.md) | The user's measured voice profile → EQ targets for the Signature presets. |
 | [preset-sources.md](preset-sources.md) | Every factory preset traced to its sources. |
 | [clean-room.md](clean-room.md) | Legal rules and the brand → descriptive-name map. |
+| [workflow-study.md](workflow-study.md) | 2.0: study of a leading modern EQ's spectral dynamics and workflow tools → what was implemented (clean-room), how, what not and why. |
 
 Prototype scripts: `tools/proto/*.py` (numpy/scipy; host Python).

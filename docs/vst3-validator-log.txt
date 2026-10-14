@@ -1,6 +1,6 @@
 * Loading module...
 
-	/var/home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
+	/home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
 
 * Check valid bundle structure...
 
@@ -15,7 +15,7 @@
 	name = Axell Penta EQ
 	category = Audio Module Class
 	subCategories = Fx|EQ
-	version = 1.0.0
+	version = 2.0.0
 	sdkVersion = VST 3.8.0
 	cid = ABCDEF019182FAEB41787962506E7131
 
@@ -23,7 +23,7 @@
 	name = Axell Penta EQ
 	category = Component Controller Class
 	subCategories = Fx|EQ
-	version = 1.0.0
+	version = 2.0.0
 	sdkVersion = VST 3.8.0
 	cid = ABCDEF011234ABCD41787962506E7131
 
@@ -60,7 +60,7 @@ Info:  => Event Buses: [0 In(s) => 0 Out(s)]
 
 [Scan Parameters]
 Info:  ===Scan Parameters ====================================
-Info:  This component exports 246 parameter(s)
+Info:  This component exports 259 parameter(s)
 Info:     Parameter 000 (id=962376260): [title="Input Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
 Info:     Parameter 001 (id=1040127981): [title="Output Gain"] [unit="dB"] [type = Float, default = 0.500000, unit = 0]
 Info:     Parameter 002 (id=108124): [title="Mix"] [unit="%"] [type = Float, default = 1.000000, unit = 0]
@@ -308,10 +308,23 @@ Info:     Parameter 240 (id=480291651): [title="Console HF Bell"] [unit=""] [typ
 Info:     Parameter 241 (id=92821705): [title="Air On"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
 Info:     Parameter 242 (id=1154567906): [title="Air Frequency"] [unit=""] [type = Discrete, default = 0.750000, unit = 0]
 Info:     Parameter 243 (id=1154581481): [title="Air Gain"] [unit="dB"] [type = Float, default = 0.000000, unit = 0]
-Info:     Parameter 244 (id=1652125811): [title="Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
-Info:     Parameter 245 (id=1886548852): [title="Program"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
-Info:  =>Parameter 245 (id=1886548852) is kIsProgramChange, but not a kIsList!
-Info:  Note: This Unit (idx=0, id=0, name="Root Unit") has 246 parameters: it could be better to split it in sub-units!.
+Info:     Parameter 244 (id=202723287): [title="Band 1 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 245 (id=1090226968): [title="Band 2 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 246 (id=1977730649): [title="Band 3 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 247 (id=717750682): [title="Band 4 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 248 (id=1605254363): [title="Band 5 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 249 (id=345274396): [title="Band 6 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 250 (id=1232778077): [title="Band 7 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 251 (id=2120281758): [title="Band 8 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 252 (id=860301791): [title="Band 9 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 253 (id=927464521): [title="Band 10 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 254 (id=1814968202): [title="Band 11 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 255 (id=554988235): [title="Band 12 Dynamic Mode"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 256 (id=1992172811): [title="Gain Scale"] [unit="%"] [type = Float, default = 0.500000, unit = 0]
+Info:     Parameter 257 (id=1652125811): [title="Bypass"] [unit=""] [type = Toggle, default = 0.000000, unit = 0]
+Info:     Parameter 258 (id=1886548852): [title="Program"] [unit=""] [type = Discrete, default = 0.000000, unit = 0]
+Info:  =>Parameter 258 (id=1886548852) is kIsProgramChange, but not a kIsList!
+Info:  Note: This Unit (idx=0, id=0, name="Root Unit") has 259 parameters: it could be better to split it in sub-units!.
 [Succeeded]
 
 [MIDI Mapping]
@@ -331,7 +344,7 @@ Info:     Unit000 (ID = 0): "Root Unit" (parent ID = -1, programlist ID = 188654
 
 [Scan Programs]
 Info:  ===Scan Programs ====================================
-Info:  Programlist 000 (id=1886548852):  "Factory Presets" (40 programs).
+Info:  Programlist 000 (id=1886548852):  "Factory Presets" (42 programs).
 Info:  Programlist 000->Program 000: "Init (Flat)"
 Info:  Programlist 000->Program 001: "Rap Lead - Clean & Forward"
 Info:  Programlist 000->Program 002: "Boom Bap Lead - Warm Grit"
@@ -346,32 +359,34 @@ Info:  Programlist 000->Program 010: "Chorus / Hook Lift"
 Info:  Programlist 000->Program 011: "Harsh Mic Tamer"
 Info:  Programlist 000->Program 012: "Room Box Removal"
 Info:  Programlist 000->Program 013: "Rap Lead - Passive Tube Polish"
-Info:  Programlist 000->Program 014: "Kick - Punch & Knock"
-Info:  Programlist 000->Program 015: "Snare - Crack & Body"
-Info:  Programlist 000->Program 016: "Hats - Smooth Sizzle"
-Info:  Programlist 000->Program 017: "808 - Clean Sub + Bite"
-Info:  Programlist 000->Program 018: "Bass - Defined Low End"
-Info:  Programlist 000->Program 019: "Dusty Sampler (12-bit era)"
-Info:  Programlist 000->Program 020: "Vinyl Loop Cleanup"
-Info:  Programlist 000->Program 021: "Keys / Rhodes - Warm Bell"
-Info:  Programlist 000->Program 022: "Guitar - Clean Up & Presence"
-Info:  Programlist 000->Program 023: "Drum Bus - Boom Bap Thump"
-Info:  Programlist 000->Program 024: "Beat Bus - Glue Polish"
-Info:  Programlist 000->Program 025: "Bass/Kick Carve (side-chain)"
-Info:  Programlist 000->Program 026: "Sample Chop - Room for Vocals"
-Info:  Programlist 000->Program 027: "Master - Gentle Polish"
-Info:  Programlist 000->Program 028: "Master - Boom Bap Warmth"
-Info:  Programlist 000->Program 029: "Master - Air & Clarity"
-Info:  Programlist 000->Program 030: "Master - Low-End Control (dynamic)"
-Info:  Programlist 000->Program 031: "Master - M/S Widen Highs"
-Info:  Programlist 000->Program 032: "Master - Mono Bass"
-Info:  Programlist 000->Program 033: "Master - De-Harsh"
-Info:  Programlist 000->Program 034: "Master - Loudness Prep"
-Info:  Programlist 000->Program 035: "Mix Bus - Console Glue"
-Info:  Programlist 000->Program 036: "Axell Signature - LCT 440 Pure"
-Info:  Programlist 000->Program 037: "Axell Signature - SM7B"
-Info:  Programlist 000->Program 038: "Axell Signature - Booth Fix"
-Info:  Programlist 000->Program 039: "Axell Signature - Tracking (Light)"
+Info:  Programlist 000->Program 014: "Vocal - Spectral Harshness Tamer"
+Info:  Programlist 000->Program 015: "Kick - Punch & Knock"
+Info:  Programlist 000->Program 016: "Snare - Crack & Body"
+Info:  Programlist 000->Program 017: "Hats - Smooth Sizzle"
+Info:  Programlist 000->Program 018: "808 - Clean Sub + Bite"
+Info:  Programlist 000->Program 019: "Bass - Defined Low End"
+Info:  Programlist 000->Program 020: "Dusty Sampler (12-bit era)"
+Info:  Programlist 000->Program 021: "Vinyl Loop Cleanup"
+Info:  Programlist 000->Program 022: "Keys / Rhodes - Warm Bell"
+Info:  Programlist 000->Program 023: "Guitar - Clean Up & Presence"
+Info:  Programlist 000->Program 024: "Drum Bus - Boom Bap Thump"
+Info:  Programlist 000->Program 025: "Beat Bus - Glue Polish"
+Info:  Programlist 000->Program 026: "Bass/Kick Carve (side-chain)"
+Info:  Programlist 000->Program 027: "Sample Chop - Room for Vocals"
+Info:  Programlist 000->Program 028: "Master - Gentle Polish"
+Info:  Programlist 000->Program 029: "Master - Boom Bap Warmth"
+Info:  Programlist 000->Program 030: "Master - Air & Clarity"
+Info:  Programlist 000->Program 031: "Master - Low-End Control (dynamic)"
+Info:  Programlist 000->Program 032: "Master - M/S Widen Highs"
+Info:  Programlist 000->Program 033: "Master - Mono Bass"
+Info:  Programlist 000->Program 034: "Master - De-Harsh"
+Info:  Programlist 000->Program 035: "Master - Loudness Prep"
+Info:  Programlist 000->Program 036: "Mix Bus - Console Glue"
+Info:  Programlist 000->Program 037: "Mix Bus - Spectral Resonance Control"
+Info:  Programlist 000->Program 038: "Axell Signature - LCT 440 Pure"
+Info:  Programlist 000->Program 039: "Axell Signature - SM7B"
+Info:  Programlist 000->Program 040: "Axell Signature - Booth Fix"
+Info:  Programlist 000->Program 041: "Axell Signature - Tracking (Light)"
 [Succeeded]
 
 [Terminate/Initialize]

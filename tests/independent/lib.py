@@ -21,11 +21,11 @@ def raw_read(path, ch):
 
 class Run:
     def __init__(self, name, fs=48000, ch=2, sets=None, ats=None, blocks="512", nonrt=True,
-                 preroll=None, sleep=0):
+                 preroll=None, sleep=0, pdc=0):
         self.name, self.fs, self.ch = name, fs, ch
         self.sets = dict(sets or {})
         self.ats = list(ats or [])
-        self.blocks, self.nonrt, self.sleep = blocks, nonrt, sleep
+        self.blocks, self.nonrt, self.sleep, self.pdc = blocks, nonrt, sleep, pdc
         self.preroll = preroll if preroll is not None else int(0.5 * fs)
         self.inp = os.path.join(WORK, name + "_in.f32")
         self.out = os.path.join(WORK, name + "_out.f32")
@@ -35,7 +35,7 @@ class Run:
 
     def job(self):
         L = [f"rate {self.fs}", f"channels {self.ch}", f"blocks {self.blocks}",
-             f"nonrealtime {1 if self.nonrt else 0}", f"preroll {self.preroll}", f"sleep {self.sleep}"]
+             f"nonrealtime {1 if self.nonrt else 0}", f"preroll {self.preroll}", f"sleep {self.sleep}", f"pdc {self.pdc}"]
         L += [f"set {k}={v}" for k, v in self.sets.items()]
         L += [f"at {a} set {k}={v}" for a, k, v in self.ats]
         L += [f"input {self.inp}", f"output {self.out}"]
@@ -58,7 +58,7 @@ def run_all(runs, inputs, sidechains=None, jobname="job"):
     if p.returncode != 0:
         raise RuntimeError(p.stdout[-3000:] + p.stderr[-3000:])
     blocks = p.stdout.split("\nrun ")
-    lat = re.findall(r"latency (-?\d+)", p.stdout)
+    lat = re.findall(r"  latency (-?\d+)", p.stdout)
     assert len(lat) == len(runs), p.stdout[-2000:]
     out = {}
     for r, l, b in zip(runs, lat, blocks[1:]):

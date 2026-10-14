@@ -20,21 +20,28 @@ echo "Release: $OUT/$NAME.tar.gz"
 cat "$OUT/SHA256SUMS.txt"
 
 SHA=$(cut -d' ' -f1 "$OUT/SHA256SUMS.txt")
+# "What's new": this version's section of the changelog
+NEW=$(awk -v v="## $VER " 'index($0, v) == 1 { on = 1; next } on && /^## / { exit } on { print }' CHANGELOG.md)
 cat > "$OUT/release-notes.md" <<NOTES
-First public release of **Axell Penta EQ**, an all-round EQ VST3 for Linux by Axell Yobag: 12 analog-matched parametric bands with dynamic EQ, Mid/Side and side-chain, plus a character rack (Inductor, Console E/G, Passive Tube, Air).
+**Axell Penta EQ $VER**, an all-round EQ VST3 for Linux by Axell Yobag: 12 analog-matched parametric bands with dynamic and spectral EQ, Mid/Side and side-chain, plus a character rack (Inductor, Console E/G, Passive Tube, Air).
+
+## What's new in $VER
+
+$NEW
 
 ## Features
 
 - 12 bands + HP/LP: bell, shelves, cuts (6–96 dB/oct with resonance), notch, band-pass, tilt
-- Clean mode matches the analog curves within ±0.1 dB to 20 kHz (no cramping; the few documented exceptions near Nyquist are listed under *Accuracy* in the README); Character mode with proportional Q and saturating boosts
-- Dynamic EQ on every gain band; detector from the band, another band's region or the external side-chain
+- Clean mode matches the analog curves within ±0.1 dB to 20 kHz for every band type, gain, Q and frequency at every sample rate (no cramping, no exceptions); Character mode with proportional Q and saturating boosts
+- Dynamic EQ on every gain band, broadband or **spectral** (per frequency); detector from the band, another band's region or the external side-chain
+- Workflow: multi-select and move bands together, keyboard editing, copy/paste, invert, note readout and snapping, grab a band from a spectrum peak, **Draw** a curve, **Match** a reference, **Gain Scale**
 - Stereo / L / R / Mid / Side per band, band solo, bypass
 - Character rack before or after the EQ, global Drive, 1x/2x/4x oversampling
 - Zero Latency, Natural Phase (2.7 ms) and Linear Phase (Low/Medium/High) with correct latency reporting
 - Analyzer (pre / post / side-chain), static loudness-matched Auto Gain, Mix, In/Out gain
-- 40 loudness-matched factory presets incl. 4 Axell Signature presets, user presets, preset browser with search, A/B, undo/redo
+- 42 loudness-matched factory presets incl. 4 Axell Signature presets, user presets, preset browser with search, A/B (saved with the session), undo/redo
 - Resizable GUI (75–200 %), HiDPI, tooltips on every control
-- Passes pluginval at strictness 10 including the Steinberg VST3 validator, 624 DSP checks, 49 plugin checks and an independent black-box audit against textbook analog curves (scipy, separate VST3 host)
+- Passes pluginval at strictness 10 including the Steinberg VST3 validator, DSP_CHECKS DSP checks, PLUGIN_CHECKS plugin checks and an independent black-box audit against textbook analog curves (scipy, separate VST3 host)
 
 ## Requirements
 
@@ -65,4 +72,8 @@ Source code: https://github.com/zmardanian/axell-penta-eq (tag [\`v$VER\`](https
 
 Licensed under the GNU AGPLv3 (built with JUCE 8.0.15 under its AGPLv3 option). Third-party notices are in \`THIRD_PARTY_NOTICES.md\`.
 NOTES
+# test counts from the reports
+DSP=$(grep -oP 'ALL PASS\*\* - \K[0-9]+' tests/report.md || echo "?")
+PLG="${PENTA_PLUGIN_CHECKS:-?}" # pass the plugin-suite count (its last line) as PENTA_PLUGIN_CHECKS
+sed -i "s/DSP_CHECKS/$DSP/; s/PLUGIN_CHECKS/${PLG:-?}/" "$OUT/release-notes.md"
 echo "Release notes: $OUT/release-notes.md"

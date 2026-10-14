@@ -66,6 +66,8 @@ struct B
         set (bandId (i, bpSrc), (float) src);
         return *this;
     }
+    // Dynamic Mode = Spectral (2.0): every frequency inside the band reacts on its own
+    B& spectral (int b) { return set (bandId (b - 1, bpDynMode), 1); }
     B& hp (float f, int slope = s24, float q = 0.7071f) { return set ("hpOn", 1).set ("hpFreq", f).set ("hpSlope", (float) slope).set ("hpQ", q); }
     B& lp (float f, int slope = s12, float q = 0.7071f) { return set ("lpOn", 1).set ("lpFreq", f).set ("lpSlope", (float) slope).set ("lpQ", q); }
     B& out (float db) { return set ("outGain", db); }
@@ -167,6 +169,13 @@ inline std::vector<FactoryPreset> build()
        .set ("ptOn", 1).set ("ptLowFreq", 3).set ("ptLowBoost", 3.0f).set ("ptLowAtten", 2.0f).set ("ptHighFreq", 4)
        .set ("ptHighBoost", 4.0f).set ("ptHighBw", 8.0f).set ("ptAttenFreq", 2).set ("ptHighAtten", 2.0f).set ("drive", 35)
        .out (-2.5f);
+      add (b); }
+    { B b ("Vocal - Spectral Harshness Tamer", V,
+           "Spectral dynamics on a bright or harsh lead: only the frequencies that jump out between 2 and 5 kHz (and "
+           "the sharpest sibilants above 6 kHz) are pulled back, each on its own - the rest of the presence stays. "
+           "Zero latency, for tracking too.");
+      b.hp (80, s24).bell (1, 250, 1.0f, 1.0f).bell (2, 3200, 0.0f, 0.7f).dyn (2, -30, -6, 4, 2, 90).spectral (2)
+       .band (3, kHighShelf, 6500, 0.0f, 0.7071f).dyn (3, -32, -7, 4, 1, 70).spectral (3).out (0.1f);
       add (b); }
 
     //== Beats & instruments =====================================================
@@ -288,6 +297,13 @@ inline std::vector<FactoryPreset> build()
            "Console G on the mix bus: gentle LF and HMF lift with proportional Q and drive for that glued, forward feel.");
       b.set ("conOn", 1).set ("conMode", 1).set ("conLfGain", 1.5f).set ("conLfFreq", 60).set ("conHmfGain", 1.0f)
        .set ("conHmfFreq", 3000).set ("conHfGain", 1.0f).set ("conHfFreq", 12000).set ("drive", 50).out (-0.6f);
+      add (b); }
+    { B b ("Mix Bus - Spectral Resonance Control", M,
+           "Spectral dynamics on the mix bus: ringing low-mids (200-500 Hz) and piercing upper mids (1.5-5 kHz) are "
+           "tamed only where and when they stick out; a touch of air on top. Transparent when nothing rings.");
+      b.bell (1, 320, 0.0f, 0.8f).dyn (1, -28, -3, 3, 10, 200).spectral (1)
+       .bell (2, 2800, 0.0f, 0.6f).dyn (2, -30, -4, 3, 5, 150).spectral (2)
+       .band (3, kHighShelf, 12000, 1.0f, 0.7071f).out (0.0f);
       add (b); }
 
     //== Axell Signature (measured voice: docs/research/voice-profile.md) ========

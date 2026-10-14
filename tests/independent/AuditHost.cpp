@@ -3,6 +3,8 @@
 // (the plugin's own string parser, as a host would) and renders raw float32 interleaved files.
 // Job file: lines accumulate settings, "run" renders them with a fresh plugin instance.
 //   rate 48000 | channels 2 | blocks 512 | blocks random 1 4096 7 | nonrealtime 1 | preroll 24000 | sleep ms
+//   pdc ms (a live host: run the message loop for ms after every block and log "pdc <sample> <latency>" whenever
+//   the latency the host compensates changes, as the plugin reported it through restartComponent)
 //   set <Param Name>=<text> | at <sample> set <Param Name>=<text> | input a.f32 | sidechain b.f32 | output c.f32
 //   run
 #include <juce_audio_processors/juce_audio_processors.h>
@@ -15,7 +17,7 @@ using namespace juce;
 struct Job
 {
     double rate = 48000;
-    int channels = 2, blockMin = 512, blockMax = 512, preroll = 24000, sleepMs = 0;
+    int channels = 2, blockMin = 512, blockMax = 512, preroll = 24000, sleepMs = 0, pdcMs = 0;
     unsigned seed = 1;
     bool nonRealtime = true;
     std::vector<std::pair<String, String>> sets;
@@ -105,6 +107,8 @@ static void runJob (AudioPluginFormatManager& fm, const PluginDescription& desc,
             buf.setSize (nBuf, n, false, false, true);
             buf.clear();
             inst->processBlock (buf, midi);
+            if (j.pdcMs > 0)
+                MessageManager::getInstance()->runDispatchLoopUntil (j.pdcMs);
             pos += n;
         }
         if (j.sleepMs > 0 && pass == 0)
@@ -116,8 +120,14 @@ static void runJob (AudioPluginFormatManager& fm, const PluginDescription& desc,
     size_t nextAt = 0;
     auto ats = j.ats;
     std::sort (ats.begin(), ats.end(), [] (auto& a, auto& b) { return std::get<0> (a) < std::get<0> (b); });
+    int hostLat = -1;
     for (int pos = 0; pos < len;)
     {
+        if (j.pdcMs > 0 && inst->getLatencySamples() != hostLat)
+        {
+            hostLat = inst->getLatencySamples();
+            std::printf ("  pdc %d %d\n", pos, hostLat);
+        }
         int n = jmin (bd (rng), len - pos);
         if (nextAt < ats.size())
         {
@@ -141,6 +151,8 @@ static void runJob (AudioPluginFormatManager& fm, const PluginDescription& desc,
             for (int c = 0; c < 2; ++c)
                 buf.copyFrom (j.channels + c, 0, sc, jmin (c, sc.getNumChannels() - 1), pos, n);
         inst->processBlock (buf, midi);
+        if (j.pdcMs > 0)
+            MessageManager::getInstance()->runDispatchLoopUntil (j.pdcMs);
         for (int c = 0; c < j.channels; ++c)
             out.copyFrom (c, pos, buf, c, 0, n);
         pos += n;
@@ -181,6 +193,7 @@ int main (int argc, char** argv)
         else if (key == "channels") j.channels = rest.getIntValue();
         else if (key == "preroll") j.preroll = rest.getIntValue();
         else if (key == "sleep") j.sleepMs = rest.getIntValue();
+        else if (key == "pdc") j.pdcMs = rest.getIntValue();
         else if (key == "nonrealtime") j.nonRealtime = rest.getIntValue() != 0;
         else if (key == "blocks")
         {

@@ -4,6 +4,7 @@
 #include "gui/BandPanel.h"
 #include "gui/EqGraph.h"
 #include "gui/LookAndFeel.h"
+#include "gui/MatchPanel.h"
 #include "gui/PresetBrowser.h"
 #include "gui/RackPanel.h"
 
@@ -22,6 +23,7 @@ public:
     void selectSlot (int slot);
     void openBrowser();
     EqGraph& getGraph() { return graph; }
+    MatchPanel& getMatch() { return match; }
 
 private:
     class Content : public juce::Component
@@ -51,12 +53,16 @@ private:
     juce::TextButton slotA { "A" }, slotB { "B" }, slotCopy { "COPY" }, undoBtn { "UNDO" }, redoBtn { "REDO" };
     ui::Choice phase, quality, os;
     ui::MenuButton analyzerBtn, sizeBtn;
+    juce::TextButton drawBtn { "DRAW" }, matchBtn { "MATCH" };
+    juce::Slider scaleSlider;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> scaleAttachment;
 
     EqGraph graph;
     ui::LevelMeter inMeter { "IN" }, outMeter { "OUT" };
     BandPanel bandPanel;
     RackPanel rack;
     PresetBrowser browser;
+    MatchPanel match;
 
     juce::Rectangle<int> headerArea, graphArea;
     juce::String latencyText;

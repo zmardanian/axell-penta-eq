@@ -71,3 +71,18 @@ in ─ sanitize ─ input gain ─┬──────────────�
 | 9 | CPU | report per instance for vocal, beat and master presets (48 kHz/128, stereo) |
 | 10 | State, presets, A/B, undo, latency reporting | `PentaPluginTests` |
 | 11 | Steinberg validator + pluginval strictness 10 | pass |
+
+## 5. 2.0 additions
+
+- **Near-Nyquist realisation** (DECISIONS D25-D28): a section whose matched biquad misses its analog curve by more
+  than 0.5 dB across the audio band is realised as a fitted biquad pair (Levenberg-Marquardt in log magnitude,
+  roots bounded by construction, structural zeros exact, 3 dB bound above 20 kHz), tracked by one Gauss-Newton step
+  per control block while it changes; jumps between realisations crossfade (warm-up + fade, ~11 ms each). The
+  correction designers serve the audio band (held above 20 kHz) and the Natural Phase matrix fills low-level gaps
+  smoothly. Result: no accuracy exceptions at any rate.
+- **Spectral dynamics** (D29, `Source/dsp/Spectral.h`): per band, an STFT detector and a per-frequency law weighted
+  by the band's region, realised as a minimum-phase FIR after the band's filter - zero added latency.
+- **Workflow** (D30-D31, `Source/gui/EqGraph.*`, `Source/gui/MatchPanel.*`, `Source/dsp/CurveFit.h`): multi-selection
+  and group edits, keyboard, clipboard, note snapping, spectrum-peak grab, Draw and Match (one band fitter),
+  Gain Scale (applied in CurveModel). New parameters are appended with version hint 2 (D32).
+

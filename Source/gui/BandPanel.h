@@ -34,6 +34,7 @@ private:
     ui::Segmented place { { "ST", "L", "R", "M", "S" }, ui::col::teal };
     ui::Knob freq { "FREQ", ui::col::accent, 52 }, gain { "GAIN", ui::col::accent, 52 }, q { "Q", ui::col::accent, 52 };
     ui::Toggle dyn { "DYNAMIC", ui::col::warn, "pill" };
+    ui::Segmented dmode { { "BROAD", "SPECTRAL" }, ui::col::warn };
     ui::Knob thr { "THRESH", ui::col::warn, 44 }, range { "RANGE", ui::col::warn, 44 }, ratio { "RATIO", ui::col::warn, 44 },
              atk { "ATTACK", ui::col::warn, 44 }, rel { "RELEASE", ui::col::warn, 44 };
     ui::Toggle cutOn { "ON", ui::col::accent, "power" };

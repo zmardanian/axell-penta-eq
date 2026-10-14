@@ -2,7 +2,7 @@
 reported vs actual latency, linearity, host block-size invariance, stereo/M-S, oversampling, mix alignment, linear
 phase, click-free automation and mode switches, dynamics, side-chain, silence (tests/independent/README.md).
 Exit code = number of failures."""
-import numpy as np, math, sys
+import numpy as np, math, re, sys
 from scipy import signal as sg
 from lib import *
 
@@ -246,6 +246,46 @@ o = run_all([r1, r2], {"m1": x, "m2": np.concatenate([x, x], 1)}, jobname="mono"
 e = np.abs(o["m1"][:, 0] - o["m2"][:, 0]).max()
 report("mono instance == stereo instance with L=R", e < 1e-6 and r1.latency == r2.latency, f"max diff {e:.3g}")
 
+# ---------------------------------------------------------------- 12b. 2.0: spectral dynamics and Gain Scale
+fs = 48000
+def tones(freqs_amps, secs=3.0, ch=2):
+    t = np.arange(int(fs * secs)) / fs
+    x = sum(a * np.sin(2 * np.pi * f * t) for f, a in freqs_amps)
+    return np.repeat(x[:, None], ch, axis=1)
+def level(y, f, a):
+    seg = y[int(1.5 * fs):int(2.8 * fs), 0]
+    t = np.arange(len(seg)) / fs
+    w = np.hanning(len(seg))
+    return 20 * np.log10(2 * np.abs(np.sum(w * seg * np.exp(-2j * np.pi * f * t))) / np.sum(w) / a)
+spec = {**band(1, Type="Bell", Frequency="3000", Gain="0", Q="1", Dynamic="On", Threshold="-40", Range="-12", Ratio="20",
+               Attack="5", Release="100")}
+x = tones([(3000, 0.5), (2200, 0.00316), (300, 0.5)])
+runs = []
+for mode in ["Spectral", "Broadband"]:
+    for ph in PHASES:
+        r = Run(f"sp_{mode[0]}_{ph[0]}", fs, sets={**spec, "Band 1 Dynamic Mode": mode, "Phase Mode": ph})
+        runs.append(r)
+out = run_all(runs, {r.name: x for r in runs}, jobname="spec")
+for r in runs:
+    y = out[r.name][r.latency:]
+    l3, l22, l300 = level(y, 3000, 0.5), level(y, 2200, 0.00316), level(y, 300, 0.5)
+    if "Spectral" in r.sets["Band 1 Dynamic Mode"]:
+        report(f"spectral dynamics ({r.sets['Phase Mode']}): loud tone cut by the range, quiet tone in the band untouched",
+               -12.5 < l3 < -11.5 and abs(l22) < 0.1 and -0.5 < l300 < 0.05,
+               f"3 kHz {l3:.2f} dB, 2.2 kHz {l22:.3f} dB, 300 Hz {l300:.2f} dB")
+    else:
+        report(f"broadband dynamics ({r.sets['Phase Mode']}) for comparison: the quiet tone is pulled down too", l22 < -6.0,
+               f"2.2 kHz {l22:.2f} dB")
+report("spectral dynamics add no latency (same as broadband in every phase mode)",
+       all(runs[i].latency == runs[i + 3].latency for i in range(3)), str([q.latency for q in runs]))
+# Gain Scale: a +8 dB bell at 50 % acts as exactly +4 dB, in every phase mode
+runs = [Run(f"gs_{ph[0]}", fs, ch=1, sets={**band(1, Type="Bell", Frequency="1000", Gain="8", Q="1"), "Gain Scale": "50", "Phase Mode": ph})
+        for ph in PHASES]
+out = run_all(runs, {r.name: tones([(1000, 0.1)], ch=1) for r in runs}, jobname="gs")
+for r in runs:
+    g = level(out[r.name][r.latency:], 1000, 0.1)
+    report(f"Gain Scale 50 % ({r.sets['Phase Mode']}): +8 dB bell -> +4 dB", abs(g - 4.0) < 0.05, f"{g:.3f} dB")
+
 # ---------------------------------------------------------------- 13. long silence: output decays to exact zero (no denormal tails / DC)
 fs = 48000; x = np.concatenate([noise(fs, 2, 13), np.zeros((fs * 10, 2))])
 s = {**band(1, Type="Bell", Frequency="40", Gain="12", Q="12"), **band(2, Type="Low Shelf", Frequency="80", Gain="6"), "Passive Tube On": "On",
@@ -254,6 +294,32 @@ r = Run("sil", fs, sets=s)
 y = run_all([r], {"sil": x}, jobname="sil")["sil"]
 tail = np.abs(y[-fs:]).max()
 report("output after 10 s of silence (resonant band + whole character rack)", tail < 1e-20, f"max |y| in last second {tail:.3g}")
+
+# ---------------------------------------------------------------- 14. live latency changes: output aligned with the host's compensation
+# A live host (message loop between blocks, ~0.1 s of audio per plugin timer tick) switches the phase mode
+# every 0.5 s. At every sample the output must be the input delayed by the latency the host compensates
+# *at that moment* (as reported through restartComponent), times a fade gain in [0, 1]; never misaligned.
+fs = 48000
+seq = ["Natural Phase", "Zero Latency", "Linear Phase", "Zero Latency", "Natural Phase", "Linear Phase", "Natural Phase", "Zero Latency"]
+x = noise(int(fs * 0.5 * (len(seq) + 1)), 1, 14)
+r = Run("pdc", fs, ch=1, sets={"Phase Mode": "Zero Latency"}, ats=[((i + 1) * (fs // 2), "Phase Mode", v) for i, v in enumerate(seq)],
+        nonrt=False, pdc=2, preroll=fs // 4)
+y = run_all([r], {"pdc": x}, jobname="pdc")["pdc"][:, 0]
+ev = [(int(a), int(b)) for a, b in re.findall(r"pdc (\d+) (-?\d+)", r.log)]
+Lh = np.zeros(len(y), int)
+for k, (pos, lat) in enumerate(ev):
+    Lh[pos:] = lat
+idx = np.arange(len(y)) - Lh
+xd = np.where(idx >= 0, x[np.clip(idx, 0, None), 0], 0.0)
+W = 16; nw = len(y) // W
+Y, X = y[:nw * W].reshape(nw, W), xd[:nw * W].reshape(nw, W)
+g = (Y * X).sum(1) / np.maximum((X * X).sum(1), 1e-12)
+res = np.abs(Y - g[:, None] * X).max(1)
+bad = (res > 0.02) | (g < -0.01) | (g > 1.01)
+audible = (np.abs(Y).max(1) > 1e-3).mean()
+lats = sorted(set(l for _, l in ev))
+report("live latency changes: output always aligned with the host's current compensation", bad.sum() == 0 and audible > 0.6 and len(lats) == 3,
+       f"{len(ev)} host latency updates {lats}, misaligned 16-sample windows {int(bad.sum())}, audible {100 * audible:.0f} %")
 
 fails = [r for r in results if not r[1]]
 print(f"\nAUDIT 2 (processing): {len(results) - len(fails)}/{len(results)} pass")

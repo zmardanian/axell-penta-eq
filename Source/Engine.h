@@ -12,6 +12,7 @@
 #include "dsp/Correction.h"
 #include "dsp/LinearPhase.h"
 #include "dsp/Rack.h"
+#include "dsp/Spectral.h"
 
 #include <algorithm>
 #include <array>
@@ -165,7 +166,8 @@ struct CurveModel
         active = p[(size_t) bi[bpUsed]] > 0.5f && p[(size_t) bi[bpBypass]] < 0.5f;
         b.type = std::clamp (ch (bi[bpType]), 0, 7);
         b.freqHz = p[(size_t) bi[bpFreq]];
-        b.gainDb = p[(size_t) bi[bpGain]];
+        // Gain Scale (global, 0..200 %) scales every band's static gain
+        b.gainDb = p[(size_t) bi[bpGain]] * std::clamp (p[(size_t) x.gainScale], 0.0f, 200.0f) * 0.01f;
         b.q = p[(size_t) bi[bpQ]];
         b.slopeIdx = std::clamp (ch (bi[bpSlope]), 0, 7);
         b.mode = std::clamp (ch (bi[bpMode]), 0, 1);
@@ -193,6 +195,8 @@ public:
             l.prepare (corrMax, 256);
         for (auto& t : firTmp.taps) // sized here so the audio thread never allocates
             t.assign ((size_t) corrMax, 0.0f);
+        for (int b = 1; b <= kNumBands; ++b)
+            slots[(size_t) b].spec.prepare (fs);
         lp.prepare (fs, nCh, [this] (const std::vector<float>& prm, int bins, std::array<std::vector<double>, 4>& m)
                     { designLinear (prm, bins, m); }, numParams());
         lp.setSynchronous (offline);
@@ -220,6 +224,9 @@ public:
         prepared = true;
         active.phase = -1; // force configuration
         reset();
+        // a fresh start: the wrapper reports the new latency right after prepare, before audio runs
+        hostPending = false;
+        gfade = gfadeTgt = 1.0;
     }
 
     void reset()
@@ -229,8 +236,8 @@ public:
         absPos = 0;
         decodeConfig (want);
         applyConfig (want);
-        gfade = 1.0;
-        gfadeTgt = 1.0;
+        // a latency change the host has not been told about yet starts muted (see waitForHost)
+        gfade = gfadeTgt = hostPending ? 0.0 : 1.0;
         gWarm = 0;
         smoothSnap = true;
         smoothSnapAg = true;
@@ -239,6 +246,8 @@ public:
         for (auto& d : detDelay)
             std::fill (d.begin(), d.end(), 0.0f);
         delayPos = 0;
+        for (int b = 1; b <= kNumBands; ++b)
+            slots[(size_t) b].spec.reset();
         soloFade = 0.0;
         soloCur = -1;
         for (auto& r : soloRf)
@@ -263,11 +272,18 @@ public:
     void setSoloBand (int band) noexcept { soloReq.store (band); } // -1 = off, 0..11
     void setAnalyzerEnabled (bool e) noexcept { analyzerOn.store (e); }
 
-    int getLatencySamples() const noexcept { return latency; }
+    // any thread: the latency of the active configuration (published by the audio thread)
+    int getLatencySamples() const noexcept { return latencyPub.load (std::memory_order_acquire); }
+    // message thread, after the wrapper has reported `samples` to the host: enables the latency
+    // handoff. Until it is called (-1) the engine does not wait (tests, offline tools).
+    void setHostLatency (int samples) noexcept { hostLatency.store (samples, std::memory_order_release); }
     double getSampleRate() const noexcept { return fs; }
     int getNumChannels() const noexcept { return nCh; }
 
     const EngineMeters& getMeters() const noexcept { return meters; }
+    // GUI: the spectral gain curve of band b (0..11) at display point i (dB, 20 Hz .. 20 kHz log-spaced)
+    float spectralDisplayDb (int b, int i) const noexcept { return slots[(size_t) (b + 1)].spec.displayDb (i); }
+    bool spectralActive (int b) const noexcept { return ! slots[(size_t) (b + 1)].spec.isIdle(); }
     void clearMeters() noexcept
     {
         for (int c = 0; c < 2; ++c)
@@ -334,6 +350,13 @@ private:
             s.env[0] = s.env[1] = 0.0;
             s.delta = 0.0;
         }
+        for (int b = 1; b <= kNumBands; ++b)
+        {
+            auto& sp = slots[(size_t) b].spec;
+            sp.setRate (c.phase == kLinear ? 1 : (1 << c.osLog2));
+            sp.reset();
+            slots[(size_t) b].wType = -1;
+        }
         for (auto& m : mods)
         {
             m.designed = false;
@@ -358,13 +381,38 @@ private:
         if (c.phase == kLinear)
             lp.configure (c.quality);
         const int osLat = c.osLog2 > 0 ? os.latencyFor (c.osLog2) : 0;
+        const int oldLatency = latency;
         latency = osLat + (c.phase == kNatural ? cd.naturalLatency() : 0)
                 + (c.phase == kLinear ? dsp::LinearPhaseEq::latencyFor (c.quality, fs) : 0);
         detLatency = c.phase == kLinear ? dsp::LinearPhaseEq::latencyFor (c.quality, fs) : 0;
         if (c.phase == kLinear && rackPre())
             detLatency += osLat;
+        latencyPub.store (latency, std::memory_order_release);
+        // the host compensates the old latency until the wrapper has reported the new one
+        hostPending = latency != oldLatency && ! offline && hostLatency.load (std::memory_order_acquire) >= 0;
+        hostWait = 0;
         lastStatic.clear();
         forceAnalysis = true;
+    }
+
+    // after a latency change: stay muted until the wrapper has reported the new latency to the host
+    // (the host keeps compensating the old one until then, so audible output would be misaligned),
+    // plus one host block, which the host may still have started under the old compensation. Gives
+    // up after 0.5 s (a host without a message loop); offline renders never wait (deterministic).
+    bool waitForHost() noexcept
+    {
+        if (! hostPending)
+            return false;
+        if (hostLatency.load (std::memory_order_acquire) == latency)
+        {
+            hostPending = false;
+            gWarm = std::max (gWarm, maxBlock);
+            return false;
+        }
+        hostWait += kCtrl;
+        if (offline || hostWait >= (int) (0.5 * fs))
+            hostPending = false;
+        return hostPending;
     }
 
     bool rackPre() const noexcept { return std::lround (params[(size_t) idx().rackPos]) == 1; }
@@ -395,6 +443,12 @@ private:
         double env[2] {}, delta = 0, detC = 0;
         bool dynLive = false;
         std::array<float, kCtrl * kMaxOs> fadeBuf {};
+        // spectral dynamics (Dynamic Mode = Spectral): per-frequency gain as a min-phase FIR after the band
+        bool spectral = false, specWasOn = false;
+        dsp::SpectralDynamics spec;
+        int wType = -1, wSlope = -1;
+        double wLf = 0.0, wLq = 0.0;
+        std::array<float, kCtrl * kMaxOs> specTmp {};
     };
 
     struct Mod
@@ -445,9 +499,10 @@ private:
                 sl.atk = std::max (0.05f, params[(size_t) bi[bpAtk]]);
                 sl.rel = std::max (1.0f, params[(size_t) bi[bpRel]]);
                 sl.src = std::clamp ((int) std::lround (params[(size_t) bi[bpSrc]]), 0, kNumBands + 1);
+                sl.spectral = sl.dyn && params[(size_t) bi[bpDynMode]] > 0.5f;
             }
             else
-                sl.dyn = false;
+                sl.dyn = sl.spectral = false;
         }
     }
 
@@ -566,7 +621,8 @@ private:
             else if (over > -0.5 * w)
                 o = (over + 0.5 * w) * (over + 0.5 * w) / (2.0 * w);
             const double amount = o * (1.0 - 1.0 / s.ratio);
-            const double target = (s.range < 0.0 ? -1.0 : 1.0) * std::min (std::abs (s.range), amount);
+            // Spectral mode: the band does not move as a whole (any broadband move releases to 0 dB)
+            const double target = s.spectral ? 0.0 : (s.range < 0.0 ? -1.0 : 1.0) * std::min (std::abs (s.range), amount);
             const double tau = (std::abs (target) > std::abs (s.delta) ? s.atk : s.rel) * 0.001;
             s.delta += (target - s.delta) * (1.0 - std::exp (-(double) kCtrl / (tau * fs)));
         }
@@ -644,7 +700,7 @@ private:
             }
         }
         else
-            gfadeTgt = gWarm > 0 ? 0.0 : 1.0;
+            gfadeTgt = waitForHost() || gWarm > 0 ? 0.0 : 1.0;
         if (gWarm > 0)
             gWarm = std::max (0, gWarm - kCtrl);
 
@@ -755,15 +811,21 @@ private:
             if (design.parallel)
             {
                 const auto comp = dsp::designMatched (design.sect[0]);
-                dsp::Biquad e = comp;
-                e.b0 = 1.0 + design.parallelC * comp.b0;
-                e.b1 = comp.a1 + design.parallelC * comp.b1;
-                e.b2 = comp.a2 + design.parallelC * comp.b2;
+                dsp::Realisation e;
+                e.q[0] = comp;
+                e.q[0].b0 = 1.0 + design.parallelC * comp.b0;
+                e.q[0].b1 = comp.a1 + design.parallelC * comp.b1;
+                e.q[0].b2 = comp.a2 + design.parallelC * comp.b2;
                 fn (s.aPlace, design.parallelEquiv, e, osLog2Bands());
+                continue;
             }
-            else
-                for (int k = 0; k < design.count; ++k)
-                    fn (s.aPlace, design.sect[(size_t) k], dsp::designMatched (design.sect[(size_t) k]), osLog2Bands());
+            // the chain's own realisations when it runs exactly this static design (a fitted
+            // near-Nyquist realisation depends on its tracking history); otherwise a fresh one
+            const bool chainIsStatic = s.designed && dsp::same (s.dLf, s.lf) && dsp::same (s.dG, s.g) && dsp::same (s.dLq, s.lq)
+                                    && s.chain.size() == design.count && ! s.chain.current().parallel;
+            for (int k = 0; k < design.count; ++k)
+                fn (s.aPlace, design.sect[(size_t) k],
+                    chainIsStatic ? s.chain.realisation (k) : dsp::realise (design.sect[(size_t) k]), osLog2Bands());
         }
         for (int mi = 0; mi < dsp::kNumModules; ++mi)
         {
@@ -773,7 +835,7 @@ private:
             dsp::rack::build (mi, m.cur, fsRack, design, design2);
             for (const auto* d : { &design, &design2 })
                 for (int k = 0; k < d->count; ++k)
-                    fn ((int) kStereo, d->sect[(size_t) k], dsp::designMatched (d->sect[(size_t) k]), active.osLog2);
+                    fn ((int) kStereo, d->sect[(size_t) k], dsp::realise (d->sect[(size_t) k]), active.osLog2);
         }
     }
 
@@ -784,7 +846,7 @@ private:
         if (! natural)
         {
             cd.clear (false);
-            forEachStaticSection ([this] (int place, const dsp::Section& s, const dsp::Biquad& q, int osl)
+            forEachStaticSection ([this] (int place, const dsp::Section& s, const dsp::Realisation& q, int osl)
                                   { cd.add (laneMask (place), s, q, osl); });
             cd.finish (firTmp, false);
             for (int l = 0; l < dsp::kNumLanes; ++l)
@@ -804,7 +866,7 @@ private:
             return;
         }
         cd.clearMatrix (nCh);
-        forEachStaticSection ([this] (int place, const dsp::Section& s, const dsp::Biquad& q, int osl)
+        forEachStaticSection ([this] (int place, const dsp::Section& s, const dsp::Realisation& q, int osl)
                               { cd.addMatrix (nCh == 1 ? (place == kSide ? kSide : kStereo) : place, s, q, osl); });
         const bool any = cd.finishMatrix (firTmp);
         for (int e = 0; e < 4; ++e)
@@ -1007,6 +1069,8 @@ private:
                 {
                     std::copy (buf[c], buf[c] + n, warmBuf.data());
                     s.chain.process (warmBuf.data(), n, c, satK, nullptr);
+                    if (si >= 1 && si <= kNumBands)
+                        s.spec.process (warmBuf.data(), n, c, nullptr, s.specTmp.data());
                 }
                 s.chain.advance (n);
                 s.warm -= n;
@@ -1018,8 +1082,15 @@ private:
                 continue;
             }
             const float* f = fillFade (s.fade, s.fadeTgt, fadeStep, n, s.fadeBuf.data());
+            // every band keeps its spectral FIR history current (an idle lane only records), so Spectral
+            // mode can start at any moment without a transient
+            const bool band = si >= 1 && si <= kNumBands;
             for (int c = c0; c <= c1; ++c)
+            {
                 s.chain.process (buf[c], n, c, satK, f);
+                if (band)
+                    s.spec.process (buf[c], n, c, f, s.specTmp.data());
+            }
             s.chain.advance (n);
         }
         toMs (false);
@@ -1065,6 +1136,89 @@ private:
             }
             m.pre.advance (n);
             m.post.advance (n);
+        }
+    }
+
+    // spectral bands: a band in Spectral mode, or one still fading its spectral gain back to flat
+    bool spectralRuns (const Slot& s) const noexcept { return (s.spectral && s.tActive) || ! s.spec.isIdle(); }
+
+    // the band's region (0..1 per analysis bin): its own shape at +12 dB, normalised - spectral gain acts
+    // only where the band acts
+    void updateSpectralWeights (Slot& s) noexcept
+    {
+        if (s.aType == s.wType && s.aSlope == s.wSlope && dsp::same (s.lf, s.wLf) && dsp::same (s.lq, s.wLq))
+            return;
+        s.wType = s.aType;
+        s.wSlope = s.aSlope;
+        s.wLf = s.lf;
+        s.wLq = s.lq;
+        dsp::BandShape b;
+        b.type = s.aType;
+        b.slopeIdx = s.aSlope;
+        b.freqHz = std::exp2 (s.lf);
+        b.q = std::exp2 (s.lq);
+        b.gainDb = 12.0;
+        dsp::buildBand (b, fs, design2, false);
+        for (int k = 0; k < s.spec.analysisBins(); ++k)
+        {
+            const double db = 10.0 * std::log10 (std::max (dsp::designMagSq (design2, 2.0 * dsp::kPi * s.spec.binHz (k) / fs), 1.0e-30));
+            s.spec.setWeight (k, s.aType == kTilt ? (db + 6.0) / 12.0 : db / 12.0);
+        }
+    }
+
+    // once per hop (aligned to the absolute position): analyse, apply the law, redesign
+    void spectralHop() noexcept
+    {
+        for (int si = 1; si <= kNumBands; ++si)
+        {
+            auto& s = slots[(size_t) si];
+            const bool on = spectralRuns (s);
+            if (on && ! s.specWasOn)
+                s.spec.restartDetector(); // its analysis buffer holds old (or no) signal
+            s.specWasOn = on;
+            if (! on)
+                continue;
+            updateSpectralWeights (s);
+            dsp::SpectralSettings st;
+            st.thr = s.thr;
+            st.range = s.spectral && s.tActive ? s.range : 0.0; // switched off: release to flat
+            st.ratio = s.ratio;
+            st.atkMs = s.atk;
+            st.relMs = s.rel;
+            s.spec.update (st);
+        }
+    }
+
+    void detectSpectral (const float* const* in, int n, const float* scMono) noexcept
+    {
+        std::array<float, kCtrl> a {};
+        for (int si = 1; si <= kNumBands; ++si)
+        {
+            auto& s = slots[(size_t) si];
+            if (! spectralRuns (s))
+                continue;
+            if (s.src == kNumBands + 1 || nCh == 1)
+            {
+                const float* m = s.src == kNumBands + 1 ? scMono : in[0];
+                if (m == nullptr)
+                    std::fill (a.begin(), a.begin() + n, 0.0f);
+                else
+                    std::copy (m, m + n, a.begin());
+                s.spec.pushDetector (a.data(), nullptr, n);
+                continue;
+            }
+            switch (s.aPlace)
+            {
+                case kLeft: s.spec.pushDetector (in[0], nullptr, n); break;
+                case kRight: s.spec.pushDetector (in[1], nullptr, n); break;
+                case kMid:
+                case kSide:
+                    for (int i = 0; i < n; ++i)
+                        a[(size_t) i] = 0.5f * (in[0][i] + (s.aPlace == kMid ? in[1][i] : -in[1][i]));
+                    s.spec.pushDetector (a.data(), nullptr, n);
+                    break;
+                default: s.spec.pushDetector (in[0], in[1], n); break;
+            }
         }
     }
 
@@ -1185,7 +1339,10 @@ private:
         }
 
         const float* detPtr[2] = { detIn[0].data(), detIn[1].data() };
+        if (absPos % slots[1].spec.hopSize() == 0)
+            spectralHop(); // from the samples before this one: causal, block-size independent
         detect (detPtr, n, scDet.data());
+        detectSpectral (detPtr, n, scDet.data());
 
         // main path (in place on `in`)
         if (! linear)
@@ -1262,7 +1419,10 @@ private:
             postFifo.push (mono.data(), n);
         }
         for (int b = 0; b < kNumBands; ++b)
-            meters.delta[(size_t) b] = (float) slots[(size_t) (b + 1)].delta;
+        {
+            const auto& sl = slots[(size_t) (b + 1)];
+            meters.delta[(size_t) b] = sl.spectral ? sl.spec.maxGainChangeDb() : (float) sl.delta;
+        }
     }
 
     void runMinPhase (float* const* x, int n) noexcept
@@ -1349,10 +1509,14 @@ private:
     //== members =================================================================
     double fs = 48000.0, fsBands = 48000.0, fsRack = 48000.0;
     int nCh = 2, maxBlock = 512, osF = 1, rackOsF = 1;
-    bool prepared = false, offline = false;
+    bool prepared = false;
+    std::atomic<bool> offline { false }; // set by the host thread, read by the audio thread
     std::vector<float> params;
     Config active, want;
-    int latency = 0, detLatency = 0, maxLatency = 0;
+    int latency = 0, detLatency = 0, maxLatency = 0; // audio thread
+    std::atomic<int> latencyPub { 0 }, hostLatency { -1 };
+    bool hostPending = false;
+    int hostWait = 0;
     int64_t absPos = 0;
 
     std::array<Slot, kNumSlots> slots;

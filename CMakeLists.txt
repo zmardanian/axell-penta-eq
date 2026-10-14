@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(AxellPentaEQ VERSION 1.0.0)
+project(AxellPentaEQ VERSION 2.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -41,7 +41,8 @@ set(PENTA_PLUGIN_SOURCES
   Source/gui/EqGraph.cpp
   Source/gui/BandPanel.cpp
   Source/gui/RackPanel.cpp
-  Source/gui/PresetBrowser.cpp)
+  Source/gui/PresetBrowser.cpp
+  Source/gui/MatchPanel.cpp)
 
 target_sources(AxellPentaEQ PRIVATE ${PENTA_PLUGIN_SOURCES})
 target_include_directories(AxellPentaEQ PRIVATE Source)

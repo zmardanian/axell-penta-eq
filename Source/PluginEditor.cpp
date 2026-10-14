@@ -5,7 +5,8 @@ using namespace ui;
 namespace
 {
 const juce::Identifier kUiWidth ("uiWidth"), kSelected ("selected"), kAnPre ("anPre"), kAnPost ("anPost"),
-    kAnSc ("anSc"), kAnPeak ("anPeak"), kAnTilt ("anTilt"), kAnSpeed ("anSpeed"), kRange ("eqRange");
+    kAnSc ("anSc"), kAnPeak ("anPeak"), kAnTilt ("anTilt"), kAnSpeed ("anSpeed"), kRange ("eqRange"), kSnap ("snapNotes"),
+    kFreeze ("anFreeze");
 
 namespace tip
 {
@@ -24,7 +25,13 @@ const char* quality = "Linear Phase resolution: higher = more accurate at low fr
                       "(Low ~45 ms, Medium ~90 ms, High ~360 ms at 48 kHz).";
 const char* os = "Oversampling for the character stages and Character bands (cleaner drive at high settings). "
                  "1x = no extra latency.";
-const char* analyzer = "Analyzer and graph options: pre/post/side-chain spectrum, peak hold, tilt, speed, EQ scale.";
+const char* analyzer = "Analyzer and graph options: pre/post/side-chain spectrum, peak hold, tilt, speed, freeze, EQ "
+                       "scale, snap to notes.";
+const char* draw = "DRAW: paint the curve you want with the mouse, then APPLY - the EQ fits up to 12 bands to it.";
+const char* match = "MATCH: capture a reference (side-chain, input, or another instance) and this track, and the EQ "
+                    "moves this track's tonal balance towards the reference.";
+const char* scale = "GAIN SCALE: scales the gain of every band (0-200 %). 50 % = half as strong, 0 % = flat. "
+                    "Drag, or double-click for 100 %.";
 const char* size = "Interface size (75-200 %). You can also drag the bottom-right corner.";
 const char* meterIn = "Input peak level (dBFS). Click to reset the peak number.";
 const char* meterOut = "Output peak level (dBFS). Click to reset the peak number.";
@@ -36,7 +43,8 @@ PentaEditor::PentaEditor (PentaProcessor& p)
       graph (p, [this] (int s) { selectSlot (s); }),
       bandPanel (p, [this] (int s) { selectSlot (s); }),
       rack (p),
-      browser (p)
+      browser (p),
+      match (p, graph)
 {
     auto ui = proc.uiState();
     const int savedWidth = (int) ui.getProperty (kUiWidth, kWidth);
@@ -44,9 +52,11 @@ PentaEditor::PentaEditor (PentaProcessor& p)
     addAndMakeVisible (content);
     for (auto* c : std::initializer_list<juce::Component*> { &presetPrev, &presetNext, &presetName, &presetSave, &slotA, &slotB,
                                                             &slotCopy, &undoBtn, &redoBtn, &phase, &quality, &os, &sizeBtn,
-                                                            &graph, &analyzerBtn, &inMeter, &outMeter, &bandPanel, &rack })
+                                                            &graph, &analyzerBtn, &drawBtn, &matchBtn, &scaleSlider,
+                                                            &inMeter, &outMeter, &bandPanel, &rack })
         content.addAndMakeVisible (c);
     content.addChildComponent (browser);
+    content.addChildComponent (match);
 
     auto g = [this] { proc.pushUndo(); };
     phase.bind (proc.apvts, "phase", tip::phase, g);
@@ -81,6 +91,31 @@ PentaEditor::PentaEditor (PentaProcessor& p)
     undoBtn.onClick = [this] { proc.undoStep(); timerCallback(); };
     redoBtn.onClick = [this] { proc.redoStep(); timerCallback(); };
     analyzerBtn.onClick = [this] { graph.showOptionsMenu(); };
+    drawBtn.setTooltip (tip::draw);
+    matchBtn.setTooltip (tip::match);
+    drawBtn.setClickingTogglesState (true);
+    drawBtn.setColour (juce::TextButton::buttonOnColourId, col::accent);
+    drawBtn.onClick = [this] { graph.setDrawMode (drawBtn.getToggleState()); };
+    graph.onDrawModeChanged = [this] { drawBtn.setToggleState (graph.isDrawMode(), juce::dontSendNotification); };
+    matchBtn.onClick = [this]
+    {
+        graph.setDrawMode (false);
+        match.open();
+    };
+    match.onClose = [this] { match.setVisible (false); };
+    scaleSlider.setSliderStyle (juce::Slider::LinearBar);
+    scaleSlider.setColour (juce::Slider::trackColourId, col::accent.withAlpha (0.35f));
+    scaleSlider.setColour (juce::Slider::textBoxTextColourId, col::text);
+    scaleSlider.setColour (juce::Slider::backgroundColourId, juce::Colour (0xff22262d));
+    scaleSlider.setColour (juce::Slider::textBoxOutlineColourId, col::track);
+    scaleSlider.setColour (juce::Slider::textBoxBackgroundColourId, juce::Colours::transparentBlack);
+    scaleSlider.setTooltip (tip::scale);
+    scaleAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (proc.apvts, "gainScale", scaleSlider);
+    scaleSlider.textFromValueFunction = [] (double v) { return "SCALE " + juce::String (juce::roundToInt (v)) + " %"; };
+    scaleSlider.valueFromTextFunction = [] (const juce::String& t) { return t.retainCharacters ("0123456789.").getDoubleValue(); };
+    scaleSlider.setDoubleClickReturnValue (true, 100.0);
+    scaleSlider.onDragStart = [this] { proc.pushUndo(); };
+    scaleSlider.updateText();
     sizeBtn.onClick = [this] { showSizeMenu(); };
     browser.onClose = [this] { browser.setVisible (false); };
     browser.onLoaded = [this] { browser.setVisible (false); selectSlot (-1); timerCallback(); };
@@ -95,6 +130,8 @@ PentaEditor::PentaEditor (PentaProcessor& p)
     o.tilt = (float) ui.getProperty (kAnTilt, 4.5);
     o.speed = (int) ui.getProperty (kAnSpeed, 1);
     o.rangeDb = (float) ui.getProperty (kRange, 18.0);
+    o.snapNotes = ui.getProperty (kSnap, false);
+    o.freeze = ui.getProperty (kFreeze, false);
     graph.onOptionsChanged = [this] { saveUiState(); };
 
     setResizable (true, true);
@@ -128,6 +165,8 @@ void PentaEditor::saveUiState()
     ui.setProperty (kAnTilt, o.tilt, nullptr);
     ui.setProperty (kAnSpeed, o.speed, nullptr);
     ui.setProperty (kRange, o.rangeDb, nullptr);
+    ui.setProperty (kSnap, o.snapNotes, nullptr);
+    ui.setProperty (kFreeze, o.freeze, nullptr);
 }
 
 void PentaEditor::selectSlot (int slot)
@@ -197,11 +236,15 @@ void PentaEditor::layout()
     graphArea = { m, 64, kWidth - 2 * m - 62, 378 };
     graph.setBounds (graphArea);
     analyzerBtn.setBounds (graphArea.getRight() - 136, graphArea.getY() + 6, 96, 22);
+    matchBtn.setBounds (analyzerBtn.getX() - 6 - 66, analyzerBtn.getY(), 66, 22);
+    drawBtn.setBounds (matchBtn.getX() - 6 - 58, analyzerBtn.getY(), 58, 22);
+    scaleSlider.setBounds (drawBtn.getX() - 8 - 120, analyzerBtn.getY(), 120, 22);
     inMeter.setBounds (graphArea.getRight() + 8, graphArea.getY(), 26, graphArea.getHeight() - 14);
     outMeter.setBounds (graphArea.getRight() + 36, graphArea.getY(), 26, graphArea.getHeight() - 14);
     bandPanel.setBounds (m, 450, kWidth - 2 * m, 140);
     rack.setBounds (m, 598, kWidth - 2 * m, kHeight - 598 - m);
     browser.setBounds (graphArea.reduced (40, 6).withTrimmedRight (-62));
+    match.setBounds (graphArea.reduced (60, 34).withTrimmedRight (-62));
 }
 
 void PentaEditor::Content::paint (juce::Graphics& g)

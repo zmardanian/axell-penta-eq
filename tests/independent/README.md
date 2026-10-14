@@ -14,8 +14,10 @@ black-box test of the **built plugin bundle** through a real VST3 host. It share
 - **`audit_mag.py`** (part 1): random settings of every band type at 44.1–192 kHz, in Zero Latency and Natural
   Phase. It covers the full Q range of shelves and tilt, and band frequencies up to 30 kHz. Pass criterion: the
   spec (≤ 0.1 dB where the curve is ≥ −24 dB; cuts ≤ 0.5 dB down to −48 dB; Natural Phase also matches the analog
-  phase). Settings outside the documented accuracy envelope (README, *Accuracy*) are listed separately as *known
-  limits*, with their worst error, never dropped.
+  phase). Since 2.0 no setting is exempt: resonant shelves and tilt up to Q 24, notch and band-pass at their true
+  centre (also above Nyquist) and every type at band frequencies of 12–30 kHz are checked at 44.1/48 kHz without
+  oversampling, in Zero Latency and Natural Phase. (The *known limits* hook stays for future features; it lists
+  settings outside the documented envelope separately, with their worst error, never dropping them.)
 - **`audit_misc.py`** (part 2), the processing checks:
   - transparency of default settings, all modes, OS factors and rates
   - reported latency = actual latency
@@ -27,7 +29,13 @@ black-box test of the **built plugin bundle** through a real VST3 host. It share
   - exact gains
   - Linear Phase symmetry and accuracy
   - no clicks for frequency/gain sweeps, type, phase-mode and oversampling switches during playback
+  - live latency changes: with a message loop between blocks (`pdc` job option), the host logs the latency it
+    compensates per block; through repeated phase-mode switches the output must be the input delayed by exactly
+    that latency, times a fade gain in [0, 1], at every sample
   - dynamic-band static curve and side-chain
+  - spectral dynamics (2.0): a loud tone in the band reduced by the range while a quiet tone in the same band is
+    untouched, in every phase mode, with no added latency; broadband mode for comparison
+  - Gain Scale (2.0): a +8 dB bell at 50 % is exactly +4 dB in every phase mode
   - decay to silence
 
 ```bash
@@ -48,3 +56,10 @@ The host is built inside the distrobox. The Python part runs wherever `python3` 
 | Float one-pole gain smoothing stalled short of its target | gains and Mix stayed up to ~0.0005 dB off | snap when a step stops moving (D21) |
 | Band-pass 72/96 dB/oct were the same filter as 48 dB/oct | the slope menu overstated the steepness | n = slope/12 sections, up to 8 |
 | A band switched to a cut kept Q 1.0 | new cut bands had a +1.3 to +2.9 dB bump at the corner | a type change by the user resets a neutral Q (D22) |
+
+After v1.0.0, an external code review reported two more issues, both confirmed and fixed:
+
+| Finding | Effect | Fix |
+|---|---|---|
+| A/B slots were not part of the session state | a reopened project kept only the slot that was playing | the state stores the A/B pair (D23) |
+| Latency handed from the audio thread to the host timer through a plain `int`; the engine faded in without waiting for the host | a data race; after a latency-changing switch, up to ~50 ms played with the old compensation (this audit's live check: ~3000 misaligned windows with v1.0.0, 0 now) | atomic handoff, muted until the host has been told (D24) |

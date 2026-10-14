@@ -95,9 +95,11 @@ Source/dsp/Rack.h          character modules (Inductor, Console E/G, Passive Tub
 Source/dsp/Correction.h    minimum-phase / natural-phase correction FIRs
 Source/dsp/LinearPhase.h   2x2 linear-phase FIR matrix, partitioned convolution, background designer
 Source/dsp/Fft.h           radix-2 FFT
+Source/dsp/Spectral.h      spectral dynamics: STFT detector, per-frequency law, minimum-phase FIR
+Source/dsp/CurveFit.h      fit bands to a target curve (Draw, Match)
 Source/Oversampling.h      linear-phase polyphase halfband oversampler (from Duo Vocal Comp)
 Source/PluginProcessor.*   JUCE wrapper: parameters, state, presets, A/B, undo, buses
-Source/PluginEditor.*, Source/gui/*   GUI
+Source/PluginEditor.*, Source/gui/*   GUI (EqGraph: graph + workflow tools, MatchPanel, BandPanel, RackPanel, PresetBrowser)
 tests/                     DSP suite, plugin suite, snapshot and curve-plot tools
 docs/                      spec, research, decisions, screenshots, preset curves, logs
 ```

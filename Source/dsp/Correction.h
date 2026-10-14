@@ -41,6 +41,9 @@ public:
         tapsMin = n / 8;
         naturalDelay = n <= 2048 ? 128 : (n <= 4096 ? 256 : 512); // 2.7 ms: steep cuts need it (tools: np.cpp)
         nb = n / 2 + 1;
+        // the correction serves the audio band: above 20 kHz its target is held at the 20 kHz value
+        // (the near-Nyquist realisations are deliberately free there, Sections.h)
+        kTop = std::min (nb - 1, (int) std::floor (20000.0 / (0.5 * sampleRate) * (nb - 1)));
         fft.prepare (n);
         work.assign ((size_t) n, {});
         for (int os = 0; os < 3; ++os)
@@ -63,6 +66,7 @@ public:
         matD.assign ((size_t) nb, {});
         matC.assign ((size_t) nb, {});
         matLevel.assign ((size_t) nb, { 1.0, 1.0 });
+        gapTmp.assign ((size_t) nb, {});
         for (auto& l : lanes)
         {
             l.ratio.assign ((size_t) nb, 1.0);
@@ -95,6 +99,12 @@ public:
     // accumulate one static section running at rate fs * 2^osLog2, applied to the lanes in laneMask
     void add (int laneMask, const Section& s, const Biquad& q, int osLog2) noexcept
     {
+        Realisation r;
+        r.q[0] = q;
+        add (laneMask, s, r, osLog2);
+    }
+    void add (int laneMask, const Section& s, const Realisation& q, int osLog2) noexcept
+    {
         if (s.kind == Kind::unity || laneMask == 0)
             return;
         const auto& t = tab[std::clamp (osLog2, 0, 2)];
@@ -115,9 +125,7 @@ public:
             if (complexMode)
                 for (int k = 0; k < nb; ++k)
                 {
-                    const auto z1 = t.z1[(size_t) k], z2 = z1 * z1;
-                    const auto hd = (q.b0 + q.b1 * z1 + q.b2 * z2) / (1.0 + q.a1 * z1 + q.a2 * z2);
-                    l.cratio[(size_t) k] *= s.response (t.w[(size_t) k]) / hd;
+                    l.cratio[(size_t) k] *= s.response (t.w[(size_t) k]) / digital (q, t.z1[(size_t) k]);
                 }
         }
     }
@@ -154,9 +162,12 @@ public:
                 const double wgt = std::clamp ((adb + 90.0) / 30.0, 0.0, 1.0);
                 const double lr = 0.5 * std::log (std::max (l.ratio[(size_t) k], 1.0e-300));
                 const double v = wgt * std::clamp (lr, -kClampLn, kClampLn);
-                l.logRes[(size_t) k] = v;
-                worst = std::max (worst, std::abs (v));
+                l.logRes[(size_t) k] = k > kTop ? l.logRes[(size_t) kTop] : v;
+                worst = std::max (worst, std::abs (l.logRes[(size_t) k]));
             }
+            if (natural)
+                for (int k = kTop + 1; k < nb; ++k)
+                    l.cratio[(size_t) k] = l.cratio[(size_t) kTop];
             double worstPhase = 0.0;
             if (natural)
                 for (int k = 0; k < nb; ++k)
@@ -190,6 +201,12 @@ public:
     // placement: 0 stereo, 1 L, 2 R, 3 M, 4 S
     void addMatrix (int placement, const Section& s, const Biquad& q, int osLog2) noexcept
     {
+        Realisation r;
+        r.q[0] = q;
+        addMatrix (placement, s, r, osLog2);
+    }
+    void addMatrix (int placement, const Section& s, const Realisation& q, int osLog2) noexcept
+    {
         if (s.kind == Kind::unity)
             return;
         if (matCh == 1 && placement == 4)
@@ -198,8 +215,7 @@ public:
         const auto& t = tab[std::clamp (osLog2, 0, 2)];
         for (int k = 0; k < nb; ++k)
         {
-            const auto z1 = t.z1[(size_t) k], z2 = z1 * z1;
-            const auto hd = (q.b0 + q.b1 * z1 + q.b2 * z2) / (1.0 + q.a1 * z1 + q.a2 * z2);
+            const auto hd = digital (q, t.z1[(size_t) k]);
             const auto ha = s.response (t.w[(size_t) k]);
             const double lev = s.magSq (t.w[(size_t) k]);
             auto& lv = matLevel[(size_t) k];
@@ -241,21 +257,27 @@ public:
                 finite = finite && std::isfinite (e.real()) && std::isfinite (e.imag());
             if (! finite)
                 C = { 1.0, 0.0, 0.0, 1.0 };
-            for (int r = 0; r < 2; ++r)
-            {
-                const double adb = 10.0 * std::log10 (std::max (matLevel[(size_t) k][(size_t) r], 1.0e-300));
-                const double wgt = std::clamp ((adb + 90.0) / 30.0, 0.0, 1.0);
-                for (int c = 0; c < 2; ++c)
-                {
-                    auto& e = C[(size_t) (2 * r + c)];
-                    const std::complex<double> id = r == c ? 1.0 : 0.0;
-                    e = id + wgt * (e - id);
-                    const double m = std::abs (e);
-                    if (m > 4.0)
-                        e *= 4.0 / m;
-                }
-            }
             matC[(size_t) k] = C;
+        }
+        // Where the analog target is very low (< -60 dB, fully below -90 dB) the correction's value
+        // does not matter for the sound, but its shape does for the FIR: fading it to the identity
+        // there (as before 2.0) puts a phase step next to steep, narrow passbands - their realisation
+        // runs a few degrees off the analog phase, and the step needs more than the 2.7 ms window.
+        // Instead such gaps are filled smoothly from the valid neighbours (D26).
+        for (int r = 0; r < 2; ++r)
+            for (int c = 0; c < 2; ++c)
+                fillLowLevel (r, 2 * r + c);
+        for (int k = 0; k < nb; ++k)
+        {
+            auto& C = matC[(size_t) k];
+            for (auto& e : C)
+            {
+                const double m = std::abs (e);
+                if (m > 4.0)
+                    e *= 4.0 / m;
+            }
+            if (k > kTop)
+                C = matC[(size_t) kTop];
         }
         const int lanesN = matCh == 1 ? 1 : 4;
         for (int li = 0; li < lanesN; ++li)
@@ -275,6 +297,75 @@ public:
     }
 
 private:
+    // matC[.][e] (row r of the 2x2 matrix): blend each bin towards a smooth fill by the weight of the
+    // analog level (1 at >= -60 dB, 0 at <= -90 dB); the fill interpolates log magnitude and unwrapped
+    // phase between the nearest fully valid bins, and holds the edge values beyond the first / last
+    void fillLowLevel (int r, int e)
+    {
+        auto wgtAt = [this, r] (int k)
+        {
+            const double adb = 10.0 * std::log10 (std::max (matLevel[(size_t) k][(size_t) r], 1.0e-300));
+            return std::clamp ((adb + 90.0) / 30.0, 0.0, 1.0);
+        };
+        const std::complex<double> id = (e == 0 || e == 3) ? 1.0 : 0.0;
+        int prevValid = -1;
+        for (int k = 0; k < nb; ++k)
+        {
+            if (wgtAt (k) >= 1.0)
+            {
+                prevValid = k;
+                continue;
+            }
+            int next = k + 1;
+            while (next < nb && wgtAt (next) < 1.0)
+                ++next;
+            const bool hasNext = next < nb;
+            // fill the whole gap [k, next)
+            for (int j = k; j < next; ++j)
+            {
+                std::complex<double> fill = id;
+                if (prevValid >= 0 && hasNext)
+                {
+                    const auto a = matC[(size_t) prevValid][(size_t) e], b = matC[(size_t) next][(size_t) e];
+                    if (std::abs (a) > 1.0e-12 && std::abs (b) > 1.0e-12)
+                    {
+                        const double t = (j - prevValid) / (double) (next - prevValid);
+                        const double lm = (1.0 - t) * std::log (std::abs (a)) + t * std::log (std::abs (b));
+                        double dph = std::arg (b) - std::arg (a);
+                        dph -= 2.0 * kPi * std::round (dph / (2.0 * kPi));
+                        fill = std::polar (std::exp (lm), std::arg (a) + t * dph);
+                    }
+                    else
+                        fill = std::abs (a) > 1.0e-12 ? a : b;
+                }
+                else if (prevValid >= 0)
+                    fill = matC[(size_t) prevValid][(size_t) e];
+                else if (hasNext)
+                    fill = matC[(size_t) next][(size_t) e];
+                gapTmp[(size_t) j] = fill;
+            }
+            for (int j = k; j < next; ++j)
+            {
+                const double w = wgtAt (j);
+                auto& v = matC[(size_t) j][(size_t) e];
+                v = w * v + (1.0 - w) * gapTmp[(size_t) j];
+            }
+            prevValid = -1;
+            if (hasNext)
+                prevValid = next;
+            k = next;
+        }
+    }
+
+    static std::complex<double> digital (const Realisation& q, std::complex<double> z1) noexcept
+    {
+        const auto z2 = z1 * z1;
+        auto h = (q.q[0].b0 + q.q[0].b1 * z1 + q.q[0].b2 * z2) / (1.0 + q.q[0].a1 * z1 + q.q[0].a2 * z2);
+        if (q.two)
+            h *= (q.q[1].b0 + q.q[1].b1 * z1 + q.q[1].b2 * z2) / (1.0 + q.q[1].a1 * z1 + q.q[1].a2 * z2);
+        return h;
+    }
+
     static void leftMultiply (std::array<std::complex<double>, 4>& M, int placement, std::complex<double> h) noexcept
     {
         // band matrix B (2x2) times M
@@ -317,6 +408,7 @@ private:
 
     std::vector<std::array<std::complex<double>, 4>> matA, matD, matC;
     std::vector<std::array<double, 2>> matLevel;
+    std::vector<std::complex<double>> gapTmp;
     int matCh = 2;
     bool matUsed = false;
 
@@ -400,7 +492,7 @@ private:
     }
 
     double fs = 48000.0;
-    int n = 2048, nb = 1025, tapsMin = 256, naturalDelay = 64;
+    int n = 2048, nb = 1025, tapsMin = 256, naturalDelay = 64, kTop = 1024;
     bool complexMode = false;
     ComplexFft<double> fft;
     std::vector<std::complex<double>> work;
@@ -416,6 +508,7 @@ public:
     void prepare (int maxLen, int fadeLen = 256)
     {
         maxTaps = std::max (1, maxLen);
+        active = maxTaps;
         hist.init (maxTaps);
         cur.assign ((size_t) maxTaps, 0.0f);
         nxt.assign ((size_t) maxTaps, 0.0f);
@@ -450,11 +543,11 @@ public:
     {
         for (int i = 0; i < numSamples; ++i)
         {
-            const float* w = hist.push (x[i]);
-            float y = os_detail::dot (w, cur.data(), maxTaps);
+            const float* w = hist.push (x[i]) + (maxTaps - active);
+            float y = os_detail::dot (w, cur.data() + (maxTaps - active), active);
             if (fadePos >= 0)
             {
-                const float yn = os_detail::dot (w, nxt.data(), maxTaps);
+                const float yn = os_detail::dot (w, nxt.data() + (maxTaps - active), active);
                 const float t = (float) (fadePos + 1) / (float) fade;
                 y += (yn - y) * t;
                 if (++fadePos >= fade)
@@ -485,11 +578,11 @@ public:
     {
         for (int i = 0; i < numSamples; ++i)
         {
-            const float* w = hist.push (x[i]);
-            float v = os_detail::dot (w, cur.data(), maxTaps);
+            const float* w = hist.push (x[i]) + (maxTaps - active);
+            float v = os_detail::dot (w, cur.data() + (maxTaps - active), active);
             if (fadePos >= 0)
             {
-                const float vn = os_detail::dot (w, nxt.data(), maxTaps);
+                const float vn = os_detail::dot (w, nxt.data() + (maxTaps - active), active);
                 v += (vn - v) * ((float) (fadePos + 1) / (float) fade);
                 if (++fadePos >= fade)
                 {
@@ -502,6 +595,10 @@ public:
     }
 
     bool isFading() const noexcept { return fadePos >= 0; }
+    void setFadeLength (int f) noexcept { fade = std::max (1, f); }
+    // convolve only the first `len` taps (the others must be zero); for lanes prepared for a longer
+    // worst case (spectral bands at 4x oversampling)
+    void setActiveLength (int len) noexcept { active = std::clamp (len, 1, maxTaps); }
 
 private:
     std::vector<float>& beginWrite (bool crossfade) noexcept
@@ -523,7 +620,7 @@ private:
         configured = true;
     }
 
-    int maxTaps = 1, fade = 256, fadePos = -1;
+    int maxTaps = 1, active = 1, fade = 256, fadePos = -1;
     bool configured = false;
     os_detail::History hist;
     std::vector<float> cur, nxt;

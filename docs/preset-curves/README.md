@@ -88,6 +88,12 @@ Measured from the engine (impulse at -60 dBFS so dynamic bands sit at their stat
 
 ![Rap Lead - Passive Tube Polish](rap-lead-passive-tube-polish.png)
 
+## Vocal - Spectral Harshness Tamer
+
+*Vocals* - Spectral dynamics on a bright or harsh lead: only the frequencies that jump out between 2 and 5 kHz (and the sharpest sibilants above 6 kHz) are pulled back, each on its own - the rest of the presence stays. Zero latency, for tracking too.
+
+![Vocal - Spectral Harshness Tamer](vocal-spectral-harshness-tamer.png)
+
 ## Kick - Punch & Knock
 
 *Beats & Instruments* - Kick weight at 60 Hz, box cut at 400 Hz, beater click at 3.5 kHz; sub-sonic and top clean-up.
@@ -219,6 +225,12 @@ Measured from the engine (impulse at -60 dBFS so dynamic bands sit at their stat
 *Mix Bus & Master* - Console G on the mix bus: gentle LF and HMF lift with proportional Q and drive for that glued, forward feel.
 
 ![Mix Bus - Console Glue](mix-bus-console-glue.png)
+
+## Mix Bus - Spectral Resonance Control
+
+*Mix Bus & Master* - Spectral dynamics on the mix bus: ringing low-mids (200-500 Hz) and piercing upper mids (1.5-5 kHz) are tamed only where and when they stick out; a touch of air on top. Transparent when nothing rings.
+
+![Mix Bus - Spectral Resonance Control](mix-bus-spectral-resonance-control.png)
 
 ## Axell Signature - LCT 440 Pure
 
