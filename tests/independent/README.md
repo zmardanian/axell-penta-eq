@@ -62,4 +62,4 @@ After v1.0.0, an external code review reported two more issues, both confirmed a
 | Finding | Effect | Fix |
 |---|---|---|
 | A/B slots were not part of the session state | a reopened project kept only the slot that was playing | the state stores the A/B pair (D23) |
-| Latency handed from the audio thread to the host timer through a plain `int`; the engine faded in without waiting for the host | a data race; after a latency-changing switch, up to ~50 ms played with the old compensation (this audit's live check: ~3000 misaligned windows with v1.0.0, 0 now) | atomic handoff, muted until the host has been told (D24) |
+| Latency handed from the audio thread to the host timer through a plain `int`; the engine faded in without waiting for the host | a data race; after a latency-changing switch, up to ~50 ms played with the old compensation (this audit's live check: ~3000 misaligned windows with v1.0.0, 0 now) | atomic handshake: a new latency plays only after it was reported; without a report the old mode stays (D24, completed in 2.0.1) |

@@ -373,18 +373,19 @@ int main()
                     }
                 }
         check (ok, "reported latency = measured impulse delay (3 rates x 3 phase modes x 3 OS)");
-        // latency follows a mode change after prepare (timer)
+        // latency follows a mode change after prepare (timer): requested, reported, then applied
         PentaProcessor p;
         prepare (p);
         const int l0 = p.getLatencySamples();
         setParam (p, "phase", 1);
         render (p, noise (2, 8192, 1));
         pump (200);
+        render (p, noise (2, 4096, 2));
         check (l0 == 0 && p.getLatencySamples() == p.engine().getLatencySamples() && p.getLatencySamples() > 0,
                "latency re-reported after switching to Natural Phase (" + juce::String (p.getLatencySamples()) + ")");
 
-        // latency handoff: after a latency change the output stays muted until the host has been told
-        // (no message loop runs between the switch and pump(), as when the host is slow to react)
+        // latency handshake (D24): the engine never plays a latency the host has not been told. No message
+        // loop runs between the switch and pump() here, as when the host's message thread is busy.
         auto peak = [] (const Buf& b, int from, int to)
         {
             float m = 0.0f;
@@ -408,40 +409,73 @@ int main()
             render (h, noise (2, 24000, 3));
             setParam (h, "phase", 1); // Zero Latency -> Natural Phase
             const auto o1 = render (h, noise (2, 14336, 4));
-            const int natLat = h.engine().getLatencySamples();
-            check (natLat > 0 && h.getLatencySamples() == 0 && peak (o1, 1024, 14336) < 1.0e-9f,
-                   "latency handoff: muted while the host still compensates the old latency (0.3 s, no message loop)");
+            check (h.engine().getLatencySamples() == 0 && h.getLatencySamples() == 0 && peak (o1, 1024, 14336) < 1.0e-9f,
+                   "latency handshake: silent, and the new latency not applied, until the host has been told");
             pump (60);
             const auto x2 = noise (2, 9728, 5);
             const auto o2 = render (h, x2);
-            const float e2 = alignErr (x2, o2, natLat, 1024);
-            check (h.getLatencySamples() == natLat && e2 < 1.0e-5f && peak (o2, 1024, 9728) > 0.1f,
-                   "latency handoff: resumes once reported, aligned to the new latency (" + juce::String (e2) + ")");
-            setParam (h, "phase", 0); // back to Zero Latency: lower latency, the riskier direction
+            const int natLat = h.engine().getLatencySamples();
+            const float e2 = alignErr (x2, o2, natLat, 2048);
+            check (natLat > 0 && h.getLatencySamples() == natLat && e2 < 1.0e-5f && peak (o2, 2048, 9728) > 0.1f,
+                   "latency handshake: applied once reported, aligned to the new latency (" + juce::String (e2) + ")");
+            setParam (h, "phase", 0); // back to Zero Latency: lower latency
             const auto o3 = render (h, noise (2, 14336, 6));
-            const bool muted = h.getLatencySamples() == natLat && peak (o3, 1024, 14336) < 1.0e-9f;
+            const bool muted = h.getLatencySamples() == natLat && h.engine().getLatencySamples() == natLat
+                            && peak (o3, 1024, 14336) < 1.0e-9f;
             pump (60);
             const auto x4 = noise (2, 9728, 7);
             const auto o4 = render (h, x4);
-            const float e4 = alignErr (x4, o4, 0, 1024);
-            check (muted && h.getLatencySamples() == 0 && e4 < 1.0e-5f && peak (o4, 1024, 9728) > 0.1f,
-                   "latency handoff: Natural Phase -> Zero Latency also waits, then aligned (" + juce::String (e4) + ")");
-            setParam (h, "lpQuality", 2); // no latency change in Zero Latency: no wait for the host
+            const float e4 = alignErr (x4, o4, 0, 2048);
+            check (muted && h.getLatencySamples() == 0 && e4 < 1.0e-5f && peak (o4, 2048, 9728) > 0.1f,
+                   "latency handshake: Natural Phase -> Zero Latency also waits, then aligned (" + juce::String (e4) + ")");
+            setParam (h, "lpQuality", 2); // no latency change in Zero Latency: no handshake
             const auto x5 = noise (2, 9728, 8);
             const auto o5 = render (h, x5);
-            check (alignErr (x5, o5, 0, 4800) < 1.0e-5f, "latency handoff: a switch that keeps the latency does not wait");
+            check (alignErr (x5, o5, 0, 4800) < 1.0e-5f, "latency handshake: a switch that keeps the latency does not wait");
         }
         {
-            // a host without a message loop: give up after 0.5 s rather than stay silent
+            // the host cannot be told (no message loop): after 0.5 s the old mode plays again - aligned with what
+            // the host still compensates; the withdrawn request can no longer be reported; once the message
+            // thread runs again the switch is retried and completes
             PentaProcessor h;
             prepare (h, 48000.0, 256);
             setParam (h, "phase", 1);
-            const auto o = render (h, noise (2, 49152, 9));
-            check (peak (o, 1024, 23000) < 1.0e-9f && peak (o, 28800, 49152) > 0.1f,
-                   "latency handoff: no host response -> resumes after 0.5 s");
+            const auto x = noise (2, 49152, 9);
+            const auto o = render (h, x);
+            int stray = 0;
+            const bool withdrawn = ! h.engine().takeLatencyRequest (stray);
+            check (peak (o, 1024, 23000) < 1.0e-9f && peak (o, 28800, 49152) > 0.1f && alignErr (x, o, 0, 28800) < 1.0e-5f
+                       && h.engine().getLatencySamples() == 0 && h.getLatencySamples() == 0 && withdrawn,
+                   "latency handshake: no host response -> the old mode resumes after 0.5 s, aligned; request withdrawn");
+            pump (60);                             // the message thread is alive again
+            render (h, noise (2, 4096, 10));       // the engine retries: fades out, asks again
+            pump (60);                             // reported
+            const auto x2 = noise (2, 14336, 11);
+            const auto o2 = render (h, x2);
+            const int lat = h.engine().getLatencySamples();
+            check (lat > 0 && h.getLatencySamples() == lat && alignErr (x2, o2, lat, 4096) < 1.0e-5f,
+                   "latency handshake: retried when the message thread runs again, then aligned to the new latency");
         }
         {
-            // offline renders never wait (deterministic, independent of the message thread)
+            // the race the atomic handshake exists for: the report has been claimed (being told to the host)
+            // when the 0.5 s run out - the engine must not fall back to the old mode; it stays silent until the
+            // acknowledgement, then plays the new latency
+            PentaProcessor h;
+            prepare (h, 48000.0, 256);
+            setParam (h, "phase", 1);
+            render (h, noise (2, 4096, 12));      // fades out, posts the request
+            int claimed = 0;
+            const bool took = h.engine().takeLatencyRequest (claimed); // "the wrapper is reporting it right now"
+            const auto o = render (h, noise (2, 49152, 13));            // > 0.5 s without an acknowledgement
+            h.engine().ackLatencyRequest();
+            const auto x2 = noise (2, 14336, 14);
+            const auto o2 = render (h, x2);
+            check (took && claimed > 0 && peak (o, 0, 49152) < 1.0e-9f && h.engine().getLatencySamples() == claimed
+                       && alignErr (x2, o2, claimed, 4096) < 1.0e-5f,
+                   "latency handshake: a request being reported is never abandoned - silent until acknowledged, then the new latency");
+        }
+        {
+            // offline renders switch at once (deterministic, independent of the message thread)
             PentaProcessor h;
             h.setNonRealtime (true);
             prepare (h, 48000.0, 256);
@@ -450,8 +484,7 @@ int main()
             const auto x = noise (2, 9728, 11);
             const auto o = render (h, x);
             const int lat = h.engine().getLatencySamples();
-            check (h.getLatencySamples() == 0 && alignErr (x, o, lat, 4800) < 1.0e-5f,
-                   "latency handoff: offline renders do not wait for the host");
+            check (lat > 0 && alignErr (x, o, lat, 4800) < 1.0e-5f, "latency handshake: offline renders switch at once");
         }
     }
 

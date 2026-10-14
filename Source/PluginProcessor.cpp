@@ -84,7 +84,7 @@ PentaProcessor::PentaProcessor()
         values[i] = t[i].def;
     }
     presetReference = readValues();
-    startTimerHz (50); // also reports latency changes: the engine stays muted until then
+    startTimerHz (50); // also reports latency changes (the engine's handshake waits for it)
 }
 
 PentaProcessor::~PentaProcessor()
@@ -229,14 +229,16 @@ void PentaProcessor::timerCallback()
         setPresetName (list[(size_t) pp].name);
         presetReference = list[(size_t) pp].resolve();
     }
-    // latency handoff: the engine publishes a new latency when it switches (muted) and stays muted
-    // until this has told the host (VST3: restartComponent, synchronous on the message thread)
-    if (preparedChannels > 0)
+    // latency handshake: the engine asks (while silent) for a new latency to be reported; it is told to
+    // the host here (VST3: restartComponent, synchronous on the message thread) and acknowledged, and
+    // only then does the engine play it (Engine::takeLatencyRequest, D24)
+    dsp.heartbeat();
+    int lat = 0;
+    if (preparedChannels > 0 && dsp.takeLatencyRequest (lat))
     {
-        const int lat = dsp.getLatencySamples();
         if (lat != getLatencySamples())
             setLatencySamples (lat);
-        dsp.setHostLatency (lat);
+        dsp.ackLatencyRequest();
     }
 }
 

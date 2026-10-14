@@ -1,6 +1,6 @@
 # Axell Penta EQ - DSP test report
 
-Build: Release. Runtime 196 s.
+Build: Release. Runtime 201 s.
 
 **Result: ALL PASS** - 743 checks passed, 0 failed (every check runs once per sample rate / channel configuration).
 
@@ -163,13 +163,13 @@ Build: Release. Runtime 196 s.
 | P. Factory presets | all presets: output finite on pink noise | yes | 1.000  | 48 k stereo | PASS 1/1 |
 | P. Factory presets | loudness vs bypass, pink noise -18 dBFS, K-weighted (worst: Master - Air & Clarity) | -0.1000 .. 0.1000 LU | 0.0484 LU | 48 k stereo | PASS 1/1 |
 | K. Real-time safety | heap allocations inside setParams()+process() (all modes/OS, automation, live mode switch) | = 0.0000  | 0.0000  | 48 k stereo | PASS 1/1 |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | vocal: 7 bands (2 dynamic) + HP, Zero Latency | (info) | 1.413 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | beat bus: 6 bands + Console + Passive Tube, OS 2x | (info) | 2.892 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | master: 8 bands (M/S), Natural Phase + Air | (info) | 1.540 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | master: same in Linear Phase (Medium) | (info) | 1.303 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | vocal + 2 spectral bands (harshness 3 kHz, sibilance 7 kHz) | (info) | 2.648 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | near Nyquist: 4 fitted bands at 48 kHz (2 dynamic, gain moving) | (info) | 4.211 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | worst case: 12 dynamic Character bands + all modules, OS 4x | (info) | 13.056 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | vocal: 7 bands (2 dynamic) + HP, Zero Latency | (info) | 1.456 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | beat bus: 6 bands + Console + Passive Tube, OS 2x | (info) | 2.974 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | master: 8 bands (M/S), Natural Phase + Air | (info) | 1.612 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | master: same in Linear Phase (Medium) | (info) | 1.329 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | vocal + 2 spectral bands (harshness 3 kHz, sibilance 7 kHz) | (info) | 2.761 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | near Nyquist: 4 fitted bands at 48 kHz (2 dynamic, gain moving) | (info) | 4.340 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | worst case: 12 dynamic Character bands + all modules, OS 4x | (info) | 13.320 % of one core | all | - |
 
 ## Detail per configuration
 
@@ -330,10 +330,10 @@ Build: Release. Runtime 196 s.
 | P. Factory presets: all presets: output finite on pink noise | - | - | - | 1.000 | - | - |
 | P. Factory presets: loudness vs bypass, pink noise -18 dBFS, K-weighted (worst: Master - Air & Clarity) | - | - | - | 0.0484 | - | - |
 | K. Real-time safety: heap allocations inside setParams()+process() (all modes/OS, automation, live mode switch) | - | - | - | 0.0000 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): vocal: 7 bands (2 dynamic) + HP, Zero Latency | - | - | - | 1.413 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): beat bus: 6 bands + Console + Passive Tube, OS 2x | - | - | - | 2.892 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): master: 8 bands (M/S), Natural Phase + Air | - | - | - | 1.540 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): master: same in Linear Phase (Medium) | - | - | - | 1.303 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): vocal + 2 spectral bands (harshness 3 kHz, sibilance 7 kHz) | - | - | - | 2.648 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): near Nyquist: 4 fitted bands at 48 kHz (2 dynamic, gain moving) | - | - | - | 4.211 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): worst case: 12 dynamic Character bands + all modules, OS 4x | - | - | - | 13.056 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): vocal: 7 bands (2 dynamic) + HP, Zero Latency | - | - | - | 1.456 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): beat bus: 6 bands + Console + Passive Tube, OS 2x | - | - | - | 2.974 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): master: 8 bands (M/S), Natural Phase + Air | - | - | - | 1.612 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): master: same in Linear Phase (Medium) | - | - | - | 1.329 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): vocal + 2 spectral bands (harshness 3 kHz, sibilance 7 kHz) | - | - | - | 2.761 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): near Nyquist: 4 fitted bands at 48 kHz (2 dynamic, gain moving) | - | - | - | 4.340 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): worst case: 12 dynamic Character bands + all modules, OS 4x | - | - | - | 13.320 | - | - |

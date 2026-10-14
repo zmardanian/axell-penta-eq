@@ -224,8 +224,10 @@ public:
         prepared = true;
         active.phase = -1; // force configuration
         reset();
-        // a fresh start: the wrapper reports the new latency right after prepare, before audio runs
-        hostPending = false;
+        // a fresh start: the wrapper reports this latency right after prepare, before audio runs
+        hostLat = latency;
+        reqOpen = holding = false;
+        latReq.store (pack (kReqIdle, 0, latency), std::memory_order_release);
         gfade = gfadeTgt = 1.0;
     }
 
@@ -235,9 +237,14 @@ public:
             return;
         absPos = 0;
         decodeConfig (want);
-        applyConfig (want);
-        // a latency change the host has not been told about yet starts muted (see waitForHost)
-        gfade = gfadeTgt = hostPending ? 0.0 : 1.0;
+        // a configuration whose latency the host does not compensate yet is not applied here: the old one
+        // stays, the output starts muted and control() runs the handshake (see hostReady)
+        const bool apply = active.phase < 0 || ! tracking() || latencyOf (want) == hostLat;
+        if (apply)
+            applyConfig (want);
+        else
+            applyConfig (Config (active));
+        gfade = gfadeTgt = apply ? 1.0 : 0.0;
         gWarm = 0;
         smoothSnap = true;
         smoothSnapAg = true;
@@ -274,9 +281,36 @@ public:
 
     // any thread: the latency of the active configuration (published by the audio thread)
     int getLatencySamples() const noexcept { return latencyPub.load (std::memory_order_acquire); }
-    // message thread, after the wrapper has reported `samples` to the host: enables the latency
-    // handoff. Until it is called (-1) the engine does not wait (tests, offline tools).
-    void setHostLatency (int samples) noexcept { hostLatency.store (samples, std::memory_order_release); }
+
+    //== latency handshake with the wrapper (message thread) =====================
+    // The engine never plays a configuration whose latency the host does not compensate. To change
+    // the latency it fades out, then posts a request; the wrapper reports the latency to the host and
+    // acknowledges; only then the new configuration is applied (warm-up, fade-in). If no report comes
+    // within 0.5 s the engine withdraws the request - atomically, so a report can never land
+    // afterwards - and fades the old configuration back in (it is what the host still compensates);
+    // it tries again once the message thread is alive (heartbeat). DECISIONS D24.
+    // after prepare: enables the handshake (without it - tests, tools - configurations switch at once)
+    void setHostLatency (int samples) noexcept { hostTracking.store (samples >= 0, std::memory_order_release); }
+    // the wrapper's timer: one tick (proves the message thread runs)
+    void heartbeat() noexcept { beat.fetch_add (1, std::memory_order_acq_rel); }
+    // the wrapper's timer: claims a pending request; true -> report `samples` to the host, then call
+    // ackLatencyRequest()
+    bool takeLatencyRequest (int& samples) noexcept
+    {
+        auto r = latReq.load (std::memory_order_acquire);
+        if (stateOf (r) != kReqPosted)
+            return false;
+        if (! latReq.compare_exchange_strong (r, pack (kReqReporting, seqOf (r), latOf (r)), std::memory_order_acq_rel))
+            return false; // withdrawn meanwhile
+        samples = latOf (r);
+        return true;
+    }
+    void ackLatencyRequest() noexcept
+    {
+        const auto r = latReq.load (std::memory_order_acquire);
+        if (stateOf (r) == kReqReporting)
+            latReq.store (pack (kReqAcked, seqOf (r), latOf (r)), std::memory_order_release);
+    }
     double getSampleRate() const noexcept { return fs; }
     int getNumChannels() const noexcept { return nCh; }
 
@@ -381,38 +415,72 @@ private:
         if (c.phase == kLinear)
             lp.configure (c.quality);
         const int osLat = c.osLog2 > 0 ? os.latencyFor (c.osLog2) : 0;
-        const int oldLatency = latency;
-        latency = osLat + (c.phase == kNatural ? cd.naturalLatency() : 0)
-                + (c.phase == kLinear ? dsp::LinearPhaseEq::latencyFor (c.quality, fs) : 0);
+        latency = latencyOf (c);
         detLatency = c.phase == kLinear ? dsp::LinearPhaseEq::latencyFor (c.quality, fs) : 0;
         if (c.phase == kLinear && rackPre())
             detLatency += osLat;
         latencyPub.store (latency, std::memory_order_release);
-        // the host compensates the old latency until the wrapper has reported the new one
-        hostPending = latency != oldLatency && ! offline && hostLatency.load (std::memory_order_acquire) >= 0;
-        hostWait = 0;
         lastStatic.clear();
         forceAnalysis = true;
     }
 
-    // after a latency change: stay muted until the wrapper has reported the new latency to the host
-    // (the host keeps compensating the old one until then, so audible output would be misaligned),
-    // plus one host block, which the host may still have started under the old compensation. Gives
-    // up after 0.5 s (a host without a message loop); offline renders never wait (deterministic).
-    bool waitForHost() noexcept
+    int latencyOf (const Config& c) const noexcept
     {
-        if (! hostPending)
-            return false;
-        if (hostLatency.load (std::memory_order_acquire) == latency)
+        return (c.osLog2 > 0 ? os.latencyFor (c.osLog2) : 0) + (c.phase == kNatural ? cd.naturalLatency() : 0)
+             + (c.phase == kLinear ? dsp::LinearPhaseEq::latencyFor (c.quality, fs) : 0);
+    }
+
+    bool tracking() const noexcept { return hostTracking.load (std::memory_order_acquire) && ! offline; }
+
+    // request word: state (3 bits) | sequence (29 bits) | latency (32 bits)
+    enum : std::uint64_t { kReqIdle = 0, kReqPosted = 1, kReqReporting = 2, kReqAcked = 3, kReqWithdrawn = 4 };
+    static std::uint64_t pack (std::uint64_t st, std::uint64_t seq, int lat) noexcept
+    {
+        return st | ((seq & 0x1fffffffu) << 3) | ((std::uint64_t) (std::uint32_t) lat << 32);
+    }
+    static std::uint64_t stateOf (std::uint64_t r) noexcept { return r & 7u; }
+    static std::uint64_t seqOf (std::uint64_t r) noexcept { return (r >> 3) & 0x1fffffffu; }
+    static int latOf (std::uint64_t r) noexcept { return (int) (std::uint32_t) (r >> 32); }
+
+    // Does the host compensate `need`? Runs the request: posts one only while the output is silent
+    // (mayPost), takes the acknowledgement, withdraws a request that is stale (the target changed) or
+    // unanswered for 0.5 s; after such a timeout the engine holds the configuration it plays until the
+    // message thread shows a heartbeat again.
+    bool hostReady (int need, bool mayPost) noexcept
+    {
+        if (reqOpen)
         {
-            hostPending = false;
-            gWarm = std::max (gWarm, maxBlock);
-            return false;
+            auto r = latReq.load (std::memory_order_acquire);
+            if (seqOf (r) == reqSeq && stateOf (r) == kReqAcked)
+            {
+                hostLat = latOf (r);
+                reqOpen = false;
+            }
+            else
+            {
+                reqWait += kCtrl;
+                const bool stale = latOf (r) != need, late = reqWait >= (int) (0.5 * fs);
+                // only a request nobody has claimed can be withdrawn; one being reported is awaited
+                if ((stale || late) && stateOf (r) == kReqPosted
+                    && latReq.compare_exchange_strong (r, pack (kReqWithdrawn, reqSeq, latOf (r)), std::memory_order_acq_rel))
+                {
+                    reqOpen = false;
+                    if (late && ! stale)
+                    {
+                        holding = true;
+                        holdBeat = beat.load (std::memory_order_acquire);
+                    }
+                }
+            }
         }
-        hostWait += kCtrl;
-        if (offline || hostWait >= (int) (0.5 * fs))
-            hostPending = false;
-        return hostPending;
+        if (! reqOpen && hostLat != need && mayPost && ! holding)
+        {
+            reqSeq = (reqSeq + 1) & 0x1fffffffu;
+            latReq.store (pack (kReqPosted, reqSeq, need), std::memory_order_release);
+            reqOpen = true;
+            reqWait = 0;
+        }
+        return ! reqOpen && hostLat == need;
     }
 
     bool rackPre() const noexcept { return std::lround (params[(size_t) idx().rackPos]) == 1; }
@@ -688,19 +756,28 @@ private:
         smoothCoef = 1.0 - std::exp (-(double) kCtrl / (0.02 * fs));
         // phase mode / OS / quality: fade the output out, switch, fade back in
         decodeConfig (want);
-        if (want != active)
+        const bool track = tracking();
+        if (holding && beat.load (std::memory_order_acquire) != holdBeat)
+            holding = false; // the message thread is alive again: try the switch once more
+        if (! track)
+            holding = reqOpen = false;
+        // while holding, the configuration that plays is the target (the host still compensates it)
+        const Config tgt = holding ? active : want;
+        const bool ready = ! track || hostReady (latencyOf (tgt), gfade <= 0.0);
+        if (tgt != active)
         {
             gfadeTgt = 0.0;
-            if (gfade <= 0.0)
+            if (gfade <= 0.0 && ready)
             {
-                applyConfig (want);
+                applyConfig (tgt);
                 // run the reset filters and delay lines muted until they hold valid output (the new
-                // latency, e.g. 90 ms for Linear Phase) plus 20 ms of filter warm-up, then fade in
-                gWarm = (int) (0.02 * fs) + latency;
+                // latency, e.g. 90 ms for Linear Phase) plus 20 ms of filter warm-up - and one more host
+                // block after the host was told, which it may have started under the old compensation
+                gWarm = (int) (0.02 * fs) + latency + (track ? maxBlock : 0);
             }
         }
         else
-            gfadeTgt = waitForHost() || gWarm > 0 ? 0.0 : 1.0;
+            gfadeTgt = ! ready || gWarm > 0 ? 0.0 : 1.0;
         if (gWarm > 0)
             gWarm = std::max (0, gWarm - kCtrl);
 
@@ -1514,9 +1591,16 @@ private:
     std::vector<float> params;
     Config active, want;
     int latency = 0, detLatency = 0, maxLatency = 0; // audio thread
-    std::atomic<int> latencyPub { 0 }, hostLatency { -1 };
-    bool hostPending = false;
-    int hostWait = 0;
+    std::atomic<int> latencyPub { 0 };
+    // latency handshake (see setHostLatency): shared with the wrapper's timer
+    std::atomic<bool> hostTracking { false };
+    std::atomic<std::uint64_t> latReq { 0 };
+    std::atomic<std::uint32_t> beat { 0 };
+    // audio thread
+    int hostLat = 0, reqWait = 0;
+    std::uint64_t reqSeq = 0;
+    std::uint32_t holdBeat = 0;
+    bool reqOpen = false, holding = false;
     int64_t absPos = 0;
 
     std::array<Slot, kNumSlots> slots;

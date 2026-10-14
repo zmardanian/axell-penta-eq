@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.1 - 2026-10-14
+
+- Latency changes (phase mode, oversampling, Linear Phase resolution) are now a handshake with the host: the
+  new mode only starts after its latency has been reported to the host. If the host cannot be told (its
+  message thread stalls or is absent) the switch does not happen: after 0.5 s the previous mode plays on -
+  aligned with the compensation the host still applies - and the switch is retried when the host responds
+  again. 2.0.0 resumed the new mode after 0.5 s in that case, which could play with the old compensation.
+
 ## 2.0.0 - 2026-10-14
 
 New:
@@ -37,9 +45,9 @@ Fixed:
 
 - A/B: both slots and the active slot are saved with the session. A reopened project used to keep only the slot
   that was playing, and always opened on A.
-- Phase mode / oversampling changes during playback: the output stays muted until the host has been told the new
-  latency, so it is never heard with the old delay compensation (previously up to ~50 ms could play misaligned,
-  e.g. after Linear Phase → Zero Latency). The latency is also handed between threads safely now.
+- Phase mode / oversampling changes during playback: the output stays muted until the new latency has been
+  reported to the host (previously up to ~50 ms could play misaligned, e.g. after Linear Phase → Zero Latency).
+  The latency is also handed between threads safely now. (2.0.1 completes this for hosts that cannot be told.)
 
 Compatibility: sessions and presets from 1.0 open unchanged (the new parameters are appended and start at
 Broadband / 100 %; existing parameter IDs and automation are untouched). Typical sessions use the same CPU as 1.0.

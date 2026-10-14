@@ -150,13 +150,13 @@ User presets are saved to `~/.local/share/AxellPentaEQ/Presets` (with your own d
 
 ## Install
 
-1. Download `AxellPentaEQ-2.0.0-linux-x86_64.tar.gz` from the
+1. Download `AxellPentaEQ-2.0.1-linux-x86_64.tar.gz` from the
    [latest release](https://github.com/zmardanian/axell-penta-eq/releases/latest).
 2. Extract it and run the installer:
 
    ```bash
-   tar xzf AxellPentaEQ-2.0.0-linux-x86_64.tar.gz
-   cd AxellPentaEQ-2.0.0-linux-x86_64
+   tar xzf AxellPentaEQ-2.0.1-linux-x86_64.tar.gz
+   cd AxellPentaEQ-2.0.1-linux-x86_64
    ./install.sh
    ```
 
@@ -197,9 +197,9 @@ bash scripts/install.sh           # copy to ~/.vst3
   (≤ −120 dBFS leakage), character-module curves and harmonics, presets (loudness within ±0.1 LU), and zero heap
   allocations in the audio path. Both suites also pass under AddressSanitizer + UBSan + LeakSanitizer.
   Report: [tests/report.md](tests/report.md).
-- **Plugin suite** (`tests/PluginTests.cpp`): 78 checks - parameters (2.0 additions appended, 1.0 sessions open
+- **Plugin suite** (`tests/PluginTests.cpp`): 80 checks - parameters (2.0 additions appended, 1.0 sessions open
   unchanged), bit-identical session restore (A/B included), presets, user presets, A/B, undo/redo, latency in every
-  mode and the latency handoff to the host, buses, side-chain, latency-aligned bypass, editor lifecycle, graph
+  mode and the latency handshake with the host, buses, side-chain, latency-aligned bypass, editor lifecycle, graph
   mouse and keyboard interaction (selection, frame, group drag, nudge, invert, copy/paste, note snapping, spectrum
   peak grab), Draw and Match end to end, Gain Scale on the audio, type changes resetting a neutral Q, tooltips on
   every control.
