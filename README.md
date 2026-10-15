@@ -250,3 +250,7 @@ measurements; no code, images or data from any commercial product are used, and 
 names only. Microphone model names in the Signature presets only say which microphone a preset was tuned for. This
 project is not affiliated with or endorsed by any equipment manufacturer. VST is a registered trademark of
 Steinberg Media Technologies GmbH.
+
+## Contact
+
+Axell Yobag - axellpetre@protonmail.com (questions, bug reports, feedback). Issues on GitHub are welcome too.
