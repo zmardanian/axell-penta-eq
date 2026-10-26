@@ -5,7 +5,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 DIR="$PWD"
-distrobox enter juce-build -- bash -lc "cd '$DIR' && { [ -f build/CMakeCache.txt ] || cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release; } && cmake --build build --target PentaAuditHost -j\$(nproc)" >/dev/null || exit 1
+distrobox enter juce-build -- bash -lc "cd '$DIR' && { [ -f build/CMakeCache.txt ] || cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release; } && cmake --build build --target PentaAuditHost -j${JOBS:-6}" >/dev/null || exit 1
 export PENTA_VST3="${1:-$DIR/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3}"
 REPORT=tests/independent/audit-report.txt
 {

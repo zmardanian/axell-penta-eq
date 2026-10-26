@@ -14,6 +14,8 @@
 #include "dsp/Rack.h"
 #include "dsp/Spectral.h"
 
+#include <axell/dsp/SibilanceDetector.h>   // 3.0: the "Ess" detector source (Axell Velvet 3.0's LIVE network, causal)
+
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -197,6 +199,9 @@ public:
             t.assign ((size_t) corrMax, 0.0f);
         for (int b = 1; b <= kNumBands; ++b)
             slots[(size_t) b].spec.prepare (fs);
+        essDet.prepare (fs, axell::voice::DetectorConfig::live());
+        essRelK = (float) (1.0 - std::exp (-1.0 / (0.020 * fs)));
+        essP = essW = 0.0f;
         lp.prepare (fs, nCh, [this] (const std::vector<float>& prm, int bins, std::array<std::vector<double>, 4>& m)
                     { designLinear (prm, bins, m); }, numParams());
         lp.setSynchronous (offline);
@@ -486,6 +491,11 @@ private:
     bool rackPre() const noexcept { return std::lround (params[(size_t) idx().rackPos]) == 1; }
 
     //== per-band state ==========================================================
+    static constexpr int kEssSrc = kNumBands + 2;   // the detector source "Ess" (after the bands and External)
+    axell::voice::SibilanceDetector essDet;
+    float essP = 0.0f, essW = 0.0f, essRelK = 0.001f;
+    bool essUsed = false;
+
     struct Slot
     {
         dsp::Chain chain;
@@ -542,6 +552,16 @@ private:
     void readSlotTargets() noexcept
     {
         const auto& x = idx();
+        bool ess = false;
+        for (int b = 1; b <= kNumBands; ++b)
+            ess = ess || (params[(size_t) x.band[b - 1][bpDyn]] > 0.5f
+                          && (int) std::lround (params[(size_t) x.band[b - 1][bpSrc]]) == kEssSrc);
+        if (ess && ! essUsed)
+        {
+            essDet.reset();
+            essP = essW = 0.0f;
+        }
+        essUsed = ess;
         for (int s = 0; s < kNumSlots; ++s)
         {
             auto& sl = slots[(size_t) s];
@@ -566,7 +586,7 @@ private:
                 sl.ratio = std::max (1.0f, params[(size_t) bi[bpRatio]]);
                 sl.atk = std::max (0.05f, params[(size_t) bi[bpAtk]]);
                 sl.rel = std::max (1.0f, params[(size_t) bi[bpRel]]);
-                sl.src = std::clamp ((int) std::lround (params[(size_t) bi[bpSrc]]), 0, kNumBands + 1);
+                sl.src = std::clamp ((int) std::lround (params[(size_t) bi[bpSrc]]), 0, kEssSrc);
                 sl.spectral = sl.dyn && params[(size_t) bi[bpDynMode]] > 0.5f;
             }
             else
@@ -690,7 +710,9 @@ private:
                 o = (over + 0.5 * w) * (over + 0.5 * w) / (2.0 * w);
             const double amount = o * (1.0 - 1.0 / s.ratio);
             // Spectral mode: the band does not move as a whole (any broadband move releases to 0 dB)
-            const double target = s.spectral ? 0.0 : (s.range < 0.0 ? -1.0 : 1.0) * std::min (std::abs (s.range), amount);
+            double target = s.spectral ? 0.0 : (s.range < 0.0 ? -1.0 : 1.0) * std::min (std::abs (s.range), amount);
+            if (s.src == kEssSrc)
+                target *= essW;   // Ess: the band's own level decides how much, the sibilance detector whether
             const double tau = (std::abs (target) > std::abs (s.delta) ? s.atk : s.rel) * 0.001;
             s.delta += (target - s.delta) * (1.0 - std::exp (-(double) kCtrl / (tau * fs)));
         }
@@ -1259,6 +1281,8 @@ private:
             dsp::SpectralSettings st;
             st.thr = s.thr;
             st.range = s.spectral && s.tActive ? s.range : 0.0; // switched off: release to flat
+            if (s.src == kEssSrc)
+                st.range *= essW;
             st.ratio = s.ratio;
             st.atkMs = s.atk;
             st.relMs = s.rel;
@@ -1296,6 +1320,19 @@ private:
                     break;
                 default: s.spec.pushDetector (in[0], in[1], n); break;
             }
+        }
+    }
+
+    // 3.0 Ess source: Velvet 3.0's LIVE sibilance network on the detector signal (causal, its frame 6 ms behind);
+    // essW = the probability, instant up, 20 ms down, read by controlDynamics / the spectral update every control block
+    void detectEss (const float* const* in, int n) noexcept
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            const float m = nCh == 2 ? 0.5f * (in[0][i] + in[1][i]) : in[0][i];
+            if (essDet.push (m))
+                essP = essDet.out().p;
+            essW = essP > essW ? essP : essW + (essP - essW) * essRelK;
         }
     }
 
@@ -1416,6 +1453,8 @@ private:
         }
 
         const float* detPtr[2] = { detIn[0].data(), detIn[1].data() };
+        if (essUsed)
+            detectEss (detPtr, n);
         if (absPos % slots[1].spec.hopSize() == 0)
             spectralHop(); // from the samples before this one: causal, block-size independent
         detect (detPtr, n, scDet.data());

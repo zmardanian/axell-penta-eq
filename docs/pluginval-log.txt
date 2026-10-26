@@ -1,14 +1,13 @@
-Started validating: /home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
-Random seed: 0x7ae525c
+Random seed: 0x8653f3
 Validation started
 Strictness level: 10
 -----------------------------------------------------------------
-Starting tests in: pluginval / Scan for plugins located in: /home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3...
+Starting tests in: pluginval / Scan for plugins located in: /var/home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3...
 Num plugins found: 1
 
-Testing plugin: VST3-Axell Penta EQ-36e333de-8c6d3599
-Axell Yobag: Axell Penta EQ v2.0.1
-Completed tests in pluginval / Scan for plugins located in: /home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
+Testing plugin: VST3-Axell Penta EQ-7a392446-8c6d3599
+Axell Yobag: Axell Penta EQ v3.0.0
+Completed tests in pluginval / Scan for plugins located in: /var/home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
 -----------------------------------------------------------------
 Starting tests in: pluginval / Open plugin (cold)...
 Completed tests in pluginval / Open plugin (cold)

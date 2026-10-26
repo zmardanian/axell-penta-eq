@@ -30,7 +30,9 @@ const char* ratio = "How fast the band reaches its range above the threshold (li
 const char* atk = "How fast the band reacts (ms). 0.5-2 ms for sibilance, 10-30 ms to keep transients.";
 const char* rel = "How fast the band returns (ms). 50-150 ms for de-essing, 150-400 ms for low end.";
 const char* src = "What the detector listens to: SELF = this band's region; BAND n = another band's region (e.g. cut "
-                  "3 kHz when 9 kHz gets loud); EXTERNAL = the side-chain input (e.g. the kick to carve the 808).";
+                  "3 kHz when 9 kHz gets loud); EXTERNAL = the side-chain input (e.g. the kick to carve the 808); "
+                  "ESS = this band's region, but it moves only on esses (S, SH, Z, CH: Axell Velvet's sibilance "
+                  "detector) - a de-esser band that never dulls the rest of the voice.";
 const char* solo = "Hold to hear only this band's region (makes it easy to find a problem frequency).";
 const char* bypass = "Bypass this band (it stays in place, greyed out).";
 const char* remove = "Remove this band.";

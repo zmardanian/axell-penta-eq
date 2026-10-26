@@ -7,6 +7,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 SRC="$PWD"
 PUB="${PENTA_PUBLIC_DIR:-$HOME/axell-penta-eq-public}"
+CORE="${AXELL_CORE:-$(realpath ../axell-core)}"
 VER=$(grep -oP 'project\(AxellPentaEQ VERSION \K[0-9.]+' CMakeLists.txt)
 FINAL="$PUB"
 UPDATE=0
@@ -26,6 +27,11 @@ cp tests/independent/*.cpp tests/independent/*.py tests/independent/README.md te
 cp docs/ENGINEERING_SPEC.md docs/DECISIONS.md docs/DEVELOPMENT.md docs/pluginval-log.txt docs/vst3-validator-log.txt "$PUB/docs/"
 cp -r docs/research docs/screenshots docs/preset-curves "$PUB/docs/"
 cp tools/proto/*.py "$PUB/tools/proto/"
+# 3.0: the Axell core (the brand look, the "Ess" detector source), vendored so the repository builds on its own
+mkdir -p "$PUB/external/axell-core"
+for d in CMakeLists.txt LICENSE README.md include src resources tests tools; do cp -r "$CORE/$d" "$PUB/external/axell-core/"; done
+rm -rf "$PUB/external/axell-core/tools/__pycache__"
+echo "axell-core $(git -C "$CORE" rev-parse --short HEAD)" > "$PUB/external/axell-core/VERSION"
 cat > "$PUB/.gitignore" <<'IGN'
 build/
 build-*/

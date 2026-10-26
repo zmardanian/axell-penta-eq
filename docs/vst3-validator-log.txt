@@ -1,6 +1,6 @@
 * Loading module...
 
-	/home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
+	/var/home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
 
 * Check valid bundle structure...
 
@@ -9,13 +9,13 @@
   Factory Info:
 	vendor = Axell Yobag
 	url = 
-	email = 
+	email = axellpetre@protonmail.com
 
   Class Info 0:
 	name = Axell Penta EQ
 	category = Audio Module Class
 	subCategories = Fx|EQ
-	version = 2.0.1
+	version = 3.0.0
 	sdkVersion = VST 3.8.0
 	cid = ABCDEF019182FAEB41787962506E7131
 
@@ -23,7 +23,7 @@
 	name = Axell Penta EQ
 	category = Component Controller Class
 	subCategories = Fx|EQ
-	version = 2.0.1
+	version = 3.0.0
 	sdkVersion = VST 3.8.0
 	cid = ABCDEF011234ABCD41787962506E7131
 

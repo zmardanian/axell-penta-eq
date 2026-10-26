@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(AxellPentaEQ VERSION 2.0.1)
+project(AxellPentaEQ VERSION 3.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,6 +13,14 @@ FetchContent_Declare(JUCE
   GIT_TAG        8.0.15
   GIT_SHALLOW    ON)
 FetchContent_MakeAvailable(JUCE)
+
+# 3.0: the Axell core's header-only brand look (title, emblem): next to this project, or vendored into
+# external/axell-core for releases
+set(AXELL_CORE_DIR "${CMAKE_CURRENT_LIST_DIR}/external/axell-core" CACHE PATH "Axell core")
+if(NOT EXISTS "${AXELL_CORE_DIR}/include")
+  set(AXELL_CORE_DIR "${CMAKE_CURRENT_LIST_DIR}/../axell-core" CACHE PATH "Axell core" FORCE)
+endif()
+include_directories(${AXELL_CORE_DIR}/include)
 
 juce_add_plugin(AxellPentaEQ
   COMPANY_NAME              "Axell Yobag"

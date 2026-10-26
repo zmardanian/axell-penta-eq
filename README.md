@@ -19,7 +19,10 @@ and **Air**. Built for rap and boom bap vocals, beats, 808s, the mix bus and the
   boosts, and boosts that saturate gently with **Drive**.
 - **Dynamic** per band: threshold, range (cut *or* boost when loud), ratio, attack, release. The detector can listen
   to the band's own region, to **another band's region** (cut 3 kHz when 9 kHz gets loud) or to the **external
-  side-chain** (duck the 808's fundamental with the kick). De-essing, harshness, mud and boom control.
+  side-chain** (duck the 808's fundamental with the kick), or (3.0) to the **esses**: the band moves only when Axell
+  Velvet's sibilance network hears an S, SH, Z or CH, so a de-essing band leaves bright vowels and consonants alone
+  (a quarter of the collateral of a self-keyed band, measured on held-out voices). De-essing, harshness, mud and boom
+  control.
 - **Spectral dynamics** per band: instead of moving as a whole, every frequency inside the band reacts on its own -
   only what is too loud gets cut (a resonance, a whistle, a harsh partial, a sharp sibilant), the rest of the band
   stays untouched. Zero added latency; the graph shows the live per-frequency gain.

@@ -2,7 +2,7 @@
 
 Build: Release. Runtime 201 s.
 
-**Result: ALL PASS** - 743 checks passed, 0 failed (every check runs once per sample rate / channel configuration).
+**Result: ALL PASS** - 763 checks passed, 0 failed (every check runs once per sample rate / channel configuration).
 
 ## Summary (worst case over all configurations)
 
@@ -92,6 +92,11 @@ Build: Release. Runtime 201 s.
 | L. Independent references (textbook formulas, not the engine's model) | Natural Phase band-pass 96 dB/oct Q 12 vs analog phase (>= -20 dB) | < 3.000 deg | 1.107 deg | 44.1 k stereo | PASS 5/5 |
 | L. Independent references (textbook formulas, not the engine's model) | dynamic high shelf 19.5 kHz Q 12 (tracked fit): output finite | = 1.000  | 1.000  | 88.2 k stereo | PASS 5/5 |
 | L. Independent references (textbook formulas, not the engine's model) | dynamic high shelf 19.5 kHz Q 12 (tracked fit): output peak | < 23.979 dBFS | 20.813 dBFS | 48 k stereo | PASS 5/5 |
+| L. Independent references (textbook formulas, not the engine's model) | dynamic band, ESS key: the esses' 6.5 kHz region is cut | < -4.000 dB | -7.692 dB | 88.2 k stereo | PASS 5/5 |
+| L. Independent references (textbook formulas, not the engine's model) | dynamic band, SELF key: the esses' 6.5 kHz region (for comparison) | (info) | -8.072 .. -7.801 dB | all | - |
+| L. Independent references (textbook formulas, not the engine's model) | dynamic band, ESS key: the vowels between the esses are left alone | > -0.5000 dB | -0.0267 dB | 44.1 k stereo | PASS 5/5 |
+| L. Independent references (textbook formulas, not the engine's model) | dynamic band, SELF key: a bright vowel's 6.5 kHz region is cut | < -3.000 dB | -11.966 dB | 192 k stereo | PASS 5/5 |
+| L. Independent references (textbook formulas, not the engine's model) | dynamic band, ESS key: a bright vowel's 6.5 kHz region is left alone | > -0.5000 dB | -0.0507 dB | 48 k stereo | PASS 5/5 |
 | L. Independent references (textbook formulas, not the engine's model) | band-pass 12..96 dB/oct vs n cascaded 2nd-order sections | < 0.1000 dB | 0.0116 dB | 44.1 k stereo | PASS 5/5 |
 | L. Independent references (textbook formulas, not the engine's model) | band-pass: each steeper slope attenuates more (1 oct out) | = 1.000  | 1.000  | 88.2 k stereo | PASS 5/5 |
 | L. Independent references (textbook formulas, not the engine's model) | input/output gain exact after smoothing (relative error) | < 2e-07  | 8.85e-08  | 96 k stereo | PASS 5/5 |
@@ -163,13 +168,13 @@ Build: Release. Runtime 201 s.
 | P. Factory presets | all presets: output finite on pink noise | yes | 1.000  | 48 k stereo | PASS 1/1 |
 | P. Factory presets | loudness vs bypass, pink noise -18 dBFS, K-weighted (worst: Master - Air & Clarity) | -0.1000 .. 0.1000 LU | 0.0484 LU | 48 k stereo | PASS 1/1 |
 | K. Real-time safety | heap allocations inside setParams()+process() (all modes/OS, automation, live mode switch) | = 0.0000  | 0.0000  | 48 k stereo | PASS 1/1 |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | vocal: 7 bands (2 dynamic) + HP, Zero Latency | (info) | 1.456 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | beat bus: 6 bands + Console + Passive Tube, OS 2x | (info) | 2.974 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | master: 8 bands (M/S), Natural Phase + Air | (info) | 1.612 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | master: same in Linear Phase (Medium) | (info) | 1.329 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | vocal + 2 spectral bands (harshness 3 kHz, sibilance 7 kHz) | (info) | 2.761 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | near Nyquist: 4 fitted bands at 48 kHz (2 dynamic, gain moving) | (info) | 4.340 % of one core | all | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo) | worst case: 12 dynamic Character bands + all modules, OS 4x | (info) | 13.320 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | vocal: 7 bands (2 dynamic) + HP, Zero Latency | (info) | 1.421 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | beat bus: 6 bands + Console + Passive Tube, OS 2x | (info) | 2.888 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | master: 8 bands (M/S), Natural Phase + Air | (info) | 1.570 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | master: same in Linear Phase (Medium) | (info) | 1.314 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | vocal + 2 spectral bands (harshness 3 kHz, sibilance 7 kHz) | (info) | 2.622 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | near Nyquist: 4 fitted bands at 48 kHz (2 dynamic, gain moving) | (info) | 4.223 % of one core | all | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo) | worst case: 12 dynamic Character bands + all modules, OS 4x | (info) | 13.077 % of one core | all | - |
 
 ## Detail per configuration
 
@@ -259,6 +264,11 @@ Build: Release. Runtime 201 s.
 | L. Independent references (textbook formulas, not the engine's model): Natural Phase band-pass 96 dB/oct Q 12 vs analog phase (>= -20 dB) | 0.2477 | 1.107 | - | 0.9787 | 0.5592 | 0.4939 |
 | L. Independent references (textbook formulas, not the engine's model): dynamic high shelf 19.5 kHz Q 12 (tracked fit): output finite | 1.000 | 1.000 | - | 1.000 | 1.000 | 1.000 |
 | L. Independent references (textbook formulas, not the engine's model): dynamic high shelf 19.5 kHz Q 12 (tracked fit): output peak | 10.965 | 11.212 | - | 20.813 | 12.024 | 11.954 |
+| L. Independent references (textbook formulas, not the engine's model): dynamic band, ESS key: the esses' 6.5 kHz region is cut | -7.716 | -8.001 | - | -7.940 | -7.692 | -7.769 |
+| L. Independent references (textbook formulas, not the engine's model): dynamic band, SELF key: the esses' 6.5 kHz region (for comparison) | -7.840 | -8.072 | - | -8.012 | -7.801 | -7.884 |
+| L. Independent references (textbook formulas, not the engine's model): dynamic band, ESS key: the vowels between the esses are left alone | -0.0265 | -0.0267 | - | -0.0266 | -0.0266 | -0.0265 |
+| L. Independent references (textbook formulas, not the engine's model): dynamic band, SELF key: a bright vowel's 6.5 kHz region is cut | -11.966 | -11.974 | - | -11.973 | -11.967 | -11.967 |
+| L. Independent references (textbook formulas, not the engine's model): dynamic band, ESS key: a bright vowel's 6.5 kHz region is left alone | -0.0505 | -0.0466 | - | -0.0507 | -0.0472 | -0.0501 |
 | L. Independent references (textbook formulas, not the engine's model): band-pass 12..96 dB/oct vs n cascaded 2nd-order sections | 9.69e-05 | 0.0116 | - | 0.0062 | 0.000674 | 0.000296 |
 | L. Independent references (textbook formulas, not the engine's model): band-pass: each steeper slope attenuates more (1 oct out) | 1.000 | 1.000 | - | 1.000 | 1.000 | 1.000 |
 | L. Independent references (textbook formulas, not the engine's model): input/output gain exact after smoothing (relative error) | 8.84e-08 | 8.7e-08 | - | 8.73e-08 | 8.81e-08 | 8.85e-08 |
@@ -330,10 +340,10 @@ Build: Release. Runtime 201 s.
 | P. Factory presets: all presets: output finite on pink noise | - | - | - | 1.000 | - | - |
 | P. Factory presets: loudness vs bypass, pink noise -18 dBFS, K-weighted (worst: Master - Air & Clarity) | - | - | - | 0.0484 | - | - |
 | K. Real-time safety: heap allocations inside setParams()+process() (all modes/OS, automation, live mode switch) | - | - | - | 0.0000 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): vocal: 7 bands (2 dynamic) + HP, Zero Latency | - | - | - | 1.456 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): beat bus: 6 bands + Console + Passive Tube, OS 2x | - | - | - | 2.974 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): master: 8 bands (M/S), Natural Phase + Air | - | - | - | 1.612 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): master: same in Linear Phase (Medium) | - | - | - | 1.329 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): vocal + 2 spectral bands (harshness 3 kHz, sibilance 7 kHz) | - | - | - | 2.761 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): near Nyquist: 4 fitted bands at 48 kHz (2 dynamic, gain moving) | - | - | - | 4.340 | - | - |
-| J. CPU (48 kHz, 128-sample blocks, stereo): worst case: 12 dynamic Character bands + all modules, OS 4x | - | - | - | 13.320 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): vocal: 7 bands (2 dynamic) + HP, Zero Latency | - | - | - | 1.421 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): beat bus: 6 bands + Console + Passive Tube, OS 2x | - | - | - | 2.888 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): master: 8 bands (M/S), Natural Phase + Air | - | - | - | 1.570 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): master: same in Linear Phase (Medium) | - | - | - | 1.314 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): vocal + 2 spectral bands (harshness 3 kHz, sibilance 7 kHz) | - | - | - | 2.622 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): near Nyquist: 4 fitted bands at 48 kHz (2 dynamic, gain moving) | - | - | - | 4.223 | - | - |
+| J. CPU (48 kHz, 128-sample blocks, stereo): worst case: 12 dynamic Character bands + all modules, OS 4x | - | - | - | 13.077 | - | - |

@@ -58,6 +58,7 @@ inline std::vector<std::string> dynSource()
     for (int b = 1; b <= kNumBands; ++b)
         v.push_back ("Band " + std::to_string (b));
     v.push_back ("External");
+    v.push_back ("Ess");         // 3.0: Axell Velvet's sibilance detector (axell-core) - the band moves only on esses
     return v;
 }
 } // namespace choice

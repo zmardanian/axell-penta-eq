@@ -1,5 +1,7 @@
 #include "PluginEditor.h"
 
+#include <axell/gui/BrandTitle.h>
+
 using namespace ui;
 
 namespace
@@ -254,20 +256,19 @@ void PentaEditor::Content::paint (juce::Graphics& g)
     g.fillAll (col::bg);
     g.setColour (col::header);
     g.fillRect (e.headerArea);
-    g.setColour (Colour (0xff23272e));
-    g.drawHorizontalLine (e.headerArea.getBottom() - 1, 0.0f, (float) kWidth);
-    g.setColour (col::text);
-    g.setFont (caps (21.0f, 2));
-    g.drawText ("AXELL PENTA EQ", 18, 7, 280, 26, Justification::centredLeft);
+    axell::brand::drawHeaderRule (g, (float) e.headerArea.getBottom() - 1.0f, 0.0f, (float) kWidth, col::grid);
+    // Axell's Dojo: the family emblem, its wave and dot in this plugin's colour
+    axell::brand::drawEmblem (g, { 12.0f, 6.0f, 46.0f, 46.0f }, juce::Colour (0xffd9b44a));
+    axell::brand::drawTitle (g, 68.0f, 28.0f, "Penta EQ", juce::String (juce::CharPointer_UTF8 ("\xe4\xba\x94"))); // 五
     {
         const auto f = caps (9.0f, 1);
         g.setFont (f);
-        float x = 19.0f;
+        float x = 67.0f;
         auto word = [&] (const String& t, Colour c, float gapAfter)
         {
             g.setColour (c);
             const float w = GlyphArrangement::getStringWidth (f, t);
-            g.drawText (t, Rectangle<float> (x, 33.0f, w + 2.0f, 14.0f), Justification::centredLeft);
+            g.drawText (t, Rectangle<float> (x, 37.0f, w + 2.0f, 14.0f), Justification::centredLeft);
             x += w + gapAfter;
         };
         word ("PARAMETRIC", col::accent, 5.0f);

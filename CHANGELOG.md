@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.0.0 - 2026-10-26
+
+- **ESS detector source (new):** a dynamic band can listen to the esses. The band's own level sets how much it moves,
+  Axell Velvet 3.0's sibilance network (zero latency) whether: a de-essing band that leaves bright vowels, stops and
+  other fricatives alone. On voices no network was trained on, at equal remaining harshness, a quarter of the
+  collateral of the same band keyed by its own level (vowels +0.07 vs +0.29 dB). (DECISIONS D33)
+- **Axell's Dojo look**: the family emblem, a brush-written title with Penta's seal (五, "five") and Penta's own
+  umber ground.
+- Verified: DSP 763 checks (all rates), plugin suite, ASan + UBSan clean, independent audit 0 failures, pluginval
+  strictness 10, Steinberg's VST3 validator 47/47.
+
 ## 2.0.1 - 2026-10-14
 
 - Latency changes (phase mode, oversampling, Linear Phase resolution) are now a handshake with the host: the

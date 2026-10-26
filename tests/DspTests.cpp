@@ -457,6 +457,76 @@ void testIndependent (dt::Recorder& r)
         r.equal ("dynamic high shelf 19.5 kHz Q 12 (tracked fit): output finite", finite ? 1 : 0, 1, "");
         r.less ("dynamic high shelf 19.5 kHz Q 12 (tracked fit): output peak", dt::db (peak), dt::db (0.5) + 30.0, "dBFS"); // resonant shelf overshoot, no blow-up
     }
+    // 2e. 3.0 detector source "Ess" (Axell Velvet's sibilance network): a bright vowel (a strong 6.5 kHz partial) and
+    // "s" / "sh" noise alternate; a 6.5 kHz dynamic cut keyed by SELF cuts both, keyed by ESS only the noise
+    {
+        auto essRun = [fs] (int src, double partial, bool esses, double& cutVowel, double& cutEss)
+        {
+            Rig rig;
+            rig.band (0, kBell, 6500.0f, 0.0f, 1.5f);
+            rig.set (bandId (0, bpDyn), 1);
+            rig.set (bandId (0, bpThr), -50);
+            rig.set (bandId (0, bpRange), -12);
+            rig.set (bandId (0, bpRatio), 8);
+            rig.set (bandId (0, bpAtk), 0.5f);
+            rig.set (bandId (0, bpRel), 80);
+            rig.set (bandId (0, bpSrc), (float) src);
+            rig.prepare (fs, 1, 256, false);
+            std::mt19937 g (7);
+            std::normal_distribution<double> nd;
+            auto bp = [fs] (double f, double q) { const double w = 2 * dt::kPi * f / fs, al = std::sin (w) / (2 * q), a0 = 1 + al;
+                                                   return std::array<double, 5> { al / a0, 0.0, -al / a0, -2 * std::cos (w) / a0, (1 - al) / a0 }; };
+            const auto cs = bp (7500.0, 2.5), ch = bp (3400.0, 1.5);
+            double zs[4] {}, zh[4] {};
+            auto biq = [] (const std::array<double, 5>& c, double x, double* z) { const double y = c[0] * x + z[0];
+                                                                                 z[0] = c[1] * x - c[3] * y + z[1]; z[1] = c[2] * x - c[4] * y; return y; };
+            const size_t seg = (size_t) (0.3 * fs), n = (size_t) (6.0 * fs);
+            auto b = dt::zeros (1, (int) n);
+            double ph = 0.0;
+            const double norm = std::sqrt (fs / 48000.0);
+            for (size_t i = 0; i < n; ++i)
+            {
+                ph += 2 * dt::kPi * 140.0 / fs;
+                double v = 0.0;
+                for (int h = 1; h < 20; ++h)
+                    v += std::sin (h * ph) / h * std::exp (-std::pow ((h * 140.0 - 700.0) / 600.0, 2));
+                v = 0.2 * v + partial * std::sin (2 * dt::kPi * 6500.0 * i / fs);   // (partial > 0: a bright vowel)
+                const double w0 = nd (g);
+                const double ss = biq (cs, biq (cs, w0, zs), zs + 2), sh = biq (ch, biq (ch, w0, zh), zh + 2);
+                const double nz = norm * ((i / seg) % 4 == 1 ? ss : sh);
+                b[0][i] = (float) ((i / seg) % 2 == 1 ? (esses ? 0.6 * nz : v) : v);
+            }
+            const auto in = b;
+            rig.run (b, 256);
+            // the band's region (6.5 kHz band-pass, 4th order), middle 60 % of each segment, from 1 s on
+            const auto cb = bp (6500.0, 1.0);
+            double zi[4] {}, zo[4] {}, ei[2] {}, eo[2] {};
+            for (size_t i = 0; i < n; ++i)
+            {
+                const double xi = biq (cb, biq (cb, in[0][i], zi), zi + 2), xo = biq (cb, biq (cb, b[0][i], zo), zo + 2);
+                const size_t u = i % seg;
+                if (i < (size_t) fs || u < seg / 5 || u > seg - seg / 5)
+                    continue;
+                const int k = (int) ((i / seg) % 2);
+                ei[k] += xi * xi;
+                eo[k] += xo * xo;
+            }
+            cutVowel = 10 * std::log10 (eo[0] / ei[0]);
+            cutEss = 10 * std::log10 (eo[1] / ei[1]);
+        };
+        double sv = 0, se = 0, ev = 0, ee = 0, d0 = 0, d1 = 0;
+        // a voice with esses: the ESS band cuts the esses about as much as a SELF band does, and not the vowels
+        essRun (0, 0.0, true, d0, se);
+        essRun (kNumBands + 2, 0.0, true, d1, ee);
+        r.less ("dynamic band, ESS key: the esses' 6.5 kHz region is cut", ee, -4.0, "dB");
+        r.info ("dynamic band, SELF key: the esses' 6.5 kHz region (for comparison)", se, "dB");
+        r.greater ("dynamic band, ESS key: the vowels between the esses are left alone", d1, -0.5, "dB");
+        // a bright vowel (a strong 6.5 kHz partial), no esses: SELF cuts it, ESS does not
+        essRun (0, 0.05, false, sv, d0);
+        essRun (kNumBands + 2, 0.05, false, ev, d1);
+        r.less ("dynamic band, SELF key: a bright vowel's 6.5 kHz region is cut", sv, -3.0, "dB");
+        r.greater ("dynamic band, ESS key: a bright vowel's 6.5 kHz region is left alone", ev, -0.5, "dB");
+    }
     // 3. band-pass: every slope distinct, n = slope/12 (rounded) 2nd-order sections
     {
         double worst = 0.0, prev = 1.0e9;

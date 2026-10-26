@@ -1,0 +1,17 @@
+59 takes
+
+ALL as recorded: harsh share before 17.3 %
+  at 8.6 % harsh left:
+    Penta band, ESS key    vowels  +0.07 | other fricatives  +0.11 | stops  +0.22 | soft esses  -0.78 dB
+    Penta band, SELF key   vowels  +0.29 | other fricatives  +0.28 | stops  +0.50 | soft esses  -0.93 dB
+    Velvet 3.0 LIVE        vowels  +0.00 | other fricatives  +0.01 | stops  +0.05 | soft esses  -0.26 dB
+    Velvet 3.0             vowels  +0.00 | other fricatives  +0.01 | stops  +0.04 | soft esses  -0.12 dB
+    classic abs            vowels  +0.04 | other fricatives  +0.08 | stops  +0.25 | soft esses  -0.64 dB
+    classic rel            does not reach it
+  at 5.2 % harsh left:
+    Penta band, ESS key    does not reach it
+    Penta band, SELF key   vowels  +0.92 | other fricatives  +0.97 | stops  +1.31 | soft esses  -2.36 dB
+    Velvet 3.0 LIVE        vowels  +0.01 | other fricatives  +0.03 | stops  +0.13 | soft esses  -0.71 dB
+    Velvet 3.0             vowels  +0.00 | other fricatives  +0.02 | stops  +0.11 | soft esses  -0.33 dB
+    classic abs            vowels  +0.10 | other fricatives  +0.26 | stops  +0.55 | soft esses  -1.41 dB
+    classic rel            vowels  +0.12 | other fricatives  +1.02 | stops  +0.91 | soft esses  -2.54 dB
