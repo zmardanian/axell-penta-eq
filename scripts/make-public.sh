@@ -19,7 +19,7 @@ elif [ -e "$PUB" ]; then
 fi
 mkdir -p "$PUB"
 for f in CMakeLists.txt LICENSE README.md CHANGELOG.md THIRD_PARTY_NOTICES.md; do cp "$f" "$PUB/"; done
-cp -r Resources Source scripts packaging "$PUB/"
+cp -r Resources Source scripts packaging .github "$PUB/"   # .github: the CI workflow (GitHub Actions)
 mkdir -p "$PUB/tests" "$PUB/docs" "$PUB/tools/proto"
 cp tests/*.cpp tests/*.h tests/lsan.supp tests/report.md "$PUB/tests/"
 mkdir -p "$PUB/tests/independent"
