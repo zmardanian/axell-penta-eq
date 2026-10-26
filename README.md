@@ -1,5 +1,7 @@
 # Axell Penta EQ
 
+[![CI](https://github.com/zmardanian/axell-penta-eq/actions/workflows/ci.yml/badge.svg)](https://github.com/zmardanian/axell-penta-eq/actions/workflows/ci.yml)
+
 An all-round equalizer VST3 for Linux by **Axell Yobag**: a surgical, analog-matched parametric EQ with dynamic and
 spectral bands, Mid/Side, curve drawing and reference matching, plus a rack of four character modules - **Inductor**, **Console E/G**, **Passive Tube**
 and **Air**. Built for rap and boom bap vocals, beats, 808s, the mix bus and the master.
