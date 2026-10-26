@@ -2,10 +2,26 @@
 
 An all-round equalizer VST3 for Linux by **Axell Yobag**: a surgical, analog-matched parametric EQ with dynamic and
 spectral bands, Mid/Side, curve drawing and reference matching, plus a rack of four character modules - **Inductor**, **Console E/G**, **Passive Tube**
-and **Air**. Built for rap and boom bap vocals, beats, 808s, the mix bus and the master. Companion to
-[Duo Vocal Comp](https://github.com/zmardanian/duo-vocal-comp).
+and **Air**. Built for rap and boom bap vocals, beats, 808s, the mix bus and the master.
+
+> **Part of Axell's Dojo** - the Axell Signature suite for rap vocals, beats and masters on Linux:
+> [Penta EQ](https://github.com/zmardanian/axell-penta-eq) · [Duo Compressor](https://github.com/zmardanian/axell-duo-compressor) ·
+> [Gate](https://github.com/zmardanian/axell-gate) · [De-Reverb](https://github.com/zmardanian/axell-dereverb) ·
+> [Velvet](https://github.com/zmardanian/axell-velvet) · [Master](https://github.com/zmardanian/axell-master), installed,
+> updated and tuned to your voice by the [Axell Signature Dojo](https://github.com/zmardanian/axell-signature-dojo).
+> Since 3.0 the plugins share one core library (`external/axell-core`): a breakthrough in one plugin becomes a
+> feature of the next.
 
 ![Axell Penta EQ](docs/screenshots/penta-150pct.png)
+
+## What's new in 3.0
+
+- **Ess detector source**: a dynamic band can listen to the esses. Its own level decides how much it moves, Axell
+  Velvet 3.0's sibilance network (zero latency) decides whether - a de-essing band that leaves bright vowels, stops and
+  other fricatives alone. On voices no network was trained on, at equal remaining harshness, it does a quarter of
+  the collateral of the same band keyed by its own level.
+- **Axell's Dojo look**: the family emblem, a brush-written title with Penta's seal (五, "five"), Penta's own umber
+  ground.
 
 ## Features
 
@@ -104,7 +120,7 @@ tilt, speed and the EQ scale (±6/12/18/30 dB).
 Band chips **HP 1 … 12 LP** select a band (grey chips are free: clicking one switches it on as a flat bell).
 **SOLO** (hold) plays only the band's region, **BYPASS** keeps the band but disables it, **REMOVE** deletes it.
 The right half holds the **DYNAMIC** section: threshold, range, ratio, attack, release, the detector source
-(*Self*, *Band n* or *External*) and **BROAD / SPECTRAL**. Spectral thresholds are per frequency: loud music reads
+(*Self*, *Band n*, *External* or *Ess*) and **BROAD / SPECTRAL**. Spectral thresholds are per frequency: loud music reads
 about −45 to −25 dBFS per frequency, so around −30 dB the band catches ringing peaks and lets the rest pass.
 
 ### Header
@@ -145,6 +161,18 @@ level (vocal peaks around −6 dBFS); adjust THRESH if yours is very different.
 
 User presets are saved to `~/.local/share/AxellPentaEQ/Presets` (with your own description).
 
+## Engineering progress
+
+| Version | Date | Engineering | Measured |
+|---|---|---|---|
+| **1.0.0** | 2026-10-14 | 12 bands + HP/LP, Clean (analog-matched) and Character modes, dynamic EQ with band / external key, L/R/M/S per band, character rack (Inductor, Console E/G, Passive Tube, Air), Zero Latency / Natural / Linear Phase, 40 presets | Clean within ±0.1 dB of the analog curve to 20 kHz (with documented near-Nyquist exceptions); an independent black-box audit found 6 defects the own suite missed (Butterworth Q, resonant shelves, Linear Phase click, gain stall, steep band-pass, cut Q) - all fixed before release |
+| **2.0.0** | 2026-10-14 | Spectral dynamics (per-frequency gain as a minimum-phase FIR, zero added latency); near-Nyquist sections as fitted 4th-order pairs; workflow tools (multi-select, keyboard, note snap, peak grab), Draw and Match (one curve fitter), Gain Scale; A/B saved with the session | No accuracy exceptions left: every band type, gain, Q and frequency within ±0.1 dB at 44.1 kHz without oversampling (audit: 1526 random settings, none exempt); Natural Phase phase error 2.1° -> 0.7°; near-Nyquist automation residue -42 -> -92 dBFS |
+| **2.0.1** | 2026-10-14 | Latency handshake: a new phase mode plays only after the host was told its latency | No misaligned audio when a host's message thread stalls (plugin suite) |
+| **3.0.0** | 2026-10-26 | Ess detector source (Axell Velvet 3.0's LIVE sibilance network, from the shared core); Axell's Dojo look | Held-out voices at equal harshness: collateral on vowels +0.07 dB (self-keyed +0.29), stops +0.22 (+0.50); 763 DSP checks, audit 0 failures, ASan clean, pluginval L10, validator 47/47 |
+
+The reasoning behind every design choice, with its measurement, is in [docs/DECISIONS.md](docs/DECISIONS.md); the
+full list of changes in [CHANGELOG.md](CHANGELOG.md).
+
 ## Requirements
 
 - x86_64 Linux with glibc 2.39 or newer (for example Bazzite, Fedora 40+, Ubuntu 24.04+)
@@ -153,17 +181,20 @@ User presets are saved to `~/.local/share/AxellPentaEQ/Presets` (with your own d
 
 ## Install
 
-1. Download `AxellPentaEQ-2.0.1-linux-x86_64.tar.gz` from the
+1. Download `AxellPentaEQ-3.0.0-linux-x86_64.tar.gz` from the
    [latest release](https://github.com/zmardanian/axell-penta-eq/releases/latest).
 2. Extract it and run the installer:
 
    ```bash
-   tar xzf AxellPentaEQ-2.0.1-linux-x86_64.tar.gz
-   cd AxellPentaEQ-2.0.1-linux-x86_64
+   tar xzf AxellPentaEQ-3.0.0-linux-x86_64.tar.gz
+   cd AxellPentaEQ-3.0.0-linux-x86_64
    ./install.sh
    ```
 
 3. Restart your DAW (REAPER scans new plugins at startup), then search for "Penta" in the FX browser.
+
+Or let the [Axell Signature Dojo](https://github.com/zmardanian/axell-signature-dojo) install and update it (and the
+rest of the suite) for you, checksum-verified.
 
 `install.sh` copies the plugin to `~/.vst3`, only ever replaces an older copy of Axell Penta EQ, and checks that
 every system library the plugin needs is present. Verify the download (optional) with `sha256sum -c SHA256SUMS.txt`.
@@ -189,7 +220,7 @@ bash scripts/install.sh           # copy to ~/.vst3
 
 ## Quality
 
-- **DSP suite** (`tests/DspTests.cpp`, JUCE-free): 743 checks at 44.1/48/88.2/96/192 kHz, mono and stereo -
+- **DSP suite** (`tests/DspTests.cpp`, JUCE-free): 763 checks at 44.1/48/88.2/96/192 kHz, mono and stereo -
   Clean magnitude vs analog on ~600 filter settings per mode (worst error: Zero Latency 0.003 dB, Natural 0.05 dB,
   Linear 0.10 dB), plus textbook references independent of the engine's own model (exact Butterworth curves at
   every slope, RBJ resonant shelves over the whole Q range without oversampling, every band type centred at
@@ -197,7 +228,8 @@ bash scripts/install.sh           # copy to ~/.vst3
   bit-identical output for any block size (with a spectral band), random extreme automation fuzzing (no NaN/Inf),
   click tests for every switch including phase-mode changes, near-Nyquist sweeps and spectral on/off during
   playback, dynamic and spectral bands (selectivity, upward mode, side-chain, Mid/Side), L/R/M/S isolation
-  (≤ −120 dBFS leakage), character-module curves and harmonics, presets (loudness within ±0.1 LU), and zero heap
+  (≤ −120 dBFS leakage), character-module curves and harmonics, presets (loudness within ±0.1 LU), the Ess detector source (esses cut as much as by a self-keyed band, vowels and
+  bright vowels untouched), and zero heap
   allocations in the audio path. Both suites also pass under AddressSanitizer + UBSan + LeakSanitizer.
   Report: [tests/report.md](tests/report.md).
 - **Plugin suite** (`tests/PluginTests.cpp`): 80 checks - parameters (2.0 additions appended, 1.0 sessions open
@@ -214,7 +246,9 @@ bash scripts/install.sh           # copy to ~/.vst3
   block-size invariance, M/S, Mix, Linear Phase, clicks, dynamics, spectral dynamics, Gain Scale and side-chain.
   Report: [tests/independent/audit-report.txt](tests/independent/audit-report.txt). Every defect it ever found is
   listed in its README.
-- **pluginval** strictness 10: SUCCESS (three seeds), including the **Steinberg VST3 validator** (47/47 tests).
+- **pluginval** strictness 10: SUCCESS, and the **Steinberg VST3 validator** 47/47 (3.0.0).
+- **Ess source on real voices** ([docs/research/bench-ess.txt](docs/research/bench-ess.txt)): Axell Velvet's de-esser
+  benchmark (59 takes of voices no network was trained on), Penta rendered black-box through the independent host.
 - **REAPER**: loaded, automated by script, rendered offline - the render matches the analog curve within 0.01 dB.
 - **CPU** (one stereo instance, 48 kHz / 128 samples, 8-core Zen 3 laptop): vocal chain 1.4 %, the same with two
   spectral bands 2.7 %, beat bus with Console + Passive Tube at 2x 2.9 %, mastering chain in Natural Phase 1.5 %, in
