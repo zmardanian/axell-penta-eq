@@ -171,6 +171,7 @@ User presets are saved to `~/.local/share/AxellPentaEQ/Presets` (with your own d
 | **2.0.0** | 2026-10-14 | Spectral dynamics (per-frequency gain as a minimum-phase FIR, zero added latency); near-Nyquist sections as fitted 4th-order pairs; workflow tools (multi-select, keyboard, note snap, peak grab), Draw and Match (one curve fitter), Gain Scale; A/B saved with the session | No accuracy exceptions left: every band type, gain, Q and frequency within ±0.1 dB at 44.1 kHz without oversampling (audit: 1526 random settings, none exempt); Natural Phase phase error 2.1° -> 0.7°; near-Nyquist automation residue -42 -> -92 dBFS |
 | **2.0.1** | 2026-10-14 | Latency handshake: a new phase mode plays only after the host was told its latency | No misaligned audio when a host's message thread stalls (plugin suite) |
 | **3.0.0** | 2026-10-26 | Ess detector source (Axell Velvet 3.0's LIVE sibilance network, from the shared core); Axell's Dojo look | Held-out voices at equal harshness: collateral on vowels +0.07 dB (self-keyed +0.29), stops +0.22 (+0.50); 763 DSP checks, audit 0 failures, ASan clean, pluginval L10, validator 47/47 |
+| **3.0.1** | 2026-10-27 | The version on the interface (in the bottom-right corner (the header has no room after the title)) | Audio byte-identical to 3.0.0 |
 
 The reasoning behind every design choice, with its measurement, is in [docs/DECISIONS.md](docs/DECISIONS.md); the
 full list of changes in [CHANGELOG.md](CHANGELOG.md).
@@ -183,13 +184,13 @@ full list of changes in [CHANGELOG.md](CHANGELOG.md).
 
 ## Install
 
-1. Download `AxellPentaEQ-3.0.0-linux-x86_64.tar.gz` from the
+1. Download `AxellPentaEQ-3.0.1-linux-x86_64.tar.gz` from the
    [latest release](https://github.com/zmardanian/axell-penta-eq/releases/latest).
 2. Extract it and run the installer:
 
    ```bash
-   tar xzf AxellPentaEQ-3.0.0-linux-x86_64.tar.gz
-   cd AxellPentaEQ-3.0.0-linux-x86_64
+   tar xzf AxellPentaEQ-3.0.1-linux-x86_64.tar.gz
+   cd AxellPentaEQ-3.0.1-linux-x86_64
    ./install.sh
    ```
 

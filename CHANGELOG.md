@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.1 - 2026-10-27
+- **Version on the interface**: the plugin's version, in the bottom-right corner (the header has no room after the title) - so you can always see which build is loaded. The audio is byte-for-byte the same as 3.0.0 (checked through the released 3.0.0 and the new build).
+
 ## 3.0.0 - 2026-10-26
 
 - **ESS detector source (new):** a dynamic band can listen to the esses. The band's own level sets how much it moves,

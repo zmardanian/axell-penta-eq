@@ -260,6 +260,9 @@ void PentaEditor::Content::paint (juce::Graphics& g)
     // Axell's Dojo: the family emblem, its wave and dot in this plugin's colour
     axell::brand::drawEmblem (g, { 12.0f, 6.0f, 46.0f, 46.0f }, juce::Colour (0xffd9b44a));
     axell::brand::drawTitle (g, 68.0f, 28.0f, "Penta EQ", juce::String (juce::CharPointer_UTF8 ("\xe4\xba\x94"))); // 五
+    // the version: the header has no room after the title (the preset bar starts there), so it sits in the bottom
+    // margin, right-aligned and clear of the resize corner
+    axell::brand::drawVersionIn (g, { (float) kWidth - 230.0f, (float) kHeight - 12.0f, 200.0f, 12.0f }, AXELL_VERSION_STRING);
     {
         const auto f = caps (9.0f, 1);
         g.setFont (f);

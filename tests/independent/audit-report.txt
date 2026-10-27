@@ -1,4 +1,4 @@
-Axell Penta EQ - independent audit, 2026-10-26, plugin: build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
+Axell Penta EQ - independent audit, 2026-10-27, plugin: build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
 
 == Zero Latency, all band types, 6 rates: 540/540 within spec, worst 0.0056 dB (>= -24 dB), worst cut skirt 0.020 dB
    Bell       n=144 worst 0.00243 dB  median 0.000055
@@ -223,7 +223,7 @@ PASS  Gain Scale 50 % (Zero Latency): +8 dB bell -> +4 dB: 4.000 dB
 PASS  Gain Scale 50 % (Natural Phase): +8 dB bell -> +4 dB: 4.000 dB
 PASS  Gain Scale 50 % (Linear Phase): +8 dB bell -> +4 dB: 4.000 dB
 PASS  output after 10 s of silence (resonant band + whole character rack): max |y| in last second 7.73e-23
-PASS  live latency changes: output always aligned with the host's current compensation: 9 host latency updates [0, 128, 4352], misaligned 16-sample windows 0, audible 84 %
+PASS  live latency changes: output always aligned with the host's current compensation: 9 host latency updates [0, 128, 4352], misaligned 16-sample windows 0, audible 82 %
 
 AUDIT 2 (processing): 174/174 pass
 
