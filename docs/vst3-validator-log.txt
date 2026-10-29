@@ -1,6 +1,6 @@
 * Loading module...
 
-	/var/home/Alex/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
+	~/axell-penta-eq/build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3
 
 * Check valid bundle structure...
 
