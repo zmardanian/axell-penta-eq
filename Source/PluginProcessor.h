@@ -3,6 +3,13 @@
 #include "Engine.h"
 #include "Presets.h"
 
+// where user presets live, as shown in tooltips (userPresetFolder() is the real path)
+#if JUCE_WINDOWS
+ #define AXELL_PRESETS_PATH(name) "%APPDATA%\\" name "\\Presets"
+#else
+ #define AXELL_PRESETS_PATH(name) "~/.local/share/" name "/Presets"
+#endif
+
 // Thin JUCE wrapper around penta::Engine (all DSP lives in the JUCE-free headers).
 class PentaProcessor : public juce::AudioProcessor, private juce::Timer
 {

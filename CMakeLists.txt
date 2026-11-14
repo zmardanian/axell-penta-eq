@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.22)
 project(AxellPentaEQ VERSION 3.0.1)
+# Windows (MSVC): static runtime (no VC++ redistributable needed), M_PI, UTF-8 sources; GCC-style flags elsewhere only
+if(MSVC)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+  add_compile_definitions(_USE_MATH_DEFINES)
+  add_compile_options(/utf-8)
+endif()
 # the version for the GUI (every target: the plugin, tests and tools draw the same header)
 add_compile_definitions(AXELL_VERSION_STRING="${PROJECT_VERSION}")
 
@@ -80,8 +86,10 @@ if(PENTA_BUILD_TESTS)
   find_package(Threads REQUIRED)
   add_executable(PentaDspTests tests/DspTests.cpp)
   target_compile_features(PentaDspTests PRIVATE cxx_std_17)
-  target_compile_options(PentaDspTests PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wno-sign-conversion
-                         $<$<CONFIG:Release>:-O3>)
+  if(NOT MSVC)
+    target_compile_options(PentaDspTests PRIVATE -Wall -Wextra -Wshadow -Wconversion -Wno-sign-conversion
+                           $<$<CONFIG:Release>:-O3>)
+  endif()
   target_compile_definitions(PentaDspTests PRIVATE
                              PENTA_TEST_BUILD_INFO="${CMAKE_BUILD_TYPE}$<$<BOOL:${PENTA_SANITIZE}>:+ASan+UBSan>")
   target_link_libraries(PentaDspTests PRIVATE Threads::Threads)

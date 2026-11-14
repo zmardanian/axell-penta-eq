@@ -14,7 +14,7 @@ namespace tip
 {
 const char* presets = "Presets: 40 factory presets for vocals, beats, mix bus/master and Axell's own voice. "
                       "Click to open the browser (search, categories, descriptions). Your presets live in "
-                      "~/.local/share/AxellPentaEQ/Presets.";
+                      "" AXELL_PRESETS_PATH ("AxellPentaEQ") ".";
 const char* ab = "A/B compare: switch between two complete settings.";
 const char* copy = "Copy the current slot into the other slot.";
 const char* undo = "Undo the last change (Ctrl+Z).";

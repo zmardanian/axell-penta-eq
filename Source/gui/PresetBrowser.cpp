@@ -35,7 +35,7 @@ PresetBrowser::PresetBrowser (PentaProcessor& p) : proc (p)
     closeBtn.setTooltip ("Close the browser (Esc).");
     search.setTooltip ("Type to filter by name, description or category.");
     saveBtn.setTooltip ("Save the current settings as a user preset.");
-    folderBtn.setTooltip ("Open the user preset folder (~/.local/share/AxellPentaEQ/Presets).");
+    folderBtn.setTooltip ("Open the user preset folder (" AXELL_PRESETS_PATH ("AxellPentaEQ") ").");
     loadBtn.onClick = [this] { load (list.getSelectedRow()); };
     saveBtn.onClick = [this] { if (onSaveRequest) onSaveRequest(); };
     folderBtn.onClick = []
