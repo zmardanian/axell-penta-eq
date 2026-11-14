@@ -2,6 +2,7 @@ build/
 build-*/
 tools/*
 !tools/proto/
+!tools/xplat.py
 tools/proto/__pycache__/
 __pycache__/
 tests/report-asan.md

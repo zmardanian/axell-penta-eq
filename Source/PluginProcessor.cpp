@@ -386,10 +386,11 @@ void PentaProcessor::markPresetReference()
 
 juce::File PentaProcessor::userPresetFolder()
 {
-#if JUCE_WINDOWS
-    juce::File root = juce::File::getSpecialLocation (juce::File::userApplicationDataDirectory);   // %APPDATA%
-#else
     auto base = juce::SystemStats::getEnvironmentVariable ("XDG_DATA_HOME", {});
+#if JUCE_WINDOWS
+    // %APPDATA% (an explicit XDG_DATA_HOME, as the tests set, wins)
+    juce::File root = base.isNotEmpty() ? juce::File (base) : juce::File::getSpecialLocation (juce::File::userApplicationDataDirectory);
+#else
     juce::File root = base.isNotEmpty() ? juce::File (base)
                                         : juce::File::getSpecialLocation (juce::File::userHomeDirectory).getChildFile (".local/share");
 #endif
