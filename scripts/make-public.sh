@@ -20,6 +20,7 @@ fi
 mkdir -p "$PUB"
 for f in CMakeLists.txt LICENSE README.md CHANGELOG.md THIRD_PARTY_NOTICES.md; do cp "$f" "$PUB/"; done
 cp -r Resources Source scripts packaging .github "$PUB/"   # .github: the CI workflow (GitHub Actions)
+mkdir -p "$PUB/tools"; cp tools/xplat.py "$PUB/tools/"   # the Linux/Windows sound-match check (CI)
 mkdir -p "$PUB/tests" "$PUB/docs" "$PUB/tools/proto"
 cp tests/*.cpp tests/*.h tests/lsan.supp tests/report.md "$PUB/tests/"
 mkdir -p "$PUB/tests/independent"
@@ -32,11 +33,15 @@ mkdir -p "$PUB/external/axell-core"
 for d in CMakeLists.txt LICENSE README.md include src resources tests tools; do cp -r "$CORE/$d" "$PUB/external/axell-core/"; done
 rm -rf "$PUB/external/axell-core/tools/__pycache__"
 echo "axell-core $(git -C "$CORE" rev-parse --short HEAD)" > "$PUB/external/axell-core/VERSION"
+# privacy: report logs name build paths - the home folder becomes ~; then nothing personal may be left anywhere
+grep -rlIZ -E '/(var/)?home/[^/ ]+/' "$PUB" --include='*.txt' 2>/dev/null | xargs -0 -r sed -i -E 's#/(var/)?home/[^/ ]+/#~/#g' || true
+if grep -rIl -E "/(var/)?home/$USER/|petre""alex" "$PUB" --exclude-dir=.git; then echo "Personal paths or addresses in the public tree (above) - not published."; exit 1; fi
 cat > "$PUB/.gitignore" <<'IGN'
 build/
 build-*/
 tools/*
 !tools/proto/
+!tools/xplat.py
 tools/proto/__pycache__/
 __pycache__/
 tests/report-asan.md
@@ -45,7 +50,7 @@ IGN
 if [ "$UPDATE" = 1 ]; then
   git -C "$FINAL" diff --quiet && git -C "$FINAL" diff --cached --quiet || { echo "$FINAL has uncommitted changes."; exit 1; }
   git -C "$FINAL" rev-parse -q --verify "refs/tags/v$VER" >/dev/null && { echo "tag v$VER already exists in $FINAL."; exit 1; }
-  rsync -a --delete --exclude .git "$PUB/" "$FINAL/"
+  rsync -a --checksum --delete --exclude .git "$PUB/" "$FINAL/"   # --checksum: a same-size change (a version number) is never skipped
   rm -rf "$(dirname "$PUB")"
   cd "$FINAL"
   git add -A
