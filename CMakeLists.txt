@@ -24,6 +24,9 @@ FetchContent_Declare(JUCE
   GIT_TAG        8.0.15
   GIT_SHALLOW    ON)
 FetchContent_MakeAvailable(JUCE)
+# fixes to JUCE itself (the copy in axell-core/cmake/JuceFixes.cmake): the Linux VST3 host run loop
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/JuceFixes.cmake)
+axell_fix_juce("${juce_SOURCE_DIR}")
 
 # 3.0: the Axell core's header-only brand look (title, emblem): next to this project, or vendored into
 # external/axell-core for releases
