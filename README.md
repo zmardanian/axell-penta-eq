@@ -1,41 +1,65 @@
-# Axell Penta EQ (VST3, Linux + Windows)
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/hero-dark.png">
+  <img alt="Axell Penta EQ - The analog-matched EQ that listens to your esses." src="docs/img/type/hero-light.png" width="720">
+</picture>
+</p>
 
-[![CI](https://github.com/zmardanian/axell-penta-eq/actions/workflows/ci.yml/badge.svg)](https://github.com/zmardanian/axell-penta-eq/actions/workflows/ci.yml)
-<!-- badges -->
-[![Latest release](https://img.shields.io/github/v/release/zmardanian/axell-penta-eq?style=flat-square&label=release&color=9c7434)](https://github.com/zmardanian/axell-penta-eq/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/zmardanian/axell-penta-eq/total?style=flat-square&color=2a1f17)](https://github.com/zmardanian/axell-penta-eq/releases)
-![Linux + Windows](https://img.shields.io/badge/Linux%20%2B%20Windows-x86__64-2a1f17?style=flat-square)
-![VST3](https://img.shields.io/badge/format-VST3-2a1f17?style=flat-square)
-[![Licence AGPL-3.0](https://img.shields.io/badge/licence-AGPL--3.0-6b5a4a?style=flat-square)](LICENSE)
-<!-- /badges -->
+<p align="center">
+  <a href="https://github.com/zmardanian/axell-penta-eq/releases/latest"><img src="https://img.shields.io/github/v/release/zmardanian/axell-penta-eq?style=flat-square&label=release&color=8a6d16" alt="latest release"></a>
+  <a href="https://github.com/zmardanian/axell-penta-eq/releases"><img src="https://img.shields.io/github/downloads/zmardanian/axell-penta-eq/total?style=flat-square&color=2a1f17" alt="downloads"></a>
+  <img src="https://img.shields.io/badge/Windows%20%C2%B7%20Linux-x86__64-2a1f17?style=flat-square" alt="Windows and Linux">
+  <a href="https://github.com/zmardanian/axell-penta-eq/actions/workflows/ci.yml"><img src="https://github.com/zmardanian/axell-penta-eq/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/licence-AGPL--3.0-6b5a4a?style=flat-square" alt="AGPL-3.0">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/penta-100pct-hidpi2x.png" alt="Axell Penta EQ" width="100%">
+</p>
+
+<p align="center">
+  <b>Surgical when you need it. Analog when you want it.</b><br>
+  Twelve bands - parametric, dynamic and spectral - matched to analog curves, Mid/Side and side-chain, curve drawing and reference matching, a rack of four character modules, and a de-essing band keyed by the suite's neural sibilance detector.
+</p>
+
+<p align="center">
+  <a href="https://github.com/zmardanian/axell-penta-eq/releases/latest"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/dl-windows-dark.png">
+  <img alt="Download for Windows" src="docs/img/type/dl-windows-light.png" height="58">
+</picture></a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/zmardanian/axell-penta-eq/releases/latest"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/dl-linux-dark.png">
+  <img alt="Download for Linux" src="docs/img/type/dl-linux-light.png" height="58">
+</picture></a>
+</p>
+
+<p align="center"><sub>Free and open source (AGPL-3.0)  ·  Windows 10 / 11 and Linux  ·  any VST3 host - FL Studio, Ableton Live, Cubase, Studio One, Bitwig, REAPER</sub></p>
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-why-dark.png">
+  <img alt="01 Why it's different - Precision with a soul." src="docs/img/type/h-why-light.png" height="68">
+</picture>
+
+- **Analog-matched to 20 kHz** - Clean curves within 0.003 dB (Zero Latency), 0.05 dB (Natural) and 0.10 dB (Linear Phase) of the analog response.
+- **An EQ band that knows what an ess is** - any band can follow the suite's sibilance network: esses cut as hard as a self-keyed band, vowels untouched.
+- **Dynamic and spectral bands** - with Mid/Side, side-chain, and three phase modes from zero latency to linear phase.
+- **Character on tap** - Inductor, Console E/G, Passive Tube and Air - four modules in a rack.
+- **Audited, not assumed** - 1526 random settings checked against scipy's analog curves by an independent host - none exempt.
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-does-dark.png">
+  <img alt="02 What it does - Everything it does." src="docs/img/type/h-does-light.png" height="68">
+</picture>
 
 An all-round equalizer VST3 for Linux and Windows by **Axell Yobag**: a surgical, analog-matched parametric EQ with dynamic and
 spectral bands, Mid/Side, curve drawing and reference matching, plus a rack of four character modules - **Inductor**, **Console E/G**, **Passive Tube**
 and **Air**. Built for rap and boom bap vocals, beats, 808s, the mix bus and the master.
-
-> **Part of Axell's Dojo** - the Axell Signature suite for rap vocals, beats and masters, on Linux and Windows:
-> **Penta EQ** · [Duo Compressor](https://github.com/zmardanian/axell-duo-compressor) ·
-> [Gate](https://github.com/zmardanian/axell-gate) · [De-Reverb](https://github.com/zmardanian/axell-dereverb) ·
-> [Velvet](https://github.com/zmardanian/axell-velvet) · [Master](https://github.com/zmardanian/axell-master) ·
-> [Space](https://github.com/zmardanian/axell-space) ·
-> [Forbidden Seal](https://github.com/zmardanian/axell-forbidden-seal) ·
-> [Axell 76](https://github.com/zmardanian/axell-76)
-> Installed, updated and tuned to your voice by the [Axell Signature Dojo](https://github.com/zmardanian/axell-signature-dojo)
-> (one Windows installer carries the whole suite). The plugins share one core library (`external/axell-core`):
-> a breakthrough in one plugin becomes a feature of the next.
-
-![Axell Penta EQ](docs/screenshots/penta-150pct.png)
-
-## What's new in 3.0
-
-- **Ess detector source**: a dynamic band can listen to the esses. Its own level decides how much it moves, Axell
-  Velvet 3.0's sibilance network (zero latency) decides whether - a de-essing band that leaves bright vowels, stops and
-  other fricatives alone. On voices no network was trained on, at equal remaining harshness, it does a quarter of
-  the collateral of the same band keyed by its own level.
-- **Axell's Dojo look**: the family emblem, a brush-written title with Penta's seal (五, "five"), Penta's own umber
-  ground.
-
-## Features
 
 **Parametric core**
 - 12 bands + dedicated high-pass and low-pass. Types: bell, low/high shelf, low/high cut (6–96 dB/oct with
@@ -89,7 +113,18 @@ and **Air**. Built for rap and boom bap vocals, beats, 808s, the mix bus and the
 | ![Draw a curve](docs/screenshots/penta-draw.png) | ![Several bands selected](docs/screenshots/penta-multiselect.png) |
 | ![Preset browser](docs/screenshots/penta-browser.png) | ![Rap lead preset at 100 %](docs/screenshots/penta-100pct.png) |
 
-## Using it
+<table>
+<tr><td align="center" width="50%"><img src="docs/screenshots/penta-spectral.png" alt="Spectral dynamics" width="100%"><br><sub>Spectral dynamics</sub></td><td align="center" width="50%"><img src="docs/screenshots/penta-match.png" alt="Reference MATCH" width="100%"><br><sub>Reference MATCH</sub></td></tr>
+<tr><td align="center" width="50%"><img src="docs/screenshots/penta-draw.png" alt="DRAW a curve" width="100%"><br><sub>DRAW a curve</sub></td><td align="center" width="50%"><img src="docs/screenshots/penta-browser.png" alt="The preset browser" width="100%"><br><sub>The preset browser</sub></td></tr>
+</table>
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-use-dark.png">
+  <img alt="03 How to use it - Fast to drive." src="docs/img/type/h-use-light.png" height="68">
+</picture>
 
 ### The graph
 | Action | Result |
@@ -155,7 +190,13 @@ band's detector to **External**. The presets *Bass/Kick Carve* and *Sample Chop 
 Linear Phase resolves narrow low-frequency moves better at higher resolution (Medium: from about 40 × Q Hz and
 100 Hz up; High: from about 10 × Q Hz).
 
-## Factory presets
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-presets-dark.png">
+  <img alt="04 Presets - Ready-made curves." src="docs/img/type/h-presets-light.png" height="68">
+</picture>
 
 | Category | Presets |
 |---|---|
@@ -173,81 +214,28 @@ level (vocal peaks around −6 dBFS); adjust THRESH if yours is very different.
 
 User presets are saved to `~/.local/share/AxellPentaEQ/Presets` (with your own description).
 
-## Engineering progress
 
-| Version | Date | Engineering | Measured |
-|---|---|---|---|
-| **1.0.0** | 2026-10-14 | 12 bands + HP/LP, Clean (analog-matched) and Character modes, dynamic EQ with band / external key, L/R/M/S per band, character rack (Inductor, Console E/G, Passive Tube, Air), Zero Latency / Natural / Linear Phase, 40 presets | Clean within ±0.1 dB of the analog curve to 20 kHz (with documented near-Nyquist exceptions); an independent black-box audit found 6 defects the own suite missed (Butterworth Q, resonant shelves, Linear Phase click, gain stall, steep band-pass, cut Q) - all fixed before release |
-| **2.0.0** | 2026-10-14 | Spectral dynamics (per-frequency gain as a minimum-phase FIR, zero added latency); near-Nyquist sections as fitted 4th-order pairs; workflow tools (multi-select, keyboard, note snap, peak grab), Draw and Match (one curve fitter), Gain Scale; A/B saved with the session | No accuracy exceptions left: every band type, gain, Q and frequency within ±0.1 dB at 44.1 kHz without oversampling (audit: 1526 random settings, none exempt); Natural Phase phase error 2.1° -> 0.7°; near-Nyquist automation residue -42 -> -92 dBFS |
-| **2.0.1** | 2026-10-14 | Latency handshake: a new phase mode plays only after the host was told its latency | No misaligned audio when a host's message thread stalls (plugin suite) |
-| **3.0.0** | 2026-10-26 | Ess detector source (Axell Velvet 3.0's LIVE sibilance network, from the shared core); Axell's Dojo look | Held-out voices at equal harshness: collateral on vowels +0.07 dB (self-keyed +0.29), stops +0.22 (+0.50); 763 DSP checks, audit 0 failures, ASan clean, pluginval L10, validator 47/47 |
-| **3.0.1** | 2026-10-27 | The version on the interface (in the bottom-right corner (the header has no room after the title)) | Audio byte-identical to 3.0.0 |
+<br>
 
-The reasoning behind every design choice, with its measurement, is in [docs/DECISIONS.md](docs/DECISIONS.md); the
-full list of changes in [CHANGELOG.md](CHANGELOG.md).
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-new-dark.png">
+  <img alt="05 What's new - New in 3.0." src="docs/img/type/h-new-light.png" height="68">
+</picture>
 
-## Requirements
-
-- x86_64 Linux with glibc 2.39 or newer (for example Bazzite, Fedora 40+, Ubuntu 24.04+)
-- Any VST3 host. Tested in REAPER.
-- The system libraries `libfreetype` and `libfontconfig` (present on every desktop distribution)
-
-## Install (Linux)
-
-1. Download `AxellPentaEQ-3.0.1-linux-x86_64.tar.gz` from the
-   [latest release](https://github.com/zmardanian/axell-penta-eq/releases/latest).
-2. Extract it and run the installer:
-
-   ```bash
-   tar xzf AxellPentaEQ-3.0.1-linux-x86_64.tar.gz
-   cd AxellPentaEQ-3.0.1-linux-x86_64
-   ./install.sh
-   ```
-
-3. Restart your DAW (REAPER scans new plugins at startup), then search for "Penta" in the FX browser.
-
-Or let the [Axell Signature Dojo](https://github.com/zmardanian/axell-signature-dojo) install and update it (and the
-rest of the suite) for you, checksum-verified.
-
-`install.sh` copies the plugin to `~/.vst3`, only ever replaces an older copy of Axell Penta EQ, and checks that
-every system library the plugin needs is present. Verify the download (optional) with `sha256sum -c SHA256SUMS.txt`.
-
-**REAPER can't find it?** Options → Preferences → Plug-ins → VST: make sure the VST path contains `~/.vst3`
-(on Bazzite and other Fedora atomic systems write the full path `/var/home/<your-user>/.vst3`), then click
-*Re-scan* (or *Clear cache/re-scan*).
-
-### Uninstall
-Run `./uninstall.sh` from the extracted release folder, or `rm -rf ~/.vst3/"Axell Penta EQ.vst3"`.
-Your presets stay in `~/.local/share/AxellPentaEQ/Presets`.
+- **Ess detector source**: a dynamic band can listen to the esses. Its own level decides how much it moves, Axell
+  Velvet 3.0's sibilance network (zero latency) decides whether - a de-essing band that leaves bright vowels, stops and
+  other fricatives alone. On voices no network was trained on, at equal remaining harshness, it does a quarter of
+  the collateral of the same band keyed by its own level.
+- **Axell's Dojo look**: the family emblem, a brush-written title with Penta's seal (五, "five"), Penta's own umber
+  ground.
 
 
-## Install (Windows)
+<br>
 
-Windows 10 / 11, 64-bit. Download `AxellPentaEQ-<version>-windows-x64.tar.gz` from the
-[latest release](https://github.com/zmardanian/axell-penta-eq/releases/latest) (optional: check it against `SHA256SUMS.txt`),
-extract it (Windows 11 opens .tar.gz directly; on Windows 10 use 7-Zip or `tar -xzf` in a terminal) and copy the folder
-`Axell Penta EQ.vst3` into `C:\Program Files\Common Files\VST3`. Then rescan plugins in your DAW.
-Or install the whole suite in one go with the Axell Signature Suite installer from the
-[Axell Signature Dojo releases](https://github.com/zmardanian/axell-signature-dojo/releases/latest) - the Dojo then keeps it up to date.
-
-Your own presets are kept in `%APPDATA%\AxellPentaEQ\Presets`.
-
-Every Windows build is made by GitHub Actions from this repository, passes the same test suites and pluginval
-(strictness 10) as the Linux build, and is checked to sound the same as it (largest difference far below -90 dBFS,
-most often bit-identical). The plugin is not code-signed yet; DAWs load it directly.
-
-## Build from source
-
-See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md). In short (Bazzite/Fedora atomic, inside a distrobox):
-
-```bash
-bash scripts/setup-toolbox.sh     # Ubuntu 24.04 box with the JUCE dependencies, nothing layered on the host
-bash scripts/build.sh             # Release build
-bash scripts/test.sh              # DSP + plugin test suites
-bash scripts/install.sh           # copy to ~/.vst3
-```
-
-## Quality
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-measured-dark.png">
+  <img alt="06 Measured - Every claim, measured." src="docs/img/type/h-measured-light.png" height="68">
+</picture>
 
 - **DSP suite** (`tests/DspTests.cpp`, JUCE-free): 763 checks at 44.1/48/88.2/96/192 kHz, mono and stereo -
   Clean magnitude vs analog on ~600 filter settings per mode (worst error: Zero Latency 0.003 dB, Natural 0.05 dB,
@@ -305,7 +293,158 @@ How the filter core works (matched biquads + a minimum-phase correction FIR that
 latency) is described in [docs/research/dsp-literature.md](docs/research/dsp-literature.md) and
 [docs/ENGINEERING_SPEC.md](docs/ENGINEERING_SPEC.md).
 
-## Licence
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-install-dark.png">
+  <img alt="07 Get it - Windows first. Linux too." src="docs/img/type/h-install-light.png" height="68">
+</picture>
+
+### Requirements
+
+- x86_64 Linux with glibc 2.39 or newer (for example Bazzite, Fedora 40+, Ubuntu 24.04+)
+- Any VST3 host. Tested in REAPER.
+- The system libraries `libfreetype` and `libfontconfig` (present on every desktop distribution)
+
+### Windows
+
+> [!TIP]
+> **The whole suite in one go:** the [Axell Signature Suite installer](https://github.com/zmardanian/axell-signature-dojo/releases/latest) puts every Axell plugin and the Dojo on Windows 10 / 11 in one step, each one optional - and the Dojo keeps them up to date. Every VST3 host loads them: FL Studio, Ableton Live, Cubase, Studio One, Bitwig, REAPER.
+
+Windows 10 / 11, 64-bit. Download `AxellPentaEQ-<version>-windows-x64.tar.gz` from the
+[latest release](https://github.com/zmardanian/axell-penta-eq/releases/latest) (optional: check it against `SHA256SUMS.txt`),
+extract it (Windows 11 opens .tar.gz directly; on Windows 10 use 7-Zip or `tar -xzf` in a terminal) and copy the folder
+`Axell Penta EQ.vst3` into `C:\Program Files\Common Files\VST3`. Then rescan plugins in your DAW.
+Or install the whole suite in one go with the Axell Signature Suite installer from the
+[Axell Signature Dojo releases](https://github.com/zmardanian/axell-signature-dojo/releases/latest) - the Dojo then keeps it up to date.
+
+Your own presets are kept in `%APPDATA%\AxellPentaEQ\Presets`.
+
+Every Windows build is made by GitHub Actions from this repository, passes the same test suites and pluginval
+(strictness 10) as the Linux build, and is checked to sound the same as it (largest difference far below -90 dBFS,
+most often bit-identical). The plugin is not code-signed yet; DAWs load it directly.
+
+### Linux
+
+1. Download `AxellPentaEQ-3.0.1-linux-x86_64.tar.gz` from the
+   [latest release](https://github.com/zmardanian/axell-penta-eq/releases/latest).
+2. Extract it and run the installer:
+
+   ```bash
+   tar xzf AxellPentaEQ-3.0.1-linux-x86_64.tar.gz
+   cd AxellPentaEQ-3.0.1-linux-x86_64
+   ./install.sh
+   ```
+
+3. Restart your DAW (REAPER scans new plugins at startup), then search for "Penta" in the FX browser.
+
+Or let the [Axell Signature Dojo](https://github.com/zmardanian/axell-signature-dojo) install and update it (and the
+rest of the suite) for you, checksum-verified.
+
+`install.sh` copies the plugin to `~/.vst3`, only ever replaces an older copy of Axell Penta EQ, and checks that
+every system library the plugin needs is present. Verify the download (optional) with `sha256sum -c SHA256SUMS.txt`.
+
+**REAPER can't find it?** Options → Preferences → Plug-ins → VST: make sure the VST path contains `~/.vst3`
+(on Bazzite and other Fedora atomic systems write the full path `/var/home/<your-user>/.vst3`), then click
+*Re-scan* (or *Clear cache/re-scan*).
+
+#### Uninstall
+Run `./uninstall.sh` from the extracted release folder, or `rm -rf ~/.vst3/"Axell Penta EQ.vst3"`.
+Your presets stay in `~/.local/share/AxellPentaEQ/Presets`.
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-history-dark.png">
+  <img alt="08 Version history - Every version, earned." src="docs/img/type/h-history-light.png" height="68">
+</picture>
+
+| Version | Date | Engineering | Measured |
+|---|---|---|---|
+| **1.0.0** | 2026-10-14 | 12 bands + HP/LP, Clean (analog-matched) and Character modes, dynamic EQ with band / external key, L/R/M/S per band, character rack (Inductor, Console E/G, Passive Tube, Air), Zero Latency / Natural / Linear Phase, 40 presets | Clean within ±0.1 dB of the analog curve to 20 kHz (with documented near-Nyquist exceptions); an independent black-box audit found 6 defects the own suite missed (Butterworth Q, resonant shelves, Linear Phase click, gain stall, steep band-pass, cut Q) - all fixed before release |
+| **2.0.0** | 2026-10-14 | Spectral dynamics (per-frequency gain as a minimum-phase FIR, zero added latency); near-Nyquist sections as fitted 4th-order pairs; workflow tools (multi-select, keyboard, note snap, peak grab), Draw and Match (one curve fitter), Gain Scale; A/B saved with the session | No accuracy exceptions left: every band type, gain, Q and frequency within ±0.1 dB at 44.1 kHz without oversampling (audit: 1526 random settings, none exempt); Natural Phase phase error 2.1° -> 0.7°; near-Nyquist automation residue -42 -> -92 dBFS |
+| **2.0.1** | 2026-10-14 | Latency handshake: a new phase mode plays only after the host was told its latency | No misaligned audio when a host's message thread stalls (plugin suite) |
+| **3.0.0** | 2026-10-26 | Ess detector source (Axell Velvet 3.0's LIVE sibilance network, from the shared core); Axell's Dojo look | Held-out voices at equal harshness: collateral on vowels +0.07 dB (self-keyed +0.29), stops +0.22 (+0.50); 763 DSP checks, audit 0 failures, ASan clean, pluginval L10, validator 47/47 |
+| **3.0.1** | 2026-10-27 | The version on the interface (in the bottom-right corner (the header has no room after the title)) | Audio byte-identical to 3.0.0 |
+
+The reasoning behind every design choice, with its measurement, is in [docs/DECISIONS.md](docs/DECISIONS.md); the
+full list of changes in [CHANGELOG.md](CHANGELOG.md).
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-suite-dark.png">
+  <img alt="09 The suite - Nine plugins, one core." src="docs/img/type/h-suite-light.png" height="68">
+</picture>
+
+<p align="center">
+<table>
+<tr><td align="center"><a href="https://github.com/zmardanian/axell-penta-eq"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/penta-eq-dark.png">
+  <img alt="Penta EQ" src="docs/img/suite/penta-eq-light.png" width="120">
+</picture></a><br><sub>analog-matched EQ</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-duo-compressor"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/duo-compressor-dark.png">
+  <img alt="Duo Compressor" src="docs/img/suite/duo-compressor-light.png" width="120">
+</picture></a><br><sub>FET + opto + limiter</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-gate"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/gate-dark.png">
+  <img alt="Gate" src="docs/img/suite/gate-light.png" width="120">
+</picture></a><br><sub>voice-aware gate</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-dereverb"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/dereverb-dark.png">
+  <img alt="De-Reverb" src="docs/img/suite/dereverb-light.png" width="120">
+</picture></a><br><sub>small-room de-reverb</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-velvet"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/velvet-dark.png">
+  <img alt="Velvet" src="docs/img/suite/velvet-light.png" width="120">
+</picture></a><br><sub>neural de-esser + warmth</sub></td></tr>
+<tr><td align="center"><a href="https://github.com/zmardanian/axell-master"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/master-dark.png">
+  <img alt="Master" src="docs/img/suite/master-light.png" width="120">
+</picture></a><br><sub>mastering limiter</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-space"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/space-dark.png">
+  <img alt="Space" src="docs/img/suite/space-light.png" width="120">
+</picture></a><br><sub>vocal reverb + delay</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-forbidden-seal"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/forbidden-seal-dark.png">
+  <img alt="Forbidden Seal" src="docs/img/suite/forbidden-seal-light.png" width="120">
+</picture></a><br><sub>saturation</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-76"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/76-dark.png">
+  <img alt="76" src="docs/img/suite/76-light.png" width="120">
+</picture></a><br><sub>1176 FET compressor</sub></td><td align="center"><a href="https://github.com/zmardanian/axell-signature-dojo"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/suite/signature-dojo-dark.png">
+  <img alt="Signature Dojo" src="docs/img/suite/signature-dojo-light.png" width="120">
+</picture></a><br><sub>the suite's home</sub></td></tr>
+</table>
+</p>
+
+Nine plugins and their home, built as one family: they share a core library, so a breakthrough in one becomes a feature of the next - the sibilance network of Velvet guards the esses in Duo, Master, Space and Forbidden Seal; Gate's voice detector holds Duo's and Master's gain through your pauses. The [Axell Signature Dojo](https://github.com/zmardanian/axell-signature-dojo) installs, updates and tunes the whole suite to your voice - on Windows from a single installer.
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-build-dark.png">
+  <img alt="10 Build from source - For developers." src="docs/img/type/h-build-light.png" height="68">
+</picture>
+
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md). In short (Bazzite/Fedora atomic, inside a distrobox):
+
+```bash
+bash scripts/setup-toolbox.sh     # Ubuntu 24.04 box with the JUCE dependencies, nothing layered on the host
+bash scripts/build.sh             # Release build
+bash scripts/test.sh              # DSP + plugin test suites
+bash scripts/install.sh           # copy to ~/.vst3
+```
+
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/type/h-credits-dark.png">
+  <img alt="11 Credits & contact - Credits & licence." src="docs/img/type/h-credits-light.png" height="68">
+</picture>
+
+### Licence
 
 Axell Penta EQ is free software, licensed under the [GNU Affero General Public License v3](LICENSE), because it is
 built with the [JUCE](https://juce.com) framework under JUCE's AGPLv3 option. Third-party components and their
@@ -317,6 +456,9 @@ names only. Microphone model names in the Signature presets only say which micro
 project is not affiliated with or endorsed by any equipment manufacturer. VST is a registered trademark of
 Steinberg Media Technologies GmbH.
 
-## Contact
+### Contact
 
 Axell Yobag - axellpetre@protonmail.com (questions, bug reports, feedback). Issues on GitHub are welcome too.
+
+
+<br>

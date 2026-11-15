@@ -19,18 +19,18 @@ elif [ -e "$PUB" ]; then
 fi
 mkdir -p "$PUB"
 for f in CMakeLists.txt LICENSE README.md CHANGELOG.md THIRD_PARTY_NOTICES.md; do cp "$f" "$PUB/"; done
-cp -r Resources Source scripts packaging .github "$PUB/"   # .github: the CI workflow (GitHub Actions)
+cp -r Resources Source scripts packaging .github cmake "$PUB/"   # .github: the CI workflow (GitHub Actions); cmake: JuceFixes.cmake
 mkdir -p "$PUB/tools"; cp tools/xplat.py "$PUB/tools/"   # the Linux/Windows sound-match check (CI)
 mkdir -p "$PUB/tests" "$PUB/docs" "$PUB/tools/proto"
 cp tests/*.cpp tests/*.h tests/lsan.supp tests/report.md "$PUB/tests/"
 mkdir -p "$PUB/tests/independent"
 cp tests/independent/*.cpp tests/independent/*.py tests/independent/README.md tests/independent/audit-report.txt "$PUB/tests/independent/"
 cp docs/ENGINEERING_SPEC.md docs/DECISIONS.md docs/DEVELOPMENT.md docs/pluginval-log.txt docs/vst3-validator-log.txt "$PUB/docs/"
-cp -r docs/research docs/screenshots docs/preset-curves "$PUB/docs/"
+cp -r docs/research docs/screenshots docs/preset-curves docs/img "$PUB/docs/"   # img: the README typography
 cp tools/proto/*.py "$PUB/tools/proto/"
 # 3.0: the Axell core (the brand look, the "Ess" detector source), vendored so the repository builds on its own
 mkdir -p "$PUB/external/axell-core"
-for d in CMakeLists.txt LICENSE README.md include src resources tests tools; do cp -r "$CORE/$d" "$PUB/external/axell-core/"; done
+for d in CMakeLists.txt LICENSE README.md cmake include src resources tests tools; do cp -r "$CORE/$d" "$PUB/external/axell-core/"; done
 rm -rf "$PUB/external/axell-core/tools/__pycache__"
 echo "axell-core $(git -C "$CORE" rev-parse --short HEAD)" > "$PUB/external/axell-core/VERSION"
 # privacy: report logs name build paths - the home folder becomes ~; then nothing personal may be left anywhere
