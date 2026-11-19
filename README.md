@@ -306,7 +306,7 @@ latency) is described in [docs/research/dsp-literature.md](docs/research/dsp-lit
 
 ### Requirements
 
-- x86_64 Linux with glibc 2.39 or newer (for example Bazzite, Fedora 40+, Ubuntu 24.04+)
+- x86_64 Linux with glibc 2.35 or newer (for example Ubuntu 22.04+, Debian 12+, Linux Mint 21+, Fedora 36+, Bazzite)
 - Any VST3 host. Tested in REAPER.
 - The system libraries `libfreetype` and `libfontconfig` (present on every desktop distribution)
 
