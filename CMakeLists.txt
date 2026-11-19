@@ -38,7 +38,7 @@ include_directories(${AXELL_CORE_DIR}/include)
 
 juce_add_plugin(AxellPentaEQ
   COMPANY_NAME              "Axell Yobag"
-  COMPANY_EMAIL             "axellpetre@protonmail.com"
+  COMPANY_EMAIL             "contact@axellsdojo.com"
   PLUGIN_MANUFACTURER_CODE  Axyb
   PLUGIN_CODE               Pnq1
   FORMATS                   VST3

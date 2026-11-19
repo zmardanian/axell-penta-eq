@@ -464,7 +464,7 @@ Steinberg Media Technologies GmbH.
 
 ### Contact
 
-Axell Yobag - axellpetre@protonmail.com (questions, bug reports, feedback). Issues on GitHub are welcome too.
+Axell Yobag - contact@axellsdojo.com (questions, bug reports, feedback). Issues on GitHub are welcome too.
 
 
 <br>
