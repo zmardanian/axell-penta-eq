@@ -457,6 +457,10 @@ Axell Penta EQ is free software, licensed under the [GNU Affero General Public L
 built with the [JUCE](https://juce.com) framework under JUCE's AGPLv3 option. Third-party components and their
 licences are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
+From the November 2026 releases on, `SHA256SUMS.txt` is signed with the suite's release key: `minisign -Vm SHA256SUMS.txt -P RWQJLVJSETsP7RRz1rdiugX9w09wtGCtwEc5hHU8k9S+crL/ekfTkQKG`, then `sha256sum -c --ignore-missing SHA256SUMS.txt` (the Axell Signature Dojo checks both itself). How releases are built and signed: [code signing policy](https://www.axellsdojo.com/code-signing/).
+
+<img src="docs/vst-compatible.svg" alt="VST Compatible" width="72">
+
 The character modules are behavioural models built from published specifications, circuit descriptions and
 measurements; no code, images or data from any commercial product are used, and the modules carry descriptive
 names only. Microphone model names in the Signature presets only say which microphone a preset was tuned for. This
