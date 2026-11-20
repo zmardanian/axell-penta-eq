@@ -1,5 +1,18 @@
 # Changelog
 
+## 3.0.2 - 2026-11-20
+- **The name in the suite's script wordmark.** The title now reads "Axell Penta EQ" in Great Vibes, in the plugin's own
+  colour - the same wordmark as axellsdojo.com and the READMEs (SIL Open Font License; credited in THIRD_PARTY_NOTICES.md).
+- **Your DAW's preset menu shows the right factory preset after a project is reopened.** The chosen preset (the
+  host's "Program") is now saved with the project and read back without re-applying it, so your settings stay exactly
+  as you left them. Before, the sound was always right but the menu could show the first preset.
+- **Every control has a name for screen readers** (Narrator, VoiceOver, Orca): knobs, switches and menus announce
+  their parameter instead of just "slider".
+- **Linux: runs on Ubuntu 22.04+, Debian 12+, Linux Mint 21+ and Fedora 36+** (built on Ubuntu 22.04).
+- The audio is byte-for-byte the same as 3.0.1 (166 renders through the released 3.0.1 and the new build: every
+  factory preset and 40 random settings of every parameter, on a vocal and a mix). Verified with pluginval 2.0 at
+  strictness 10 with its real-time check: no memory allocation while processing audio.
+
 ## 3.0.1 - 2026-10-27
 - **Version on the interface**: the plugin's version, in the bottom-right corner (the header has no room after the title) - so you can always see which build is loaded. The audio is byte-for-byte the same as 3.0.0 (checked through the released 3.0.0 and the new build).
 

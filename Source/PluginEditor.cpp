@@ -1,4 +1,5 @@
 #include "PluginEditor.h"
+#include <axell/gui/ScreenReader.h>
 
 #include <axell/gui/BrandTitle.h>
 
@@ -147,6 +148,7 @@ PentaEditor::PentaEditor (PentaProcessor& p)
     setWantsKeyboardFocus (true);
     timerCallback();
     startTimerHz (30);
+    axell::nameControlsForScreenReaders (*this);   // Narrator / VoiceOver read every control by name
 }
 
 PentaEditor::~PentaEditor()

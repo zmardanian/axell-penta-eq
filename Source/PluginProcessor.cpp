@@ -6,6 +6,7 @@ using APVTS = juce::AudioProcessorValueTreeState;
 namespace
 {
 const juce::Identifier kPresetNameId ("presetName");
+const juce::Identifier kProgramId ("program");   // the factory preset last chosen, so hosts see the same Program after a reload
 const juce::Identifier kAbId ("AB");
 const juce::Identifier kPresetDescId ("presetDescription");
 
@@ -526,6 +527,7 @@ void PentaProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = exactState();
     state.setProperty (kPresetNameId, getPresetName(), nullptr);
+    state.setProperty (kProgramId, currentProgram.load(), nullptr);
     // A/B: which slot is active, and the inactive slot's parameters (the active one is the state itself)
     {
         juce::ValueTree ab (kAbId);
@@ -577,6 +579,10 @@ void PentaProcessor::setStateInformation (const void* data, int sizeInBytes)
             slots[1 - act] = other;
         }
         setPresetName (tree.getProperty (kPresetNameId, getPresetName()).toString());
+        // only the index: the parameters come from the state itself, the preset is not applied again
+        if (tree.hasProperty (kProgramId))
+            currentProgram.store (juce::jlimit (0, juce::jmax (0, getNumPrograms() - 1), (int) tree.getProperty (kProgramId)));
+        tree.removeProperty (kProgramId, nullptr);
         restoreTree (tree);
         undoPast.clear();
         undoFuture.clear();

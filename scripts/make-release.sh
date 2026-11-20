@@ -7,12 +7,22 @@ cd "$(dirname "$0")/.."
 VER=$(grep -oP 'project\(AxellPentaEQ VERSION \K[0-9.]+' CMakeLists.txt)
 NAME="AxellPentaEQ-$VER-linux-x86_64"
 OUT="${PENTA_RELEASE_DIR:-$HOME/axell-penta-eq-release}"
-BUNDLE="build/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3"
-[ -d "$BUNDLE" ] || { echo "No Release build. Run scripts/build.sh first."; exit 1; }
+BUNDLE="build-portable/AxellPentaEQ_artefacts/Release/VST3/Axell Penta EQ.vst3"
+[ -d "$BUNDLE" ] || { echo "No Release build. Run scripts/build-portable.sh first (tests run on scripts/build.sh)."; exit 1; }
 rm -rf "$OUT/$NAME" "$OUT/$NAME.tar.gz"
 mkdir -p "$OUT/$NAME"
 cp -r "$BUNDLE" "$OUT/$NAME/"
 strip --strip-unneeded "$OUT/$NAME/Axell Penta EQ.vst3/Contents/x86_64-linux/Axell Penta EQ.so" 2>/dev/null || true
+check_portable() {
+# portability guard: the archive must run on Ubuntu 22.04 / Debian 12 (glibc 2.35, libstdc++ of gcc 12)
+need() { objdump -T "$1" | grep -oE "$2"'_[0-9.]+' | sed "s/$2_//" | sort -V | tail -n 1; }
+for so in "$@"; do
+  g=$(need "$so" GLIBC); x=$(need "$so" GLIBCXX)
+  [ "$(printf '%s\n2.35\n' "$g" | sort -V | tail -n 1)" = "2.35" ] || { echo "$so needs glibc $g (> 2.35): build with scripts/build-portable.sh"; exit 1; }
+  [ -z "$x" ] || [ "$(printf '%s\n3.4.30\n' "$x" | sort -V | tail -n 1)" = "3.4.30" ] || { echo "$so needs GLIBCXX $x (> 3.4.30): build with scripts/build-portable.sh"; exit 1; }
+done
+}
+check_portable "$OUT/$NAME/Axell Penta EQ.vst3/Contents/x86_64-linux/Axell Penta EQ.so"
 cp packaging/install.sh packaging/uninstall.sh packaging/README.txt LICENSE THIRD_PARTY_NOTICES.md CHANGELOG.md "$OUT/$NAME/"
 chmod +x "$OUT/$NAME/install.sh" "$OUT/$NAME/uninstall.sh"
 (cd "$OUT" && tar --owner=0 --group=0 --sort=name -czf "$NAME.tar.gz" "$NAME" && sha256sum "$NAME.tar.gz" > SHA256SUMS.txt)
@@ -45,7 +55,7 @@ $NEW
 
 ## Requirements
 
-- x86_64 Linux, glibc 2.39+ (Bazzite, Fedora 40+, Ubuntu 24.04+)
+- x86_64 Linux, glibc 2.35+ (Ubuntu 22.04+, Debian 12+, Linux Mint 21+, Fedora 36+, Bazzite)
 - Any VST3 host. Tested in REAPER.
 
 ## Install

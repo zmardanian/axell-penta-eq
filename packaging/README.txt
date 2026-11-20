@@ -32,7 +32,7 @@ Manual install: copy the "Axell Penta EQ.vst3" folder into ~/.vst3 yourself.
 
 If your DAW doesn't find the plugin, add ~/.vst3 to its VST3 path. In REAPER:
 Options > Preferences > Plug-ins > VST, add the folder (on Bazzite and other
-Fedora atomic systems use the full path /var/home/<your-user>/.vst3), then
+Fedora atomic systems use the full path ~/.vst3), then
 click Re-scan.
 
 
